@@ -311,6 +311,7 @@
       pointer-events: auto;
       cursor: crosshair;
       z-index: 35;
+      touch-action: none; /* Crucial para Touch & Mesa Digitalizadora */
     }
 
     /* Título Único da Página */
@@ -697,7 +698,7 @@
       border-radius: 4px;
     }
     .frame-quick-actions button:hover { background: #44403c; color: #fef08a; }
-    .frame-drag-handle { cursor: move; font-size: 13px !important; color: #fef08a !important; }
+    .frame-drag-handle { cursor: move; font-size: 13px !important; color: #fef08a !important; touch-action: none; }
 
     .resize-handle {
       position: absolute;
@@ -709,6 +710,7 @@
       opacity: 0.3;
       background: radial-gradient(circle, #78716c 2px, transparent 2px);
       background-size: 5px 5px;
+      touch-action: none;
     }
     .craft-media-card:hover .resize-handle { opacity: 0.85; }
 
@@ -1328,7 +1330,7 @@
       syncInkCanvasDimensions();
     }
 
-    // --- MESA DIGITALIZADORA & PINCEL ---
+    // --- MESA DIGITALIZADORA & PINCEL (CORRIGIDO PARA TOUCH/STYLUS) ---
     let currentInkTool = 'select';
     let isDrawingInk = false;
     let lastInkX = 0, lastInkY = 0;
@@ -1357,17 +1359,23 @@
       const targetW = sheet.clientWidth;
       const targetH = sheet.clientHeight;
 
+      if (targetW === 0 || targetH === 0) return;
+
       if (inkCanvas.width !== targetW || inkCanvas.height !== targetH) {
         const temp = document.createElement('canvas');
         temp.width = inkCanvas.width;
         temp.height = inkCanvas.height;
         const tempCtx = temp.getContext('2d');
-        tempCtx.drawImage(inkCanvas, 0, 0);
+        if (inkCanvas.width > 0 && inkCanvas.height > 0) {
+          tempCtx.drawImage(inkCanvas, 0, 0);
+        }
 
         inkCanvas.width = targetW;
         inkCanvas.height = targetH;
 
-        inkCtx.drawImage(temp, 0, 0);
+        if (temp.width > 0 && temp.height > 0) {
+          inkCtx.drawImage(temp, 0, 0);
+        }
       }
     }
 
@@ -1392,25 +1400,25 @@
       saveToStorage();
     }
 
-    inkCanvas.addEventListener('pointerdown', (e) => {
-      if (currentInkTool === 'select') return;
-      isDrawingInk = true;
-      inkCanvas.setPointerCapture(e.pointerId);
-
+    function getCanvasCoords(e) {
       const rect = inkCanvas.getBoundingClientRect();
-      lastInkX = e.clientX - rect.left;
-      lastInkY = e.clientY - rect.top;
-    });
+      const scaleX = inkCanvas.width / (rect.width || 1);
+      const scaleY = inkCanvas.height / (rect.height || 1);
+      return {
+        x: (e.clientX - rect.left) * scaleX,
+        y: (e.clientY - rect.top) * scaleY
+      };
+    }
 
-    inkCanvas.addEventListener('pointermove', (e) => {
-      if (!isDrawingInk || currentInkTool === 'select') return;
-
-      const rect = inkCanvas.getBoundingClientRect();
-      const curX = e.clientX - rect.left;
-      const curY = e.clientY - rect.top;
-
+    function drawInkSegment(e, curX, curY, isDot = false) {
       const baseSize = parseFloat(document.getElementById('brushSize').value);
-      const pressure = (e.pressure && e.pressure > 0) ? e.pressure : 0.5;
+      let pressure = 0.5;
+      if (e.pointerType === 'pen' && e.pressure && e.pressure > 0) {
+        pressure = e.pressure;
+      } else if (e.pointerType === 'touch' && e.pressure && e.pressure > 0) {
+        pressure = e.pressure;
+      }
+
       const color = document.getElementById('brushColor').value;
 
       inkCtx.save();
@@ -1420,25 +1428,66 @@
       if (currentInkTool === 'pen') {
         inkCtx.globalCompositeOperation = 'source-over';
         inkCtx.strokeStyle = color;
-        inkCtx.lineWidth = baseSize * (pressure * 2);
+        inkCtx.fillStyle = color;
+        inkCtx.lineWidth = Math.max(1, baseSize * (pressure * 2));
       } else if (currentInkTool === 'eraser') {
         inkCtx.globalCompositeOperation = 'destination-out';
         inkCtx.lineWidth = Math.max(baseSize * 5, 20);
       }
 
       inkCtx.beginPath();
-      inkCtx.moveTo(lastInkX, lastInkY);
-      inkCtx.lineTo(curX, curY);
-      inkCtx.stroke();
+      if (isDot) {
+        inkCtx.arc(curX, curY, (currentInkTool === 'eraser' ? Math.max(baseSize * 5, 20) : Math.max(1, baseSize * (pressure * 2))) / 2, 0, Math.PI * 2);
+        inkCtx.fill();
+      } else {
+        inkCtx.moveTo(lastInkX, lastInkY);
+        inkCtx.lineTo(curX, curY);
+        inkCtx.stroke();
+      }
       inkCtx.restore();
+    }
 
-      lastInkX = curX;
-      lastInkY = curY;
+    inkCanvas.addEventListener('pointerdown', (e) => {
+      if (currentInkTool === 'select') return;
+      e.preventDefault();
+      isDrawingInk = true;
+      try {
+        inkCanvas.setPointerCapture(e.pointerId);
+      } catch (err) {}
+
+      const coords = getCanvasCoords(e);
+      lastInkX = coords.x;
+      lastInkY = coords.y;
+
+      drawInkSegment(e, coords.x, coords.y, true);
     });
 
-    function stopInkDrawing() {
+    inkCanvas.addEventListener('pointermove', (e) => {
+      if (!isDrawingInk || currentInkTool === 'select') return;
+      e.preventDefault();
+
+      const events = (e.getCoalescedEvents && e.getCoalescedEvents().length > 0)
+        ? e.getCoalescedEvents()
+        : [e];
+
+      for (const ev of events) {
+        const coords = getCanvasCoords(ev);
+        drawInkSegment(ev, coords.x, coords.y, false);
+        lastInkX = coords.x;
+        lastInkY = coords.y;
+      }
+    });
+
+    function stopInkDrawing(e) {
       if (isDrawingInk) {
         isDrawingInk = false;
+        if (e && e.pointerId) {
+          try {
+            if (inkCanvas.hasPointerCapture(e.pointerId)) {
+              inkCanvas.releasePointerCapture(e.pointerId);
+            }
+          } catch (err) {}
+        }
         syncCurrentPageToState();
         saveToStorage();
       }
@@ -1446,6 +1495,11 @@
 
     inkCanvas.addEventListener('pointerup', stopInkDrawing);
     inkCanvas.addEventListener('pointercancel', stopInkDrawing);
+    inkCanvas.addEventListener('pointerout', (e) => {
+      if (!inkCanvas.hasPointerCapture(e.pointerId)) {
+        stopInkDrawing(e);
+      }
+    });
 
     // --- RENDER DA INTERFACE ---
     function renderNavigation() {
@@ -1635,7 +1689,7 @@
       });
     }
 
-    // Suporte à tecla Tab e Enter dentro da área de código
+    // Suporte à tecla Tab dentro da área de código
     window.handleCodeKeyDown = (e) => {
       if (e.key === 'Tab') {
         e.preventDefault();
@@ -2131,7 +2185,7 @@
 
       filtered.forEach(th => {
         const card = document.createElement('div');
-        card.style.cssText = `background:#fafaf9; border:1px solid ${th.resolved ? '#cbd5e1' : '#e7e5e4'}; border-radius:8px; padding:12px; display:flex; direction:column; gap:8px; opacity:${th.resolved ? 0.75 : 1};`;
+        card.style.cssText = `background:#fafaf9; border:1px solid ${th.resolved ? '#cbd5e1' : '#e7e5e4'}; border-radius:8px; padding:12px; display:flex; flex-direction:column; gap:8px; opacity:${th.resolved ? 0.75 : 1};`;
         card.id = `card_${th.id}`;
 
         let commentsHTML = '';
@@ -2401,7 +2455,9 @@
           }
 
           cardElement.classList.add('dragging');
-          dragHandle.setPointerCapture(e.pointerId);
+          try {
+            dragHandle.setPointerCapture(e.pointerId);
+          } catch (err) {}
 
           const startX = e.clientX;
           const startY = e.clientY;
@@ -2421,8 +2477,13 @@
             updateInfinitePageHeight();
           }
 
-          function onPointerUp() {
+          function onPointerUp(upEvent) {
             cardElement.classList.remove('dragging');
+            try {
+              if (dragHandle.hasPointerCapture(upEvent.pointerId)) {
+                dragHandle.releasePointerCapture(upEvent.pointerId);
+              }
+            } catch (err) {}
             window.removeEventListener('pointermove', onPointerMove);
             window.removeEventListener('pointerup', onPointerUp);
             updateInfinitePageHeight();
@@ -2438,7 +2499,9 @@
         resizeHandle.addEventListener('pointerdown', (e) => {
           e.preventDefault();
           e.stopPropagation();
-          resizeHandle.setPointerCapture(e.pointerId);
+          try {
+            resizeHandle.setPointerCapture(e.pointerId);
+          } catch (err) {}
 
           const startX = e.clientX;
           const startWidth = cardElement.offsetWidth;
@@ -2450,7 +2513,12 @@
             itemData.width = newWidth;
           }
 
-          function onResizeUp() {
+          function onResizeUp(upEvent) {
+            try {
+              if (resizeHandle.hasPointerCapture(upEvent.pointerId)) {
+                resizeHandle.releasePointerCapture(upEvent.pointerId);
+              }
+            } catch (err) {}
             window.removeEventListener('pointermove', onResizeMove);
             window.removeEventListener('pointerup', onResizeUp);
             updateInfinitePageHeight();
