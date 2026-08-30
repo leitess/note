@@ -69,7 +69,7 @@
       position: relative;
     }
 
-    /* HEADER */
+    /* HEADER RESPONSIVO */
     header {
       background: #181615;
       color: #fafaf9;
@@ -77,7 +77,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 10px;
+      gap: 12px;
       z-index: 50;
       flex-shrink: 0;
       border-bottom: 1px solid #2d2a26;
@@ -100,6 +100,7 @@
       border-radius: var(--radius-sm);
       font-size: 13px;
       font-weight: 600;
+      flex-shrink: 0;
     }
 
     .header-book-select {
@@ -129,8 +130,7 @@
       outline: none;
       transition: all 0.2s ease;
       flex: 1 1 auto;
-      min-width: 110px;
-      max-width: 380px;
+      min-width: 100px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -146,7 +146,7 @@
       flex-shrink: 0;
     }
 
-    /* BOTÕES */
+    /* BOTÕES GERAIS */
     button, .btn {
       background: #fbfbfa;
       color: #1c1917;
@@ -189,7 +189,7 @@
     .main-workspace {
       display: flex;
       flex: 1;
-      height: calc(100% - 48px);
+      min-height: 0;
       overflow: hidden;
       position: relative;
     }
@@ -279,7 +279,7 @@
       touch-action: none !important;
     }
 
-    /* TOOLBAR WRAPPER COM NAVEGAÇÃO SUAVE */
+    /* TOOLBAR WRAPPER */
     .toolbar-wrapper {
       position: sticky;
       top: 0;
@@ -928,13 +928,52 @@
       }
       .sidebar.open { transform: translateX(0); }
 
-      header { padding: 6px 10px; gap: 6px; }
-      .header-book-select { max-width: 100px; font-size: 15px; }
-      .header-book-input { font-size: 18px; max-width: 160px; }
-      
-      .header-actions .btn:not(#btnOpenSearch):not(#btnExport) {
+      /* HEADER EM 2 LINHAS NO SMARTPHONE */
+      header {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 7px 10px;
+        gap: 6px;
+      }
+
+      .header-left {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+
+      .header-book-select {
+        max-width: 95px;
+        font-size: 14px;
+        padding: 3px 5px;
+      }
+
+      .header-book-input {
+        font-size: 18px;
+        flex: 1 1 auto;
+        min-width: 0;
+        width: auto;
+      }
+
+      .header-actions {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 4px;
+        padding-top: 4px;
+        border-top: 1px solid rgba(255,255,255,0.08);
+      }
+
+      .header-actions button,
+      .header-actions .btn {
+        flex: 1 1 auto;
+        padding: 4px 5px;
         font-size: 11px;
-        padding: 4px 6px;
+        white-space: nowrap;
+        justify-content: center;
+        min-height: 26px;
       }
 
       .paper-sheet {
@@ -980,12 +1019,12 @@
       </div>
 
       <div class="header-actions">
-        <button id="btnOpenSearch" class="btn-dark" title="Buscar (Ctrl+K)">🔍</button>
-        <button id="btnOpenInbox" class="btn-dark">⚡ Inbox</button>
-        <button onclick="toggleZenMode()" title="Modo Foco">🧘</button>
+        <button id="btnOpenSearch" class="btn-dark" title="Buscar (Ctrl+K)">🔍 Busca</button>
+        <button id="btnOpenInbox" class="btn-dark" title="Inbox de Pensamentos Rápidos">⚡ Inbox</button>
+        <button onclick="toggleZenMode()" title="Modo Foco Sem Distrações">🧘 Zen</button>
         <button id="btnExport" title="Backup JSON">💾 Salvar</button>
         <label class="btn" style="margin-bottom:0;" title="Importar caderno JSON">
-          📂
+          📂 Importar
           <input type="file" id="inputImport" accept=".json" style="display:none;" />
         </label>
         <button id="btnResetAll" class="btn-danger btn-icon" title="Limpar Tudo">⚠️</button>
@@ -1215,14 +1254,12 @@
   <script>
     mermaid.initialize({ startOnLoad: false, theme: 'neutral', securityLevel: 'loose' });
 
-    // --- AUTO RESIZE TEXTAREA ---
     function autoResizeTextarea(el) {
       if (!el) return;
       el.style.height = 'auto';
       el.style.height = (el.scrollHeight) + 'px';
     }
 
-    // --- CONTROLE DE ROLAGEM E DESLIZAMENTO DA TOOLBAR ---
     const paperToolbar = document.getElementById('paperToolbar');
     const btnScrollLeft = document.getElementById('btnScrollToolbarLeft');
     const btnScrollRight = document.getElementById('btnScrollToolbarRight');
@@ -1241,7 +1278,6 @@
     paperToolbar.addEventListener('scroll', updateToolbarNavButtons);
     window.addEventListener('resize', updateToolbarNavButtons);
 
-    // 1. ROLAGEM COM SCROLL DO MOUSE (WHEEL -> HORIZONTAL)
     paperToolbar.addEventListener('wheel', (e) => {
       if (e.deltaY !== 0) {
         e.preventDefault();
@@ -1249,7 +1285,6 @@
       }
     }, { passive: false });
 
-    // 2. ARRASTO COM O MOUSE (CLICK & DRAG / PANNING)
     let isToolbarDragging = false;
     let toolbarStartX = 0;
     let toolbarScrollLeftStart = 0;
@@ -1277,7 +1312,6 @@
       }
     });
 
-    // --- SIDEBAR MOBILE ---
     const sidebar = document.getElementById('appSidebar');
     const sidebarBackdrop = document.getElementById('sidebarBackdrop');
 
@@ -1289,7 +1323,6 @@
 
     document.getElementById('btnToggleSidebar').onclick = () => toggleMobileSidebar();
 
-    // --- ESTRUTURA GLOBAL DE MÚLTIPLOS CADERNOS ---
     function createInitialBook(title = 'Meu Caderno Artesanal') {
       const bId = 'b_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
       const cId = 'c_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
@@ -1372,6 +1405,10 @@
       return page;
     }
 
+    // --- PROTEÇÃO DO ESTADO DE TINTA (DESENHOS) ---
+    let isCanvasDirtySinceLoad = false;
+    let currentLoadedInkPageId = null;
+
     function syncCurrentPageToState() {
       const book = getActiveBook();
       book.bookTitle = document.getElementById('bookTitleInput').value || 'Meu Caderno Artesanal';
@@ -1382,12 +1419,11 @@
       page.paperOrientation = document.getElementById('paperOrientation').value;
       
       const canvas = document.getElementById('inkCanvas');
-      if (canvas && canvas.width > 0 && canvas.height > 0) {
+      if (canvas && canvas.width > 0 && canvas.height > 0 && isCanvasDirtySinceLoad) {
         page.inkDataURL = canvas.toDataURL();
       }
     }
 
-    // --- HISTÓRICO (UNDO/REDO) ---
     let undoStack = [];
     let redoStack = [];
     let isPerformingUndoRedo = false;
@@ -1461,7 +1497,6 @@
       mindmap: `mindmap\n  root((Visão do Projeto))\n    Conceito\n      Artesanal\n      Scrapbook\n    Engenharia\n      UML & BPMN\n      ERD de Dados\n    Refinamento\n      Threads\n      Snapshots`
     };
 
-    // --- EXPANSÃO DINÂMICA DE ALTURA & CANVAS ---
     function updateInfinitePageHeight() {
       const collage = document.getElementById('collageContainer');
       const page = getActivePage();
@@ -1489,7 +1524,7 @@
       syncInkCanvasDimensions();
     }
 
-    // --- PINCEL E TOUCH ---
+    // --- PINCEL E DESENHO MANUAL SEGURO ---
     let currentInkTool = 'select';
     let isDrawingInk = false;
     let lastInkX = 0, lastInkY = 0;
@@ -1542,13 +1577,22 @@
     }
 
     function loadInkFromState() {
+      const page = getActivePage();
+      if (!page) return;
+
+      currentLoadedInkPageId = page.id;
+      isCanvasDirtySinceLoad = false;
+
       syncInkCanvasDimensions();
       inkCtx.clearRect(0, 0, inkCanvas.width, inkCanvas.height);
-      const page = getActivePage();
-      if (page && page.inkDataURL) {
+
+      if (page.inkDataURL) {
         const img = new Image();
         img.onload = () => {
-          inkCtx.drawImage(img, 0, 0);
+          const currentPage = getActivePage();
+          if (currentPage && currentPage.id === currentLoadedInkPageId) {
+            inkCtx.drawImage(img, 0, 0);
+          }
         };
         img.src = page.inkDataURL;
       }
@@ -1558,7 +1602,10 @@
       if (!confirm('Deseja apagar todos os desenhos e rabiscos feitos à mão nesta página?')) return;
       inkCtx.clearRect(0, 0, inkCanvas.width, inkCanvas.height);
       const page = getActivePage();
-      if (page) page.inkDataURL = null;
+      if (page) {
+        page.inkDataURL = null;
+        isCanvasDirtySinceLoad = true;
+      }
       saveToStorage();
     }
 
@@ -1573,6 +1620,7 @@
     }
 
     function drawInkSegment(clientX, clientY, pressureInput, pointerType, isDot = false) {
+      isCanvasDirtySinceLoad = true;
       const baseSize = parseFloat(document.getElementById('brushSize').value) || 3;
       let pressure = 0.5;
       
@@ -1673,7 +1721,6 @@
     inkCanvas.addEventListener('pointerup', stopInkDrawing);
     inkCanvas.addEventListener('pointercancel', stopInkDrawing);
 
-    // --- RENDER CADERNOS & NAVEGAÇÃO ---
     function renderBookSelector() {
       const select = document.getElementById('bookSelect');
       select.innerHTML = '';
@@ -1818,7 +1865,6 @@
       renderPageContent();
     }
 
-    // Orientação do Papel
     document.getElementById('paperOrientation').onchange = (e) => {
       const page = getActivePage();
       if (page) {
@@ -1851,7 +1897,6 @@
       insertHtmlAtCursor(`<${tag} class="craft-${tag}">${escapeHTML(text)}</${tag}><p><br></p>`);
     };
 
-    // --- BLOCOS DE CÓDIGO (PRISM.JS) ---
     window.insertCodeSnippet = () => {
       const codeBlockHTML = `
         <div class="craft-code-block" contenteditable="false">
@@ -1933,7 +1978,6 @@
       }
     };
 
-    // --- LINKS BIDIRECIONAIS ---
     document.getElementById('textEditor').addEventListener('click', (e) => {
       const target = e.target.closest('.wiki-link');
       if (target) {
@@ -1974,7 +2018,6 @@
     }
     document.getElementById('textEditor').addEventListener('blur', parseWikiLinks);
 
-    // --- DIAGRAMAS MERMAID ---
     const diagramModal = document.getElementById('diagramModal');
     const mermaidCodeInput = document.getElementById('mermaidCodeInput');
     const mermaidOutput = document.getElementById('mermaidOutput');
@@ -2017,7 +2060,6 @@
       }
     }
 
-    // --- SNAPSHOTS / HISTÓRICO ---
     const snapshotDrawer = document.getElementById('snapshotDrawer');
 
     document.getElementById('btnSaveSnapshot').onclick = () => {
@@ -2031,6 +2073,7 @@
         label: label.trim(),
         title: page.title,
         contentHTML: page.contentHTML,
+        inkDataURL: page.inkDataURL,
         date: new Date().toLocaleString()
       });
 
@@ -2077,6 +2120,9 @@
       const s = page.snapshots[idx];
       page.title = s.title;
       page.contentHTML = s.contentHTML;
+      if (s.inkDataURL !== undefined) {
+        page.inkDataURL = s.inkDataURL;
+      }
       renderPageContent();
       saveToStorage();
       closeDrawers();
@@ -2089,7 +2135,6 @@
       saveToStorage();
     };
 
-    // --- INBOX ---
     const inboxDrawer = document.getElementById('inboxDrawer');
 
     document.getElementById('btnOpenInbox').onclick = () => {
@@ -2157,7 +2202,6 @@
       saveToStorage();
     };
 
-    // --- BUSCA GLOBAL ---
     const searchModal = document.getElementById('searchModal');
     document.getElementById('btnOpenSearch').onclick = () => {
       searchModal.classList.add('open');
@@ -2211,7 +2255,6 @@
       document.body.classList.toggle('zen-mode');
     };
 
-    // --- ATALHOS DE TECLADO ---
     window.addEventListener('keydown', (e) => {
       const isCtrlOrCmd = e.ctrlKey || e.metaKey;
       
@@ -2252,7 +2295,6 @@
       document.querySelectorAll('.side-drawer').forEach(d => d.classList.remove('open'));
     }
 
-    // --- SELEÇÃO DE TEXTO ---
     const textEditor = document.getElementById('textEditor');
     const selectionTooltip = document.getElementById('selectionTooltip');
     const threadDrawer = document.getElementById('threadDrawer');
@@ -2527,7 +2569,6 @@
       renderThreads();
     };
 
-    // --- CARDS E MÍDIAS ---
     function renderCollageElements() {
       const container = document.getElementById('collageContainer');
       const editor = document.getElementById('textEditor');
@@ -2809,7 +2850,6 @@
       saveToStorage();
     };
 
-    // --- FORMATAÇÃO & ESTRUTURAS ---
     function formatDoc(cmd, val = null) {
       document.execCommand(cmd, false, val);
       document.getElementById('textEditor').focus();
@@ -2937,7 +2977,6 @@
       e.target.value = '';
     };
 
-    // --- CAPÍTULOS & PÁGINAS ---
     document.getElementById('btnAddChapter').onclick = () => {
       const book = getActiveBook();
       const name = prompt('Nome do novo Capítulo (Domo):', `Capítulo ${book.chapters.length + 1}`);
@@ -3082,7 +3121,7 @@
       saveToStorage();
     });
 
-    // Backup JSON
+    // Backup JSON do Caderno Atual (Garante sincronia completa da tinta)
     document.getElementById('btnExport').onclick = () => {
       syncCurrentPageToState();
       const currentBook = getActiveBook();
