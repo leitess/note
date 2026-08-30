@@ -227,6 +227,11 @@
       height: 100%;
     }
 
+    .page-viewport.drawing-mode-active {
+      overflow: hidden !important;
+      touch-action: none !important;
+    }
+
     /* TOOLBAR */
     .paper-toolbar {
       position: sticky;
@@ -305,13 +310,17 @@
       pointer-events: none;
       z-index: 10;
       border-radius: 6px;
+      touch-action: none !important;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
     }
 
     #inkCanvas.drawing-active {
       pointer-events: auto;
       cursor: crosshair;
       z-index: 35;
-      touch-action: none; /* Crucial para Touch & Mesa Digitalizadora */
+      touch-action: none !important;
     }
 
     /* Título Único da Página */
@@ -1000,7 +1009,7 @@
               <input type="color" id="inkColor" title="Cor do Texto" value="#1c1917" onchange="formatDoc('foreColor', this.value)" />
             </div>
 
-            <!-- Pincéis / Mesa Digitalizadora -->
+            <!-- Pincéis / Mesa Digitalizadora / Touch Mobile -->
             <div class="toolbar-group" style="background:#f5f5f4; padding:2px 6px; border-radius:6px; border:1px solid #e7e5e4;">
               <button type="button" id="toolSelect" class="btn active-tool" title="Digitar / Selecionar" onclick="setInkTool('select')">👆 Digitar</button>
               <button type="button" id="toolPen" class="btn" title="Pincel de Tinta Livre" onclick="setInkTool('pen')">🖊️ Pincel</button>
@@ -1330,13 +1339,14 @@
       syncInkCanvasDimensions();
     }
 
-    // --- MESA DIGITALIZADORA & PINCEL (CORRIGIDO PARA TOUCH/STYLUS) ---
+    // --- MESA DIGITALIZADORA, PINCEL & TOUCH MOBILE TOTALMENTE COMPATÍVEL ---
     let currentInkTool = 'select';
     let isDrawingInk = false;
     let lastInkX = 0, lastInkY = 0;
 
     const inkCanvas = document.getElementById('inkCanvas');
     const inkCtx = inkCanvas.getContext('2d');
+    const viewport = document.getElementById('viewport');
 
     function setInkTool(tool) {
       currentInkTool = tool;
@@ -1345,10 +1355,12 @@
       if (tool === 'select') {
         document.getElementById('toolSelect').classList.add('active-tool');
         inkCanvas.classList.remove('drawing-active');
+        viewport.classList.remove('drawing-mode-active');
       } else {
         if (tool === 'pen') document.getElementById('toolPen').classList.add('active-tool');
         if (tool === 'eraser') document.getElementById('toolEraser').classList.add('active-tool');
         inkCanvas.classList.add('drawing-active');
+        viewport.classList.add('drawing-mode-active');
       }
     }
 
@@ -1400,26 +1412,29 @@
       saveToStorage();
     }
 
-    function getCanvasCoords(e) {
+    function getCanvasCoords(clientX, clientY) {
       const rect = inkCanvas.getBoundingClientRect();
       const scaleX = inkCanvas.width / (rect.width || 1);
       const scaleY = inkCanvas.height / (rect.height || 1);
       return {
-        x: (e.clientX - rect.left) * scaleX,
-        y: (e.clientY - rect.top) * scaleY
+        x: (clientX - rect.left) * scaleX,
+        y: (clientY - rect.top) * scaleY
       };
     }
 
-    function drawInkSegment(e, curX, curY, isDot = false) {
-      const baseSize = parseFloat(document.getElementById('brushSize').value);
+    function drawInkSegment(clientX, clientY, pressureInput, pointerType, isDot = false) {
+      const baseSize = parseFloat(document.getElementById('brushSize').value) || 3;
       let pressure = 0.5;
-      if (e.pointerType === 'pen' && e.pressure && e.pressure > 0) {
-        pressure = e.pressure;
-      } else if (e.pointerType === 'touch' && e.pressure && e.pressure > 0) {
-        pressure = e.pressure;
+      
+      if (pressureInput && pressureInput > 0) {
+        pressure = pressureInput;
+      }
+      if (pointerType === 'touch' && (!pressureInput || pressureInput === 0 || pressureInput < 0.1)) {
+        pressure = 0.5;
       }
 
       const color = document.getElementById('brushColor').value;
+      const coords = getCanvasCoords(clientX, clientY);
 
       inkCtx.save();
       inkCtx.lineCap = 'round';
@@ -1433,20 +1448,45 @@
       } else if (currentInkTool === 'eraser') {
         inkCtx.globalCompositeOperation = 'destination-out';
         inkCtx.lineWidth = Math.max(baseSize * 5, 20);
+        inkCtx.fillStyle = '#000000';
       }
 
       inkCtx.beginPath();
       if (isDot) {
-        inkCtx.arc(curX, curY, (currentInkTool === 'eraser' ? Math.max(baseSize * 5, 20) : Math.max(1, baseSize * (pressure * 2))) / 2, 0, Math.PI * 2);
+        const radius = (currentInkTool === 'eraser' ? Math.max(baseSize * 5, 20) : Math.max(1, baseSize * (pressure * 2))) / 2;
+        inkCtx.arc(coords.x, coords.y, radius, 0, Math.PI * 2);
         inkCtx.fill();
       } else {
         inkCtx.moveTo(lastInkX, lastInkY);
-        inkCtx.lineTo(curX, curY);
+        inkCtx.lineTo(coords.x, coords.y);
         inkCtx.stroke();
       }
       inkCtx.restore();
+
+      lastInkX = coords.x;
+      lastInkY = coords.y;
     }
 
+    // Interceptação de eventos Touch para Mobile (Impede cancelamento e rolagem)
+    inkCanvas.addEventListener('touchstart', (e) => {
+      if (currentInkTool !== 'select') {
+        e.preventDefault();
+      }
+    }, { passive: false });
+
+    inkCanvas.addEventListener('touchmove', (e) => {
+      if (currentInkTool !== 'select') {
+        e.preventDefault();
+      }
+    }, { passive: false });
+
+    inkCanvas.addEventListener('touchend', (e) => {
+      if (currentInkTool !== 'select') {
+        e.preventDefault();
+      }
+    }, { passive: false });
+
+    // Eventos Pointer Unificados
     inkCanvas.addEventListener('pointerdown', (e) => {
       if (currentInkTool === 'select') return;
       e.preventDefault();
@@ -1455,26 +1495,23 @@
         inkCanvas.setPointerCapture(e.pointerId);
       } catch (err) {}
 
-      const coords = getCanvasCoords(e);
+      const coords = getCanvasCoords(e.clientX, e.clientY);
       lastInkX = coords.x;
       lastInkY = coords.y;
 
-      drawInkSegment(e, coords.x, coords.y, true);
+      drawInkSegment(e.clientX, e.clientY, e.pressure, e.pointerType, true);
     });
 
     inkCanvas.addEventListener('pointermove', (e) => {
       if (!isDrawingInk || currentInkTool === 'select') return;
       e.preventDefault();
 
-      const events = (e.getCoalescedEvents && e.getCoalescedEvents().length > 0)
+      const events = (e.getCoalescedEvents && typeof e.getCoalescedEvents === 'function' && e.getCoalescedEvents().length > 0)
         ? e.getCoalescedEvents()
         : [e];
 
       for (const ev of events) {
-        const coords = getCanvasCoords(ev);
-        drawInkSegment(ev, coords.x, coords.y, false);
-        lastInkX = coords.x;
-        lastInkY = coords.y;
+        drawInkSegment(ev.clientX, ev.clientY, ev.pressure, ev.pointerType, false);
       }
     });
 
@@ -1495,11 +1532,6 @@
 
     inkCanvas.addEventListener('pointerup', stopInkDrawing);
     inkCanvas.addEventListener('pointercancel', stopInkDrawing);
-    inkCanvas.addEventListener('pointerout', (e) => {
-      if (!inkCanvas.hasPointerCapture(e.pointerId)) {
-        stopInkDrawing(e);
-      }
-    });
 
     // --- RENDER DA INTERFACE ---
     function renderNavigation() {
