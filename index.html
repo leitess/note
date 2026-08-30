@@ -370,7 +370,7 @@
     .paper-sheet.orientation-portrait { max-width: 1020px; }
     .paper-sheet.orientation-landscape { max-width: 1480px; }
 
-    /* CANVAS */
+    /* CANVAS DE TINTA */
     #inkCanvas {
       position: absolute;
       top: 0;
@@ -525,7 +525,7 @@
       user-select: none;
       transition: box-shadow 0.2s ease, border-color 0.2s ease;
       box-sizing: border-box;
-      min-width: 200px;
+      min-width: 140px;
       max-width: 100%;
       z-index: 6;
     }
@@ -535,6 +535,19 @@
     .craft-media-card.mode-flow.align-center { display: block; margin: 20px auto; float: none; clear: both; }
     .craft-media-card.mode-free { position: absolute; float: none; margin: 0; z-index: 25; }
     .craft-media-card.dragging { opacity: 0.9; box-shadow: 0 12px 28px rgba(0,0,0,0.22) !important; z-index: 50; }
+
+    /* ESTILO DESENHO MÓVEL (STICKER / RECORTADO) */
+    .style-drawing {
+      background: transparent !important;
+      border: 1px dashed transparent;
+      padding: 4px;
+      border-radius: 4px;
+    }
+    .style-drawing:hover {
+      border-color: #a8a29e;
+      background: rgba(255, 255, 255, 0.35) !important;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    }
 
     .style-polaroid {
       background: #ffffff;
@@ -928,7 +941,6 @@
       }
       .sidebar.open { transform: translateX(0); }
 
-      /* HEADER EM 2 LINHAS NO SMARTPHONE */
       header {
         flex-direction: column;
         align-items: stretch;
@@ -1056,7 +1068,7 @@
 
       <!-- Viewport da Folha de Caderno -->
       <main class="page-viewport" id="viewport">
-        <!-- TOOLBAR COM NAVEGAÇÃO SUAVE E INTUITIVA -->
+        <!-- TOOLBAR -->
         <div class="toolbar-wrapper">
           <button type="button" class="toolbar-scroll-btn" id="btnScrollToolbarLeft" title="Rolar para esquerda" onclick="scrollToolbar(-220)">‹</button>
           
@@ -1093,14 +1105,15 @@
                 <input type="color" id="inkColor" title="Cor do Texto" value="#1c1917" onchange="formatDoc('foreColor', this.value)" />
               </div>
 
-              <!-- Pincéis / Mesa / Touch -->
+              <!-- Pincéis / Mesa / Desenho Livre e Móvel -->
               <div class="toolbar-group" style="background:#f5f5f4; padding:2px 5px; border-radius:6px; border:1px solid #e7e5e4;">
                 <button type="button" id="toolSelect" class="btn active-tool" title="Digitar / Selecionar" onclick="setInkTool('select')">👆 Digitar</button>
                 <button type="button" id="toolPen" class="btn" title="Pincel Livre" onclick="setInkTool('pen')">🖊️ Pincel</button>
                 <button type="button" id="toolEraser" class="btn" title="Borracha" onclick="setInkTool('eraser')">🧹 Borracha</button>
                 <input type="color" id="brushColor" title="Cor do Pincel" value="#1c1917" />
                 <input type="range" id="brushSize" min="1" max="30" value="3" title="Espessura" style="width:45px;" />
-                <button type="button" id="btnClearInk" class="btn-danger" style="font-size:10px; padding:2px 5px;" title="Limpar desenhos" onclick="clearPageInk()">Limpar</button>
+                <button type="button" id="btnInkToCard" class="btn-dark" title="Converter o desenho da folha em um Card Móvel redimensionável" onclick="convertInkToMovableCard()">✨ Card Móvel</button>
+                <button type="button" id="btnClearInk" class="btn-danger" style="font-size:10px; padding:2px 5px;" title="Limpar desenhos da folha" onclick="clearPageInk()">Limpar</button>
               </div>
 
               <!-- Inserção: Código, Tabelas, Mídias e Diagramas -->
@@ -1405,7 +1418,7 @@
       return page;
     }
 
-    // --- PROTEÇÃO DO ESTADO DE TINTA (DESENHOS) ---
+    // --- PROTEÇÃO RIGOROSA DO ESTADO DE TINTA (ISOLAMENTO POR PÁGINA) ---
     let isCanvasDirtySinceLoad = false;
     let currentLoadedInkPageId = null;
 
@@ -1419,7 +1432,7 @@
       page.paperOrientation = document.getElementById('paperOrientation').value;
       
       const canvas = document.getElementById('inkCanvas');
-      if (canvas && canvas.width > 0 && canvas.height > 0 && isCanvasDirtySinceLoad) {
+      if (canvas && canvas.width > 0 && canvas.height > 0 && isCanvasDirtySinceLoad && currentLoadedInkPageId === page.id) {
         page.inkDataURL = canvas.toDataURL();
       }
     }
@@ -1524,7 +1537,7 @@
       syncInkCanvasDimensions();
     }
 
-    // --- PINCEL E DESENHO MANUAL SEGURO ---
+    // --- PINCEL E DESENHO MANUAL ---
     let currentInkTool = 'select';
     let isDrawingInk = false;
     let lastInkX = 0, lastInkY = 0;
@@ -1587,10 +1600,11 @@
       inkCtx.clearRect(0, 0, inkCanvas.width, inkCanvas.height);
 
       if (page.inkDataURL) {
+        const targetPageId = page.id;
         const img = new Image();
         img.onload = () => {
           const currentPage = getActivePage();
-          if (currentPage && currentPage.id === currentLoadedInkPageId) {
+          if (currentPage && currentPage.id === targetPageId) {
             inkCtx.drawImage(img, 0, 0);
           }
         };
@@ -1599,7 +1613,7 @@
     }
 
     function clearPageInk() {
-      if (!confirm('Deseja apagar todos os desenhos e rabiscos feitos à mão nesta página?')) return;
+      if (!confirm('Deseja apagar todos os desenhos feitos à mão nesta página?')) return;
       inkCtx.clearRect(0, 0, inkCanvas.width, inkCanvas.height);
       const page = getActivePage();
       if (page) {
@@ -1608,6 +1622,71 @@
       }
       saveToStorage();
     }
+
+    // --- CONVERTER DESENHO EM CARD MÓVEL & REDIMENSIONÁVEL ---
+    window.convertInkToMovableCard = () => {
+      const w = inkCanvas.width;
+      const h = inkCanvas.height;
+      if (w === 0 || h === 0) return;
+
+      const imgData = inkCtx.getImageData(0, 0, w, h);
+      const data = imgData.data;
+      let minX = w, minY = h, maxX = 0, maxY = 0;
+      let hasPixels = false;
+
+      for (let y = 0; y < h; y++) {
+        for (let x = 0; x < w; x++) {
+          const alpha = data[(y * w + x) * 4 + 3];
+          if (alpha > 10) {
+            hasPixels = true;
+            if (x < minX) minX = x;
+            if (x > maxX) maxX = x;
+            if (y < minY) minY = y;
+            if (y > maxY) maxY = y;
+          }
+        }
+      }
+
+      if (!hasPixels) {
+        alert('Nenhum traço de pincel encontrado nesta página para converter em card.');
+        return;
+      }
+
+      const padding = 10;
+      minX = Math.max(0, minX - padding);
+      minY = Math.max(0, minY - padding);
+      maxX = Math.min(w, maxX + padding);
+      maxY = Math.min(h, maxY + padding);
+
+      const cropW = Math.max(20, maxX - minX);
+      const cropH = Math.max(20, maxY - minY);
+
+      const tempCanvas = document.createElement('canvas');
+      tempCanvas.width = cropW;
+      tempCanvas.height = cropH;
+      const tempCtx = tempCanvas.getContext('2d');
+      tempCtx.drawImage(inkCanvas, minX, minY, cropW, cropH, 0, 0, cropW, cropH);
+
+      const croppedDataUrl = tempCanvas.toDataURL('image/png');
+
+      // Limpa a folha do canvas e adiciona como Card Móvel
+      inkCtx.clearRect(0, 0, w, h);
+      const page = getActivePage();
+      if (page) {
+        page.inkDataURL = null;
+        isCanvasDirtySinceLoad = true;
+      }
+
+      addMediaElement('drawing', croppedDataUrl, '', {
+        mode: 'free',
+        x: minX,
+        y: minY,
+        width: Math.max(140, cropW)
+      });
+
+      setInkTool('select');
+      saveToStorage();
+    };
 
     function getCanvasCoords(clientX, clientY) {
       const rect = inkCanvas.getBoundingClientRect();
@@ -1740,6 +1819,9 @@
 
     window.switchBook = (bookId) => {
       syncCurrentPageToState();
+      inkCtx.clearRect(0, 0, inkCanvas.width, inkCanvas.height);
+      isCanvasDirtySinceLoad = false;
+
       appState.activeBookId = bookId;
       renderAll();
       saveToStorage();
@@ -1749,6 +1831,9 @@
       const title = prompt('Nome do novo Caderno:', `Caderno ${appState.books.length + 1}`);
       if (!title || !title.trim()) return;
       syncCurrentPageToState();
+      inkCtx.clearRect(0, 0, inkCanvas.width, inkCanvas.height);
+      isCanvasDirtySinceLoad = false;
+
       const newBook = createInitialBook(title.trim());
       appState.books.push(newBook);
       appState.activeBookId = newBook.id;
@@ -1764,6 +1849,10 @@
       const currentBook = getActiveBook();
       if (!confirm(`Excluir o caderno "${currentBook.bookTitle}" e todas as suas anotações?`)) return;
       
+      syncCurrentPageToState();
+      inkCtx.clearRect(0, 0, inkCanvas.width, inkCanvas.height);
+      isCanvasDirtySinceLoad = false;
+
       appState.books = appState.books.filter(b => b.id !== currentBook.id);
       appState.activeBookId = appState.books[0].id;
       renderAll();
@@ -1790,6 +1879,9 @@
         li.onclick = (e) => {
           if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
           syncCurrentPageToState();
+          inkCtx.clearRect(0, 0, inkCanvas.width, inkCanvas.height);
+          isCanvasDirtySinceLoad = false;
+
           book.activeChapterId = c.id;
           book.activePageId = c.pages[0]?.id || null;
           renderAll();
@@ -1813,6 +1905,9 @@
           li.onclick = (e) => {
             if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
             syncCurrentPageToState();
+            inkCtx.clearRect(0, 0, inkCanvas.width, inkCanvas.height);
+            isCanvasDirtySinceLoad = false;
+
             book.activePageId = p.id;
             renderAll();
             saveToStorage();
@@ -1853,11 +1948,9 @@
       setInkTool('select');
       highlightAllCodeBlocks();
       
-      setTimeout(() => {
-        updateInfinitePageHeight();
-        loadInkFromState();
-        updateToolbarNavButtons();
-      }, 70);
+      updateInfinitePageHeight();
+      loadInkFromState();
+      updateToolbarNavButtons();
     }
 
     function renderAll() {
@@ -1992,6 +2085,9 @@
         const found = chap.pages.find(p => p.title.trim().toLowerCase() === pageName.trim().toLowerCase());
         if (found) {
           syncCurrentPageToState();
+          inkCtx.clearRect(0, 0, inkCanvas.width, inkCanvas.height);
+          isCanvasDirtySinceLoad = false;
+
           book.activeChapterId = chap.id;
           book.activePageId = found.id;
           renderAll();
@@ -2233,6 +2329,9 @@
               `;
               div.onclick = () => {
                 syncCurrentPageToState();
+                inkCtx.clearRect(0, 0, inkCanvas.width, inkCanvas.height);
+                isCanvasDirtySinceLoad = false;
+
                 appState.activeBookId = book.id;
                 book.activeChapterId = chap.id;
                 book.activePageId = page.id;
@@ -2569,6 +2668,7 @@
       renderThreads();
     };
 
+    // --- RENDER DE CARDS & DESENHOS MÓVEIS ---
     function renderCollageElements() {
       const container = document.getElementById('collageContainer');
       const editor = document.getElementById('textEditor');
@@ -2594,6 +2694,7 @@
       const type = item.type;
 
       let styleClass = 'style-polaroid';
+      if (type === 'drawing') styleClass = 'style-drawing';
       if (type === 'sticky') styleClass = 'style-sticky';
       if (type === 'audio') styleClass = 'style-cassette';
       if (type === 'file') styleClass = 'style-filetag';
@@ -2613,7 +2714,13 @@
 
       let innerCardHTML = '';
 
-      if (type === 'image' || type === 'drawing') {
+      if (type === 'drawing') {
+        innerCardHTML = `
+          <div class="drawing-media-box" style="width:100%; display:flex; justify-content:center; align-items:center;">
+            <img src="${item.src}" alt="Desenho Recortado" style="width:100%; height:auto; display:block; pointer-events:none; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.12));" />
+          </div>
+        `;
+      } else if (type === 'image') {
         innerCardHTML = `
           <div class="polaroid-media-box">
             <img src="${item.src}" alt="Foto" />
@@ -2767,7 +2874,7 @@
 
           function onResizeMove(moveEvent) {
             const deltaX = moveEvent.clientX - startX;
-            const newWidth = Math.max(180, Math.min(startWidth + deltaX, 1100));
+            const newWidth = Math.max(100, Math.min(startWidth + deltaX, 1200));
             cardElement.style.width = newWidth + 'px';
             itemData.width = newWidth;
           }
@@ -2801,11 +2908,11 @@
         svgData: type === 'diagram' ? srcOrData : null,
         text: type === 'sticky' ? srcOrData : null,
         caption: defaultCaption,
-        width: type === 'diagram' ? 440 : (type === 'sticky' ? 240 : 300),
-        mode: 'flow',
-        align: 'right',
-        x: 30,
-        y: 40,
+        width: type === 'diagram' ? 440 : (type === 'sticky' ? 240 : (type === 'drawing' ? (extra.width || 200) : 300)),
+        mode: extra.mode || 'flow',
+        align: extra.align || 'right',
+        x: extra.x !== undefined ? extra.x : 30,
+        y: extra.y !== undefined ? extra.y : 40,
         ...extra
       };
 
@@ -2982,6 +3089,9 @@
       const name = prompt('Nome do novo Capítulo (Domo):', `Capítulo ${book.chapters.length + 1}`);
       if (!name) return;
       syncCurrentPageToState();
+      inkCtx.clearRect(0, 0, inkCanvas.width, inkCanvas.height);
+      isCanvasDirtySinceLoad = false;
+
       const newPid = 'p_' + Date.now();
       const newCid = 'c_' + Date.now();
       book.chapters.push({
@@ -3000,6 +3110,9 @@
       const chap = getActiveChapter();
       if (!chap) return;
       syncCurrentPageToState();
+      inkCtx.clearRect(0, 0, inkCanvas.width, inkCanvas.height);
+      isCanvasDirtySinceLoad = false;
+
       const newPid = 'p_' + Date.now();
       chap.pages.push({
         id: newPid,
@@ -3038,6 +3151,10 @@
         return;
       }
       if (!confirm('Excluir este capítulo e todas as suas páginas?')) return;
+      syncCurrentPageToState();
+      inkCtx.clearRect(0, 0, inkCanvas.width, inkCanvas.height);
+      isCanvasDirtySinceLoad = false;
+
       book.chapters = book.chapters.filter(c => c.id !== cId);
       book.activeChapterId = book.chapters[0].id;
       book.activePageId = book.chapters[0].pages[0]?.id || null;
@@ -3054,6 +3171,10 @@
         return;
       }
       if (!confirm('Excluir esta página?')) return;
+      syncCurrentPageToState();
+      inkCtx.clearRect(0, 0, inkCanvas.width, inkCanvas.height);
+      isCanvasDirtySinceLoad = false;
+
       chap.pages = chap.pages.filter(p => p.id !== pId);
       book.activePageId = chap.pages[0].id;
       renderAll();
@@ -3121,7 +3242,7 @@
       saveToStorage();
     });
 
-    // Backup JSON do Caderno Atual (Garante sincronia completa da tinta)
+    // Backup JSON do Caderno Atual
     document.getElementById('btnExport').onclick = () => {
       syncCurrentPageToState();
       const currentBook = getActiveBook();
@@ -3161,6 +3282,9 @@
           } else {
             throw new Error('Formato inválido');
           }
+          
+          inkCtx.clearRect(0, 0, inkCanvas.width, inkCanvas.height);
+          isCanvasDirtySinceLoad = false;
           renderAll();
           saveToStorage();
           alert('Caderno importado com sucesso!');
