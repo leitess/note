@@ -27,6 +27,9 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
 
+  <!-- JSZip para Programação Literada & Empacotamento -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
   <style>
     :root {
       --bg-app: #dcd6cb;
@@ -391,7 +394,7 @@
       touch-action: none !important;
     }
 
-    /* TÍTULO DA PÁGINA */
+    /* TÍTULO DA PÁGINA E ASSINATURA */
     .page-title {
       font-family: 'Patrick Hand', cursive;
       font-size: 36px;
@@ -414,7 +417,6 @@
       word-break: break-word;
     }
 
-    /* METADADOS / ASSINATURA ABAIXO DO TÍTULO */
     .page-author-meta {
       display: flex;
       align-items: center;
@@ -439,6 +441,28 @@
       font-weight: 700;
       font-family: 'Patrick Hand', cursive;
       font-size: 19px;
+    }
+
+    /* Badge de Projeto Literado */
+    .project-badge-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(180, 83, 9, 0.12);
+      color: var(--accent);
+      border: 1px solid rgba(180, 83, 9, 0.3);
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      cursor: pointer;
+      user-select: none;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+    .project-badge-toggle.is-active {
+      background: #15803d;
+      color: #fff;
+      border-color: #166534;
     }
 
     #collageContainer {
@@ -490,7 +514,7 @@
       margin: 14px 0 6px 0;
     }
 
-    /* BLOCOS DE CÓDIGO */
+    /* BLOCOS DE CÓDIGO & PROGRAMAÇÃO LITERADA */
     .craft-code-block {
       background: #242220 !important;
       border: 1px solid #3d3935;
@@ -500,16 +524,16 @@
       overflow: hidden;
       font-family: 'Fira Code', monospace;
     }
-
     .code-block-header {
       background: #1a1816;
-      padding: 5px 10px;
+      padding: 6px 10px;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
       border-bottom: 1px solid #332f2b;
     }
-
     .code-lang-select {
       background: #2b2723;
       color: #fef08a;
@@ -521,7 +545,34 @@
       outline: none;
       cursor: pointer;
     }
-
+    .code-filepath-input {
+      background: #11100f;
+      color: #a3e635;
+      border: 1px solid #44403c;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 11px;
+      padding: 3px 8px;
+      flex: 1;
+      min-width: 140px;
+      max-width: 320px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .code-filepath-input:focus {
+      border-color: #a3e635;
+      background: #0c0a09;
+    }
+    .code-download-btn {
+      background: #2b2723;
+      color: #e7e5e4;
+      border: 1px solid #4d4742;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 10px;
+      cursor: pointer;
+    }
+    .code-download-btn:hover { background: #3f3933; color: #a3e635; }
     .code-copy-btn {
       background: #332f2b;
       color: #e7e5e4;
@@ -533,20 +584,45 @@
     }
     .code-copy-btn:hover { background: #4d4742; color: #fff; }
 
+    pre.craft-pre-override {
+      overflow-y: visible !important;
+      overflow-x: auto !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      background: transparent !important;
+    }
     .code-snippet-area {
-      padding: 12px 14px;
+      display: block !important;
+      padding: 12px 14px !important;
       color: #ccc;
       font-family: 'Fira Code', monospace;
       font-size: 13.5px;
       line-height: 20px;
-      white-space: pre-wrap;
+      white-space: pre-wrap !important;
+      overflow-wrap: break-word !important;
       outline: none;
       min-height: 60px;
-      word-break: break-word;
       tab-size: 2;
     }
 
-    /* CARDS */
+    /* PAINEL DE PROJETO LITERADO NO RODAPÉ */
+    .tangle-project-footer {
+      margin-top: 40px;
+      padding: 16px 20px;
+      background: #1c1917;
+      color: #f5f5f4;
+      border-radius: var(--radius-md);
+      border-left: 5px solid #a3e635;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+      user-select: none;
+    }
+
+    /* CARDS E ADESIVOS */
     .craft-media-card {
       position: relative;
       user-select: none;
@@ -1049,7 +1125,7 @@
     <header>
       <div class="header-left">
         <button type="button" class="btn-menu-toggle" id="btnToggleSidebar" title="Abrir Navegação">📚 Menu</button>
-        <select id="bookSelect" class="header-book-select" title="Selecione de Caderno" onchange="switchBook(this.value)"></select>
+        <select id="bookSelect" class="header-book-select" title="Selecione o Caderno" onchange="switchBook(this.value)"></select>
         <input 
           type="text" 
           id="bookTitleInput" 
@@ -1100,7 +1176,7 @@
 
       <!-- Viewport da Folha de Caderno -->
       <main class="page-viewport" id="viewport">
-        <!-- TOOLBAR -->
+        <!-- TOOLBAR COM NAVEGAÇÃO SUAVE E INTUITIVA -->
         <div class="toolbar-wrapper">
           <button type="button" class="toolbar-scroll-btn" id="btnScrollToolbarLeft" title="Rolar para esquerda" onclick="scrollToolbar(-220)">‹</button>
           
@@ -1144,13 +1220,14 @@
                 <button type="button" id="toolEraser" class="btn" title="Borracha" onclick="setInkTool('eraser')">🧹 Borracha</button>
                 <input type="color" id="brushColor" title="Cor do Pincel" value="#1c1917" />
                 <input type="range" id="brushSize" min="1" max="30" value="3" title="Espessura" style="width:45px;" />
-                <button type="button" id="btnInkToCard" class="btn-dark" title="Converter o desenho da folha em um Card Móvel redimensionável" onclick="convertInkToMovableCard()">✨ Card Móvel</button>
+                <button type="button" id="btnInkToCard" class="btn-dark" title="Converter o desenho da folha em um Card Móvel" onclick="convertInkToMovableCard()">✨ Card Móvel</button>
                 <button type="button" id="btnClearInk" class="btn-danger" style="font-size:10px; padding:2px 5px;" title="Limpar desenhos da folha" onclick="clearPageInk()">Limpar</button>
               </div>
 
-              <!-- Inserção: Código, Tabelas, Mídias e Diagramas -->
+              <!-- Inserção: Código Literado, Tabelas, Mídias e Diagramas -->
               <div class="toolbar-group">
-                <button type="button" id="btnInsertCode" class="btn-dark" title="Inserir Bloco de Código" onclick="insertCodeSnippet()">💻 Código</button>
+                <button type="button" id="btnInsertCode" class="btn-dark" title="Inserir Bloco de Código Literado" onclick="insertCodeSnippet()">💻 Código</button>
+                <button type="button" class="btn-dark" title="Exportar projeto literado em arquivo .ZIP" onclick="tangleAndExportZip()">📦 Tangling (ZIP)</button>
                 <button type="button" id="btnInsertTable" title="Inserir Tabela">📊 Tabela</button>
                 <button type="button" id="btnInsertQuote" title="Inserir Citação">❝ Citação</button>
                 <button type="button" id="btnOpenDiagramModal" class="btn-accent" title="Criar Diagrama">📐 Diagrama</button>
@@ -1193,13 +1270,17 @@
           <canvas id="inkCanvas"></canvas>
           <textarea id="pageTitle" class="page-title" rows="1" placeholder="Título da Página..." oninput="autoResizeTextarea(this)"></textarea>
           
-          <!-- Metadados / Assinatura Abaixo do Título -->
-          <div class="page-author-meta">
+          <!-- Metadados / Assinatura & Modo Projeto Literado -->
+          <div class="page-author-meta" contenteditable="false">
             <span class="author-tag">✍️ Leite, S. S.</span>
             <span>•</span>
-            <span>📅 30 de agosto de 2026</span>
+            <span id="currentDateDisplay">📅 Carregando data...</span>
             <span>•</span>
             <span>📍 São Paulo - SP</span>
+            <span>•</span>
+            <span id="projectModeToggle" class="project-badge-toggle" onclick="toggleProjectMode()" title="Ativar para tratar esta anotação como um Projeto de Software">
+              💻 Projeto Literado: <b id="projectModeLabel">Desativado</b>
+            </span>
           </div>
 
           <div id="collageContainer">
@@ -1309,6 +1390,24 @@
   <script>
     mermaid.initialize({ startOnLoad: false, theme: 'neutral', securityLevel: 'loose' });
 
+    const templates = {
+      flowchart: `graph TD\n    A[Início] --> B{Decisão}\n    B -- Sim --> C[Resultado 1]\n    B -- Não --> D[Resultado 2]`,
+      sequence: `sequenceDiagram\n    autonumber\n    Alice->>Bob: Olá Bob\n    Bob-->>Alice: Olá Alice`,
+      class: `classDiagram\n    class Animal{\n      +String name\n      +makeSound()\n    }`,
+      erd: `erDiagram\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|{ LINE-ITEM : contains`,
+      state: `stateDiagram-v2\n    [*] --> Still\n    Still --> [*]`,
+      mindmap: `mindmap\n  root((Projeto))\n    Origem\n      Ideia\n    Desenvolvimento`
+    };
+
+    function setTodayDate() {
+      const dateEl = document.getElementById('currentDateDisplay');
+      if (dateEl) {
+        const today = new Date();
+        const options = { day: 'numeric', month: 'long', year: 'numeric' };
+        dateEl.innerHTML = '📅 ' + today.toLocaleDateString('pt-BR', options);
+      }
+    }
+
     function autoResizeTextarea(el) {
       if (!el) return;
       el.style.height = 'auto';
@@ -1400,7 +1499,9 @@
             elements: [],
             inkDataURL: null,
             threads: [],
-            snapshots: []
+            snapshots: [],
+            isSoftwareProject: false,
+            createdAt: new Date().toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' })
           }]
         }]
       };
@@ -1456,6 +1557,7 @@
         if (!page.elements) page.elements = [];
         if (!page.paperOrientation) page.paperOrientation = 'orientation-portrait';
         if (!page.fontSize) page.fontSize = 24;
+        if (page.isSoftwareProject === undefined) page.isSoftwareProject = false;
       }
       return page;
     }
@@ -1520,6 +1622,7 @@
         highlightAllCodeBlocks();
         syncCurrentPageToState();
         updateInfinitePageHeight();
+        renderProjectFooter();
         saveToStorage();
         isPerformingUndoRedo = false;
       }
@@ -1537,19 +1640,11 @@
         highlightAllCodeBlocks();
         syncCurrentPageToState();
         updateInfinitePageHeight();
+        renderProjectFooter();
         saveToStorage();
         isPerformingUndoRedo = false;
       }
     }
-
-    const templates = {
-      flowchart: `graph TD\n    A([Início / Ideia]) --> B{Validar Viabilidade?}\n    B -->|Sim| C[Desenhar Arquitetura]\n    B -->|Não| D[Refinar Conceito]\n    C --> E[Documentar Protótipo]\n    D --> A\n    E --> F([Publicação])`,
-      sequence: `sequenceDiagram\n    autonumber\n    actor Usuario as Usuário\n    participant UI as Caderno Artesanal\n    participant Store as LocalStorage\n\n    Usuario->>UI: Digita anotação e link [[Página]]\n    UI->>Store: Sincroniza estado automático\n    Usuario->>UI: Cria diagrama UML\n    UI->>UI: Renderiza SVG dinâmico\n    UI-->>Usuario: Exibe na folha de papel`,
-      class: `classDiagram\n    class Livro {\n      +String titulo\n      +List~Capitulo~ capitulos\n      +salvarVersao()\n    }\n    class Capitulo {\n      +String id\n      +String nome\n      +List~Pagina~ paginas\n    }\n    class Pagina {\n      +String id\n      +String conteudoHTML\n      +List~Thread~ discussões\n    }\n    Livro "1" *-- "many" Capitulo\n    Capitulo "1" *-- "many" Pagina`,
-      erd: `erDiagram\n    LIVRO ||--|{ CAPITULO : contem\n    CAPITULO ||--|{ PAGINA : possui\n    PAGINA ||--o{ THREAD : debate\n    PAGINA ||--o{ SCRAP_ITEM : decora\n\n    PAGINA {\n      string id PK\n      string titulo\n      string estilo_papel\n    }`,
-      state: `stateDiagram-v2\n    [*] --> IdeiaBruta\n    IdeiaBruta --> EmDiscussao : Criar Thread\n    EmDiscussao --> Refinando : Comentários & Diagramas\n    Refinando --> Resolvido : Conclusão\n    Resolvido --> [*]`,
-      mindmap: `mindmap\n  root((Visão do Projeto))\n    Conceito\n      Artesanal\n      Scrapbook\n    Engenharia\n      UML & BPMN\n      ERD de Dados\n    Refinamento\n      Threads\n      Snapshots`
-    };
 
     function updateInfinitePageHeight() {
       const collage = document.getElementById('collageContainer');
@@ -1578,6 +1673,7 @@
       syncInkCanvasDimensions();
     }
 
+    /* PINCEL E TINTA */
     let currentInkTool = 'select';
     let isDrawingInk = false;
     let lastInkX = 0, lastInkY = 0;
@@ -1741,12 +1837,8 @@
       const baseSize = parseFloat(document.getElementById('brushSize').value) || 3;
       let pressure = 0.5;
       
-      if (pressureInput && pressureInput > 0) {
-        pressure = pressureInput;
-      }
-      if (pointerType === 'touch' && (!pressureInput || pressureInput === 0 || pressureInput < 0.1)) {
-        pressure = 0.5;
-      }
+      if (pressureInput && pressureInput > 0) pressure = pressureInput;
+      if (pointerType === 'touch' && (!pressureInput || pressureInput === 0 || pressureInput < 0.1)) pressure = 0.5;
 
       const color = document.getElementById('brushColor').value;
       const coords = getCanvasCoords(clientX, clientY);
@@ -1908,7 +2000,7 @@
         const li = document.createElement('li');
         li.className = `nav-item ${c.id === book.activeChapterId ? 'active' : ''}`;
         li.innerHTML = `
-          <span title="Duplo clique para renomear" ondblclick="renameChapter('${c.id}')">📁 ${c.title}</span>
+          <span title="Duplo clique para renomear" ondblclick="renameChapter('${c.id}')">📁 ${escapeHTML(c.title)}</span>
           <div class="nav-actions">
             <button class="btn-icon" title="Renomear Domo" onclick="renameChapter('${c.id}')">✏️</button>
             ${book.chapters.length > 1 ? `<button class="btn-danger btn-icon" title="Excluir" onclick="deleteChapter(event, '${c.id}')">✕</button>` : ''}
@@ -1935,7 +2027,7 @@
           const li = document.createElement('li');
           li.className = `nav-item ${p.id === book.activePageId ? 'active' : ''}`;
           li.innerHTML = `
-            <span>📄 ${p.title || 'Sem título'}</span>
+            <span>${p.isSoftwareProject ? '💻' : '📄'} ${escapeHTML(p.title || 'Sem título')}</span>
             <div class="nav-actions">
               ${currentChap.pages.length > 1 ? `<button class="btn-danger btn-icon" title="Excluir" onclick="deletePage(event, '${p.id}')">✕</button>` : ''}
             </div>
@@ -1980,6 +2072,14 @@
       editor.style.fontSize = (page.fontSize || 24) + 'px';
       editor.style.lineHeight = ((page.fontSize || 24) + 8) + 'px';
 
+      const dateEl = document.getElementById('currentDateDisplay');
+      if (dateEl) {
+        if (!page.createdAt) {
+            page.createdAt = new Date().toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' });
+        }
+        dateEl.innerHTML = '📅 ' + page.createdAt;
+      }
+
       renderCollageElements();
       renderThreads();
       initHistory(page.contentHTML || '');
@@ -1989,6 +2089,9 @@
       updateInfinitePageHeight();
       loadInkFromState();
       updateToolbarNavButtons();
+
+      updateProjectModeUI();
+      renderProjectFooter();
     }
 
     function renderAll() {
@@ -2028,36 +2131,69 @@
       insertHtmlAtCursor(`<${tag} class="craft-${tag}">${escapeHTML(text)}</${tag}><p><br></p>`);
     };
 
+    /* PROGRAMAÇÃO LITERADA & TANGLING */
+    const LANG_EXTENSIONS = {
+      python: '.py',
+      javascript: '.js',
+      typescript: '.ts',
+      sql: '.sql',
+      cpp: '.cpp',
+      rust: '.rs',
+      go: '.go',
+      html: '.html',
+      bash: '.sh',
+      json: '.json'
+    };
+
     window.insertCodeSnippet = () => {
       const codeBlockHTML = `
         <div class="craft-code-block" contenteditable="false">
           <div class="code-block-header">
-            <select class="code-lang-select" onchange="changeCodeLang(this)">
-              <option value="python">Python</option>
-              <option value="javascript">JavaScript</option>
-              <option value="typescript">TypeScript</option>
-              <option value="sql">SQL</option>
-              <option value="cpp">C++</option>
-              <option value="rust">Rust</option>
-              <option value="go">Go</option>
-              <option value="html">HTML/CSS</option>
-              <option value="bash">Shell/Bash</option>
-              <option value="json">JSON</option>
-            </select>
-            <button type="button" class="code-copy-btn" onclick="copyCodeFromBlock(this)">📋 Copiar</button>
+            <div style="display:flex; align-items:center; gap:6px; flex:1; min-width:0;">
+              <select class="code-lang-select" onchange="changeCodeLang(this)">
+                <option value="python">Python</option>
+                <option value="javascript">JavaScript</option>
+                <option value="typescript">TypeScript</option>
+                <option value="sql">SQL</option>
+                <option value="cpp">C++</option>
+                <option value="rust">Rust</option>
+                <option value="go">Go</option>
+                <option value="html">HTML/CSS</option>
+                <option value="bash">Shell/Bash</option>
+                <option value="json">JSON</option>
+              </select>
+              <input 
+                type="text" 
+                class="code-filepath-input" 
+                placeholder="ex: src/app.py (caminho relativo)" 
+                title="Caminho relativo para este módulo"
+                oninput="this.setAttribute('value', this.value); syncCurrentPageToState(); saveToStorage(); renderProjectFooter();"
+              />
+            </div>
+            <div style="display:flex; align-items:center; gap:4px; flex-shrink:0;">
+              <button type="button" class="code-download-btn" title="Baixar apenas este arquivo" onclick="downloadSingleBlock(this)">💾 Salvar</button>
+              <button type="button" class="code-copy-btn" onclick="copyCodeFromBlock(this)">📋 Copiar</button>
+            </div>
           </div>
-          <pre style="margin:0; background:transparent;"><code class="code-snippet-area language-python" contenteditable="true" spellcheck="false" onkeydown="handleCodeKeyDown(event)" onblur="highlightSingleCodeBlock(this)"># Escreva seu código aqui...</code></pre>
+          <pre class="craft-pre-override"><code class="code-snippet-area language-python" contenteditable="true" spellcheck="false" onkeydown="handleCodeKeyDown(event)" onblur="highlightSingleCodeBlock(this)"># Escreva seu código aqui...</code></pre>
         </div>
         <p><br></p>
       `;
       insertHtmlAtCursor(codeBlockHTML);
       setTimeout(highlightAllCodeBlocks, 50);
+      renderProjectFooter();
     };
 
     window.changeCodeLang = (selectEl) => {
       const block = selectEl.closest('.craft-code-block');
       const codeEl = block.querySelector('.code-snippet-area');
       const lang = selectEl.value;
+      
+      Array.from(selectEl.options).forEach(opt => {
+        if (opt.value === lang) opt.setAttribute('selected', 'selected');
+        else opt.removeAttribute('selected');
+      });
+
       codeEl.className = `code-snippet-area language-${lang}`;
       highlightSingleCodeBlock(codeEl);
       syncCurrentPageToState();
@@ -2108,6 +2244,155 @@
         setTimeout(() => btn.textContent = original, 1800);
       }
     };
+
+    window.downloadSingleBlock = (btn) => {
+      const block = btn.closest('.craft-code-block');
+      const pathInput = block.querySelector('.code-filepath-input');
+      const langSelect = block.querySelector('.code-lang-select');
+      const codeArea = block.querySelector('.code-snippet-area');
+
+      let filePath = (pathInput ? pathInput.value : '').trim();
+      const lang = langSelect ? langSelect.value : 'text';
+      const defaultExt = LANG_EXTENSIONS[lang] || '.txt';
+
+      if (!filePath) {
+        filePath = `modulo_${Date.now()}${defaultExt}`;
+      }
+
+      const fileName = filePath.split('/').pop() || `codigo${defaultExt}`;
+      const codeContent = codeArea.innerText;
+
+      const blob = new Blob([codeContent], { type: 'text/plain;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = fileName;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    };
+
+    function extractProjectFiles() {
+      const editor = document.getElementById('textEditor');
+      const blocks = editor.querySelectorAll('.craft-code-block');
+      const filesMap = {};
+      let autoCount = 1;
+
+      blocks.forEach(block => {
+        const pathInput = block.querySelector('.code-filepath-input');
+        const langSelect = block.querySelector('.code-lang-select');
+        const codeArea = block.querySelector('.code-snippet-area');
+
+        if (!codeArea) return;
+
+        const rawCode = codeArea.innerText;
+        let path = (pathInput ? pathInput.value : '').trim();
+        const lang = langSelect ? langSelect.value : 'text';
+
+        path = path.replace(/^[\\\/]+/, '').replace(/\\/g, '/');
+
+        if (!path) {
+          const ext = LANG_EXTENSIONS[lang] || '.txt';
+          path = `src/modulo_${autoCount}${ext}`;
+          autoCount++;
+        }
+
+        // Concatena blocos que compartilham o mesmo caminho de arquivo (Tangling)
+        if (filesMap[path]) {
+          filesMap[path] += '\n\n' + rawCode;
+        } else {
+          filesMap[path] = rawCode;
+        }
+      });
+
+      return filesMap;
+    }
+
+    window.tangleAndExportZip = async () => {
+      const files = extractProjectFiles();
+      const fileKeys = Object.keys(files);
+
+      if (fileKeys.length === 0) {
+        alert('Nenhum bloco de código encontrado nesta página para empacotar.');
+        return;
+      }
+
+      if (typeof JSZip === 'undefined') {
+        alert('Biblioteca JSZip não encontrada. Verifique sua conexão com a internet.');
+        return;
+      }
+
+      const zip = new JSZip();
+      fileKeys.forEach(filePath => {
+        zip.file(filePath, files[filePath]);
+      });
+
+      const page = getActivePage();
+      const projName = (page && page.title ? page.title : 'projeto')
+        .toLowerCase()
+        .replace(/[^a-z0-9]/gi, '_');
+
+      try {
+        const zipBlob = await zip.generateAsync({ type: 'blob' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(zipBlob);
+        a.download = `${projName}_fontes.zip`;
+        a.click();
+        URL.revokeObjectURL(a.href);
+      } catch (err) {
+        alert('Erro ao gerar o arquivo ZIP: ' + err.message);
+      }
+    };
+
+    window.toggleProjectMode = () => {
+      const page = getActivePage();
+      if (!page) return;
+      page.isSoftwareProject = !page.isSoftwareProject;
+      updateProjectModeUI();
+      renderProjectFooter();
+      renderNavigation();
+      saveToStorage();
+    };
+
+    function updateProjectModeUI() {
+      const page = getActivePage();
+      const badge = document.getElementById('projectModeToggle');
+      const label = document.getElementById('projectModeLabel');
+      if (!badge || !label) return;
+
+      const isActive = !!(page && page.isSoftwareProject);
+      badge.classList.toggle('is-active', isActive);
+      label.textContent = isActive ? 'Ativado ✓' : 'Desativado';
+    }
+
+    function renderProjectFooter() {
+      const existingFooter = document.getElementById('tangleProjectFooter');
+      if (existingFooter) existingFooter.remove();
+
+      const page = getActivePage();
+      if (!page || !page.isSoftwareProject) return;
+
+      const collageContainer = document.getElementById('collageContainer');
+      const files = extractProjectFiles();
+      const fileCount = Object.keys(files).length;
+
+      const footer = document.createElement('div');
+      footer.id = 'tangleProjectFooter';
+      footer.className = 'tangle-project-footer';
+      footer.contentEditable = 'false';
+      footer.innerHTML = `
+        <div>
+          <div style="font-size:14px; font-weight:700; color:#a3e635; display:flex; align-items:center; gap:6px;">
+            ⚙️ Projeto de Software Configurado
+          </div>
+          <div style="font-size:12px; color:#a8a29e; margin-top:2px;">
+            ${fileCount} arquivo(s) mapeado(s) prontos para compilação/tangling em lote.
+          </div>
+        </div>
+        <button class="btn-accent" style="padding:6px 14px; font-size:12px;" onclick="tangleAndExportZip()">
+          📦 Compilar & Baixar Projeto (.ZIP)
+        </button>
+      `;
+      collageContainer.appendChild(footer);
+    }
 
     document.getElementById('textEditor').addEventListener('click', (e) => {
       const target = e.target.closest('.wiki-link');
@@ -2178,7 +2463,7 @@
         const { svg } = await mermaid.render(id, code);
         mermaidOutput.innerHTML = svg;
       } catch (err) {
-        mermaidOutput.innerHTML = `<span style="color:#dc2626; font-size:12px;">Erro no diagrama: ${err.message || ''}</span>`;
+        mermaidOutput.innerHTML = `<span style="color:#dc2626; font-size:12px;">Erro no diagrama: ${escapeHTML(err.message || '')}</span>`;
       }
     }
 
@@ -2208,11 +2493,12 @@
         title: page.title,
         contentHTML: page.contentHTML,
         inkDataURL: page.inkDataURL,
+        isSoftwareProject: page.isSoftwareProject,
         date: new Date().toLocaleString()
       });
 
       saveToStorage();
-      alert('Versão salva!');
+      alert('Versão salva com sucesso!');
     };
 
     document.getElementById('btnOpenSnapshots').onclick = () => {
@@ -2254,6 +2540,7 @@
       const s = page.snapshots[idx];
       page.title = s.title;
       page.contentHTML = s.contentHTML;
+      page.isSoftwareProject = s.isSoftwareProject || false;
       if (s.inkDataURL !== undefined) {
         page.inkDataURL = s.inkDataURL;
       }
@@ -3134,7 +3421,7 @@
       book.chapters.push({
         id: newCid,
         title: name,
-        pages: [{ id: newPid, title: 'Página 1', paperOrientation: 'orientation-portrait', fontSize: 24, contentHTML: '', elements: [], inkDataURL: null, threads: [], snapshots: [] }]
+        pages: [{ id: newPid, title: 'Página 1', paperOrientation: 'orientation-portrait', fontSize: 24, contentHTML: '', elements: [], inkDataURL: null, threads: [], snapshots: [], isSoftwareProject: false }]
       });
       book.activeChapterId = newCid;
       book.activePageId = newPid;
@@ -3160,7 +3447,9 @@
         elements: [],
         inkDataURL: null,
         threads: [],
-        snapshots: []
+        snapshots: [],
+        isSoftwareProject: false,
+        createdAt: new Date().toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' })
       });
       book.activePageId = newPid;
       renderAll();
@@ -3223,7 +3512,7 @@
       try {
         localStorage.setItem('scrapbook_craft_data', JSON.stringify(appState));
       } catch (err) {
-        console.warn('Armazenamento cheio.');
+        console.warn('Armazenamento local cheio.');
       }
     }
 
@@ -3268,6 +3557,7 @@
 
     document.getElementById('textEditor').addEventListener('input', () => {
       pushHistoryState(document.getElementById('textEditor').innerHTML);
+      renderProjectFooter();
       saveToStorage();
     });
 
@@ -3279,7 +3569,6 @@
       saveToStorage();
     });
 
-    // Backup JSON do Caderno Atual
     document.getElementById('btnExport').onclick = () => {
       syncCurrentPageToState();
       const currentBook = getActiveBook();
@@ -3291,7 +3580,6 @@
       a.click();
     };
 
-    // Importar JSON
     document.getElementById('inputImport').onchange = (e) => {
       const file = e.target.files[0];
       if (!file) return;
@@ -3346,7 +3634,10 @@
       return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag));
     }
 
-    window.onload = loadFromStorage;
+    window.onload = () => {
+      loadFromStorage();
+      //setTodayDate();
+    };
   </script>
 </body>
 </html>
