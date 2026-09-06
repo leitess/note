@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>Caderno Artesanal - Scrapbook & Notas</title>
+  <title>Caderno de Engenharia & Journaling</title>
   
-  <!-- Fontes do Caderno e Código -->
+  <!-- Fontes -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Fira+Code:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Fira+Code:wght@400;500;600&family=Inter:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&display=swap" rel="stylesheet">
 
   <!-- Mermaid.js -->
   <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
@@ -27,27 +27,31 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
 
-  <!-- JSZip para Programação Literada & Empacotamento -->
+  <!-- JSZip -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
   <style>
     :root {
-      --bg-app: #dcd6cb;
-      --sidebar-bg: #23201d;
+      --bg-app: #e5e0d8;
+      --sidebar-bg: #1c1a17;
       --sidebar-text: #e7e5e4;
       --accent: #b45309;
       --accent-hover: #92400e;
-      --border-craft: #d6cebf;
+      --border-craft: #d7d1c5;
       --text-ink: #1c1917;
       --paper-bg: #ffffff;
       --radius-sm: 6px;
-      --radius-md: 8px;
+      --radius-md: 10px;
+      --font-hand: 'Patrick Hand', cursive;
+      --font-code: 'Fira Code', monospace;
+      --font-sans: 'Inter', sans-serif;
+      --font-reading: 'Newsreader', serif;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      font-family: 'Inter', sans-serif;
+      font-family: var(--font-sans);
       background-color: var(--bg-app);
       color: var(--text-ink);
       height: 100vh;
@@ -61,18 +65,18 @@
 
     .app-window {
       width: 100%;
-      max-width: 1720px;
+      max-width: 1760px;
       height: 100%;
       background: #fff;
       border-radius: var(--radius-md);
-      box-shadow: 0 12px 36px rgba(0,0,0,0.18);
+      box-shadow: 0 16px 40px rgba(0,0,0,0.14);
       display: flex;
       flex-direction: column;
       overflow: hidden;
       position: relative;
     }
 
-    /* HEADER RESPONSIVO */
+    /* HEADER */
     header {
       background: #181615;
       color: #fafaf9;
@@ -111,17 +115,17 @@
       color: #fef08a;
       border: 1px solid #44403c;
       border-radius: var(--radius-sm);
-      font-family: 'Patrick Hand', cursive;
+      font-family: var(--font-hand);
       font-size: 17px;
       padding: 3px 8px;
       outline: none;
       cursor: pointer;
-      max-width: 140px;
+      max-width: 150px;
       flex-shrink: 0;
     }
 
     .header-book-input {
-      font-family: 'Patrick Hand', cursive;
+      font-family: var(--font-hand);
       font-size: 22px;
       line-height: 26px;
       font-weight: 700;
@@ -138,9 +142,8 @@
       overflow: hidden;
       text-overflow: ellipsis;
     }
-
     .header-book-input:hover { border-color: #78716c; background: rgba(255, 255, 255, 0.05); }
-    .header-book-input:focus { border-color: #fef08a; background: rgba(0, 0, 0, 0.4); text-overflow: clip; }
+    .header-book-input:focus { border-color: #fef08a; background: rgba(0, 0, 0, 0.4); }
 
     .header-actions {
       display: flex;
@@ -149,12 +152,12 @@
       flex-shrink: 0;
     }
 
-    /* BOTÕES GERAIS */
+    /* BOTÕES */
     button, .btn {
-      background: #fbfbfa;
+      background: #fcfbf9;
       color: #1c1917;
       border: 1px solid #d6d3d1;
-      padding: 5px 9px;
+      padding: 5px 10px;
       border-radius: var(--radius-sm);
       cursor: pointer;
       font-size: 12px;
@@ -167,16 +170,15 @@
       user-select: none;
       min-height: 28px;
     }
-
-    button:hover, .btn:hover { background: #f0eee9; border-color: #a8a29e; }
+    button:hover, .btn:hover { background: #f2eee6; border-color: #a8a29e; }
     button:active, .btn:active { transform: scale(0.98); }
-    
+
     .btn-accent { background: var(--accent); color: #fff; border-color: var(--accent); }
     .btn-accent:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
-    
+
     .btn-dark { background: #2b2723; color: #fef08a; border-color: #44403c; }
     .btn-dark:hover { background: #3d3833; border-color: #57534e; }
-    
+
     .btn-danger { color: #dc2626; border-color: #fca5a5; }
     .btn-danger:hover { background: #fee2e2; border-color: #f87171; }
     .btn-icon { padding: 4px 7px; font-size: 12px; }
@@ -197,31 +199,23 @@
       position: relative;
     }
 
-    /* SIDEBAR */
+    /* SIDEBAR CRONOLÓGICA COM TAGS */
     .sidebar {
-      width: 250px;
-      min-width: 210px;
+      width: 280px;
+      min-width: 240px;
       background: var(--sidebar-bg);
       color: var(--sidebar-text);
       display: flex;
       flex-direction: column;
-      border-right: 1px solid #1c1917;
+      border-right: 1px solid #141210;
       flex-shrink: 0;
       transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
       z-index: 150;
     }
 
-    .sidebar-section {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      border-bottom: 1px solid #332f2b;
-    }
-
     .sidebar-header {
-      padding: 8px 12px;
-      background: #181615;
+      padding: 10px 12px;
+      background: #141210;
       font-size: 11px;
       font-weight: 700;
       text-transform: uppercase;
@@ -230,35 +224,91 @@
       justify-content: space-between;
       align-items: center;
       color: #a8a29e;
+      border-bottom: 1px solid #282420;
     }
 
-    .nav-list { list-style: none; overflow-y: auto; padding: 6px; }
+    /* CHIPS DE FILTRO DE TAGS NA SIDEBAR */
+    .tag-filter-bar {
+      padding: 6px 8px;
+      background: #23201d;
+      border-bottom: 1px solid #2d2925;
+      display: flex;
+      gap: 4px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .tag-filter-bar::-webkit-scrollbar { display: none; }
+    .tag-chip {
+      background: #2f2b27;
+      color: #d6d3d1;
+      border: 1px solid #44403c;
+      padding: 2px 7px;
+      border-radius: 12px;
+      font-size: 10px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s;
+    }
+    .tag-chip:hover, .tag-chip.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    .nav-list { list-style: none; overflow-y: auto; padding: 6px; flex: 1; }
 
     .nav-item {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 7px 9px;
+      flex-direction: column;
+      padding: 8px 10px;
       border-radius: var(--radius-sm);
       cursor: pointer;
-      font-size: 13px;
-      margin-bottom: 3px;
+      margin-bottom: 4px;
       color: #d6d3d1;
+      gap: 3px;
+      border: 1px solid transparent;
+      transition: all 0.15s;
+    }
+    .nav-item:hover { background: #2c2824; color: #fff; }
+    .nav-item.active {
+      background: #39332d;
+      border-color: #575047;
+      color: #fef08a;
+    }
+    .nav-item-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      font-weight: 600;
       gap: 6px;
     }
-
-    .nav-item:hover { background: #383430; color: #fff; }
-    .nav-item.active { background: #4a4540; color: #fef08a; font-weight: 600; }
-    .nav-item span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
-    .nav-actions { display: flex; gap: 3px; align-items: center; }
+    .nav-item-top span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+    .nav-item-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 10px;
+      color: #a8a29e;
+    }
+    .nav-item-tags {
+      display: flex;
+      gap: 3px;
+      overflow: hidden;
+    }
+    .mini-tag {
+      background: rgba(254, 240, 138, 0.15);
+      color: #fef08a;
+      padding: 0 4px;
+      border-radius: 3px;
+      font-size: 9px;
+    }
 
     .sidebar-backdrop {
       display: none;
       position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
       background: rgba(0,0,0,0.55);
       backdrop-filter: blur(2px);
       z-index: 140;
@@ -269,7 +319,7 @@
     .page-viewport {
       flex: 1;
       display: block;
-      background: #d6cebf;
+      background: #dcd6cb;
       overflow-y: auto;
       overflow-x: hidden;
       position: relative;
@@ -282,7 +332,7 @@
       touch-action: none !important;
     }
 
-    /* TOOLBAR WRAPPER */
+    /* TOOLBAR */
     .toolbar-wrapper {
       position: sticky;
       top: 0;
@@ -293,7 +343,7 @@
       display: flex;
       align-items: center;
       padding: 4px 6px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
       user-select: none;
     }
 
@@ -311,10 +361,8 @@
       justify-content: center;
       cursor: pointer;
       flex-shrink: 0;
-      transition: all 0.15s ease;
       z-index: 5;
     }
-    .toolbar-scroll-btn:hover { background: #e7e5e4; color: #1c1917; border-color: #a8a29e; }
     .toolbar-scroll-btn.disabled { opacity: 0.25; pointer-events: none; }
 
     .paper-toolbar {
@@ -333,7 +381,6 @@
     .paper-toolbar.grabbing { cursor: grabbing; }
     .paper-toolbar::-webkit-scrollbar { height: 4px; }
     .paper-toolbar::-webkit-scrollbar-thumb { background: #c7c0b3; border-radius: 4px; }
-    .paper-toolbar::-webkit-scrollbar-track { background: transparent; }
 
     .toolbar-cluster { display: flex; align-items: center; gap: 5px; flex-shrink: 0; }
     .toolbar-group {
@@ -354,49 +401,53 @@
       height: 26px;
     }
 
-    /* FOLHA */
+    /* FOLHA DE PAPEL */
     .paper-sheet {
       width: 100%;
       margin: 16px auto 140px auto;
-      min-height: 960px;
+      min-height: 980px;
       height: auto;
       background-color: var(--paper-bg);
       border-radius: var(--radius-sm);
-      box-shadow: 0 6px 20px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.04);
-      padding: 40px 50px 140px 50px;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.03);
+      padding: 42px 54px 140px 54px;
       position: relative;
       display: block;
       box-sizing: border-box;
       transition: max-width 0.2s ease;
     }
-
     .paper-sheet.orientation-portrait { max-width: 1020px; }
     .paper-sheet.orientation-landscape { max-width: 1480px; }
 
     /* CANVAS DE TINTA */
     #inkCanvas {
       position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
       pointer-events: none;
       z-index: 10;
       border-radius: var(--radius-sm);
       touch-action: none !important;
       user-select: none;
     }
-
     #inkCanvas.drawing-active {
       pointer-events: auto;
       cursor: crosshair;
       z-index: 35;
-      touch-action: none !important;
     }
 
-    /* TÍTULO DA PÁGINA E ASSINATURA */
+    /* HEADER DA PÁGINA: TÍTULO, DATA E TAGS */
+    .title-wrapper {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 6px;
+      position: relative;
+      z-index: 5;
+    }
+
     .page-title {
-      font-family: 'Patrick Hand', cursive;
+      font-family: var(--font-hand);
       font-size: 36px;
       line-height: 42px;
       font-weight: 700;
@@ -404,53 +455,55 @@
       outline: none;
       background: transparent;
       color: #1c1917;
-      margin-bottom: 6px;
       border-bottom: 2px dashed #a8a29e;
-      padding-bottom: 6px;
+      padding-bottom: 4px;
       width: 100%;
       display: block;
-      position: relative;
-      z-index: 5;
       resize: none;
       overflow: hidden;
       word-wrap: break-word;
-      word-break: break-word;
     }
 
-    .page-author-meta {
+    .btn-suggest-title {
+      background: #fef08a;
+      color: #78350f;
+      border: 1px solid #facc15;
+      font-size: 11px;
+      padding: 4px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      white-space: nowrap;
+      margin-top: 4px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+    }
+    .btn-suggest-title:hover { background: #fde047; }
+
+    .page-meta-row {
       display: flex;
       align-items: center;
       flex-wrap: wrap;
       gap: 10px;
-      margin-bottom: 22px;
-      font-family: 'Inter', sans-serif;
-      font-size: 13px;
+      margin-bottom: 12px;
+      font-size: 12.5px;
       color: #78716c;
       font-weight: 500;
       position: relative;
       z-index: 5;
       user-select: none;
     }
-    .page-author-meta span {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-    }
-    .page-author-meta .author-tag {
-      color: var(--accent);
-      font-weight: 700;
-      font-family: 'Patrick Hand', cursive;
-      font-size: 19px;
-    }
+    .page-meta-row span { display: inline-flex; align-items: center; gap: 4px; }
+    .author-tag { color: var(--accent); font-weight: 700; font-family: var(--font-hand); font-size: 19px; }
 
-    /* Badge de Projeto Literado */
     .project-badge-toggle {
       display: inline-flex;
       align-items: center;
       gap: 5px;
-      background: rgba(180, 83, 9, 0.12);
+      background: rgba(180, 83, 9, 0.1);
       color: var(--accent);
-      border: 1px solid rgba(180, 83, 9, 0.3);
+      border: 1px solid rgba(180, 83, 9, 0.25);
       padding: 2px 8px;
       border-radius: 12px;
       font-size: 11px;
@@ -465,6 +518,95 @@
       border-color: #166534;
     }
 
+    /* CAMPO DE TAGS NA FOLHA */
+    .page-tags-bar {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 22px;
+      position: relative;
+      z-index: 5;
+    }
+    .page-tag-chip {
+      background: #f5eedc;
+      color: #78350f;
+      border: 1px solid #d6cebf;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 11.5px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .page-tag-chip button {
+      background: transparent;
+      border: none;
+      color: #a8a29e;
+      cursor: pointer;
+      font-size: 11px;
+      min-height: auto;
+      padding: 0;
+    }
+    .page-tag-chip button:hover { color: #dc2626; }
+    .page-tag-input {
+      border: 1px dashed #d6d3d1;
+      background: transparent;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      outline: none;
+      width: 110px;
+      transition: all 0.2s;
+    }
+    .page-tag-input:focus {
+      border-color: var(--accent);
+      background: #fff;
+      width: 150px;
+    }
+
+    /* PAINEL DE IGNIÇÃO / ANTE-BLOQUEIO MENTAL */
+    .ignition-box {
+      background: #faf8f5;
+      border: 1px dashed #d6cebf;
+      border-radius: var(--radius-md);
+      padding: 14px 18px;
+      margin-bottom: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      user-select: none;
+    }
+    .ignition-box.hidden { display: none; }
+    .ignition-header {
+      font-size: 12px;
+      font-weight: 700;
+      color: #78716c;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .ignition-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .btn-ignition {
+      background: #fff;
+      border: 1px solid #d6d3d1;
+      padding: 6px 12px;
+      font-size: 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      color: #292524;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.15s;
+    }
+    .btn-ignition:hover { background: #fef08a; border-color: #eab308; transform: translateY(-1px); }
+
     #collageContainer {
       position: relative;
       width: 100%;
@@ -476,37 +618,35 @@
     #collageContainer::after { content: ""; display: block; clear: both; }
 
     .text-flow-area {
-      min-height: 450px;
+      min-height: 480px;
       height: auto;
       outline: none;
-      font-family: 'Patrick Hand', cursive;
+      font-family: var(--font-hand);
       font-size: 24px;
-      line-height: 32px;
+      line-height: 33px;
       color: #262626;
       word-wrap: break-word;
       overflow-wrap: break-word;
     }
 
     .text-flow-area h2.craft-h2 {
-      font-family: 'Patrick Hand', cursive;
-      font-size: 28px;
+      font-family: var(--font-hand);
+      font-size: 29px;
       font-weight: 700;
       color: var(--accent);
       border-bottom: 1px dashed #d6cebf;
-      margin: 22px 0 10px 0;
+      margin: 24px 0 10px 0;
       padding-bottom: 4px;
     }
-
     .text-flow-area h3.craft-h3 {
-      font-family: 'Patrick Hand', cursive;
+      font-family: var(--font-hand);
       font-size: 25px;
       font-weight: 700;
       color: #292524;
       margin: 18px 0 8px 0;
     }
-
     .text-flow-area h4.craft-h4 {
-      font-family: 'Patrick Hand', cursive;
+      font-family: var(--font-hand);
       font-size: 22px;
       font-weight: 600;
       color: #57534e;
@@ -514,32 +654,32 @@
       margin: 14px 0 6px 0;
     }
 
-    /* BLOCOS DE CÓDIGO & PROGRAMAÇÃO LITERADA */
+    /* BLOCOS DE CÓDIGO */
     .craft-code-block {
-      background: #242220 !important;
+      background: #201e1b !important;
       border: 1px solid #3d3935;
       border-radius: var(--radius-md);
-      margin: 16px 0;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+      margin: 18px 0;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.16);
       overflow: hidden;
-      font-family: 'Fira Code', monospace;
+      font-family: var(--font-code);
     }
     .code-block-header {
-      background: #1a1816;
+      background: #171513;
       padding: 6px 10px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       gap: 8px;
       flex-wrap: wrap;
-      border-bottom: 1px solid #332f2b;
+      border-bottom: 1px solid #2d2925;
     }
     .code-lang-select {
       background: #2b2723;
       color: #fef08a;
       border: 1px solid #4d4742;
       border-radius: 4px;
-      font-family: 'Fira Code', monospace;
+      font-family: var(--font-code);
       font-size: 11px;
       padding: 2px 6px;
       outline: none;
@@ -550,20 +690,15 @@
       color: #a3e635;
       border: 1px solid #44403c;
       border-radius: 4px;
-      font-family: 'Fira Code', monospace;
+      font-family: var(--font-code);
       font-size: 11px;
       padding: 3px 8px;
       flex: 1;
       min-width: 140px;
       max-width: 320px;
       outline: none;
-      transition: border-color 0.2s;
     }
-    .code-filepath-input:focus {
-      border-color: #a3e635;
-      background: #0c0a09;
-    }
-    .code-download-btn {
+    .code-download-btn, .code-copy-btn {
       background: #2b2723;
       color: #e7e5e4;
       border: 1px solid #4d4742;
@@ -572,17 +707,7 @@
       font-size: 10px;
       cursor: pointer;
     }
-    .code-download-btn:hover { background: #3f3933; color: #a3e635; }
-    .code-copy-btn {
-      background: #332f2b;
-      color: #e7e5e4;
-      border: 1px solid #4d4742;
-      padding: 2px 7px;
-      border-radius: 4px;
-      font-size: 10px;
-      cursor: pointer;
-    }
-    .code-copy-btn:hover { background: #4d4742; color: #fff; }
+    .code-download-btn:hover, .code-copy-btn:hover { background: #3f3933; color: #a3e635; }
 
     pre.craft-pre-override {
       overflow-y: visible !important;
@@ -595,7 +720,7 @@
       display: block !important;
       padding: 12px 14px !important;
       color: #ccc;
-      font-family: 'Fira Code', monospace;
+      font-family: var(--font-code);
       font-size: 13.5px;
       line-height: 20px;
       white-space: pre-wrap !important;
@@ -605,7 +730,6 @@
       tab-size: 2;
     }
 
-    /* PAINEL DE PROJETO LITERADO NO RODAPÉ */
     .tangle-project-footer {
       margin-top: 40px;
       padding: 16px 20px;
@@ -622,7 +746,7 @@
       user-select: none;
     }
 
-    /* CARDS E ADESIVOS */
+    /* CARDS SCRAPBOOK */
     .craft-media-card {
       position: relative;
       user-select: none;
@@ -632,24 +756,14 @@
       max-width: 100%;
       z-index: 6;
     }
-
     .craft-media-card.mode-flow.align-right { float: right; margin: 8px 0 16px 20px; clear: right; }
     .craft-media-card.mode-flow.align-left { float: left; margin: 8px 20px 16px 0; clear: left; }
     .craft-media-card.mode-flow.align-center { display: block; margin: 20px auto; float: none; clear: both; }
     .craft-media-card.mode-free { position: absolute; float: none; margin: 0; z-index: 25; }
     .craft-media-card.dragging { opacity: 0.9; box-shadow: 0 12px 28px rgba(0,0,0,0.22) !important; z-index: 50; }
 
-    .style-drawing {
-      background: transparent !important;
-      border: 1px dashed transparent;
-      padding: 4px;
-      border-radius: 4px;
-    }
-    .style-drawing:hover {
-      border-color: #a8a29e;
-      background: rgba(255, 255, 255, 0.35) !important;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-    }
+    .style-drawing { background: transparent !important; border: 1px dashed transparent; padding: 4px; border-radius: 4px; }
+    .style-drawing:hover { border-color: #a8a29e; background: rgba(255, 255, 255, 0.4) !important; }
 
     .style-polaroid {
       background: #ffffff;
@@ -674,7 +788,7 @@
       border: none;
       outline: none;
       background: transparent;
-      font-family: 'Patrick Hand', cursive;
+      font-family: var(--font-hand);
       font-size: 20px;
       font-weight: 600;
       color: #44403c;
@@ -683,13 +797,12 @@
       padding: 2px 4px;
       border-bottom: 1px dashed transparent;
     }
-    .style-polaroid .polaroid-caption:hover, .style-polaroid .polaroid-caption:focus { border-bottom-color: #a8a29e; }
 
     .style-sticky {
       background: #fef08a !important;
       padding: 16px 14px 12px 14px;
       border-radius: 2px 2px 8px 2px;
-      box-shadow: 2px 4px 12px rgba(0,0,0,0.12), 0 1px 3px rgba(0,0,0,0.06);
+      box-shadow: 2px 4px 12px rgba(0,0,0,0.12);
       border: none;
       color: #1c1917;
       min-height: 140px;
@@ -703,7 +816,7 @@
       border-radius: 2px 2px 0 0;
     }
     .sticky-content-area {
-      font-family: 'Patrick Hand', cursive;
+      font-family: var(--font-hand);
       font-size: 21px;
       line-height: 25px;
       color: #292524;
@@ -714,10 +827,10 @@
     }
 
     .style-cassette {
-      background: #262320;
+      background: #24211e;
       border: 2px solid #3d3935;
       border-radius: 6px;
-      padding: 10px 12px 12px 12px;
+      padding: 10px 12px;
       box-shadow: 0 4px 14px rgba(0,0,0,0.16);
       color: #fafaf9;
     }
@@ -735,7 +848,7 @@
       flex: 1;
       border: none;
       background: transparent;
-      font-family: 'Patrick Hand', cursive;
+      font-family: var(--font-hand);
       font-size: 15px;
       font-weight: 700;
       color: #78350f;
@@ -764,7 +877,7 @@
     .filetag-paperclip { position: absolute; top: -10px; left: 10px; font-size: 18px; pointer-events: none; }
     .filetag-body { display: flex; flex-direction: column; gap: 4px; margin-top: 2px; }
     .filetag-name-input {
-      font-family: 'Inter', sans-serif;
+      font-family: var(--font-sans);
       font-size: 12.5px;
       font-weight: 700;
       color: #1c1917;
@@ -780,7 +893,7 @@
       background: #ffffff;
       border: 1px solid #cbd5e1;
       border-radius: var(--radius-sm);
-      padding: 10px 10px 12px 10px;
+      padding: 10px;
       box-shadow: 0 3px 12px rgba(0,0,0,0.06);
     }
     .diagram-viewport { overflow-x: auto; width: 100%; background: #fafaf9; border-radius: 4px; padding: 6px; }
@@ -789,7 +902,7 @@
       border: none;
       outline: none;
       background: transparent;
-      font-family: 'Fira Code', monospace;
+      font-family: var(--font-code);
       font-size: 12px;
       font-weight: 600;
       color: #475569;
@@ -798,7 +911,6 @@
       border-bottom: 1px dashed transparent;
     }
 
-    /* AÇÕES DOS CARDS */
     .frame-quick-actions {
       position: absolute;
       top: -12px;
@@ -844,11 +956,10 @@
       width: 100%;
       border-collapse: collapse;
       margin: 16px 0;
-      background: rgba(255, 255, 255, 0.7);
+      background: rgba(255, 255, 255, 0.75);
       border: 2px solid #a8a29e;
       border-radius: var(--radius-sm);
       overflow: hidden;
-      font-family: inherit;
     }
     .text-flow-area table.craft-table th, .text-flow-area table.craft-table td {
       border: 1px dashed #c7c2b6;
@@ -863,11 +974,11 @@
       color: var(--accent);
       border-bottom: 2px solid #a8a29e;
     }
+
     .text-flow-area blockquote.craft-quote {
-      position: relative;
-      margin: 14px 0;
-      padding: 10px 14px 10px 18px;
-      background: rgba(254, 240, 138, 0.25);
+      margin: 16px 0;
+      padding: 12px 16px 12px 20px;
+      background: rgba(254, 240, 138, 0.2);
       border-left: 4px solid var(--accent);
       border-radius: 0 6px 6px 0;
       font-style: italic;
@@ -881,6 +992,27 @@
       color: #78716c;
       margin-top: 4px;
       text-align: right;
+    }
+
+    .text-flow-area blockquote.craft-decision {
+      background: rgba(240, 253, 244, 0.9);
+      border-left: 5px solid #16a34a;
+      border-radius: 6px;
+      padding: 14px 18px;
+      font-style: normal;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    }
+    .craft-decision .decision-tag {
+      display: inline-block;
+      background: #16a34a;
+      color: #fff;
+      font-family: var(--font-sans);
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-bottom: 6px;
+      text-transform: uppercase;
     }
 
     .wiki-link {
@@ -899,46 +1031,48 @@
       border-radius: 3px;
       padding: 1px 3px;
       cursor: pointer;
+      transition: background-color 0.15s;
     }
+    mark.craft-highlight:hover { background-color: #fde047; }
     mark.craft-highlight.resolved {
       background-color: rgba(229, 231, 235, 0.6);
       border-bottom: 2px dashed #9ca3af;
       color: #71717a;
     }
 
+    /* TOOLTIP DE SELEÇÃO */
     .selection-tooltip {
       position: absolute;
       display: none;
-      background: #1c1917;
+      background: #181615;
       color: #fff;
-      border-radius: 18px;
-      padding: 4px 6px;
-      box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+      border-radius: 20px;
+      padding: 4px 8px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
       z-index: 1000;
-      gap: 4px;
+      gap: 5px;
       align-items: center;
-      transform: translate(-50%, -110%);
+      transform: translate(-50%, -115%);
     }
     .selection-tooltip button {
-      background: #292524;
+      background: #2b2723;
       color: #fef08a;
       border: 1px solid #44403c;
-      padding: 3px 6px;
-      border-radius: 10px;
-      font-size: 10px;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 11px;
     }
 
     /* GAVETAS LATERAIS */
     .side-drawer {
       position: absolute;
-      top: 0;
-      right: 0;
-      width: 360px;
-      max-width: 90vw;
+      top: 0; right: 0;
+      width: 380px;
+      max-width: 92vw;
       height: 100%;
       background: #ffffff;
       border-left: 1px solid #d6d3d1;
-      box-shadow: -4px 0 16px rgba(0,0,0,0.08);
+      box-shadow: -6px 0 20px rgba(0,0,0,0.09);
       z-index: 300;
       display: flex;
       flex-direction: column;
@@ -947,21 +1081,49 @@
     }
     .side-drawer.open { transform: translateX(0); }
     .drawer-header {
-      padding: 10px 14px;
-      background: #1c1917;
+      padding: 12px 16px;
+      background: #181615;
       color: #f5f5f4;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
 
+    .thread-card {
+      background: #fafaf9;
+      border: 1px solid #e7e5e4;
+      border-radius: var(--radius-sm);
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .thread-card.highlight-target {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(180, 83, 9, 0.2);
+    }
+    .thread-type-badge {
+      font-size: 9px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+    }
+    .thread-type-idea { background: #fef08a; color: #854d0e; }
+    .thread-type-doubt { background: #e0f2fe; color: #075985; }
+    .thread-type-refactor { background: #ffedd5; color: #9a3412; }
+    .thread-type-decision { background: #dcfce7; color: #166534; }
+
     /* MODAIS */
     .modal-backdrop {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
       background: rgba(0, 0, 0, 0.55);
       backdrop-filter: blur(2px);
       display: none;
@@ -977,13 +1139,13 @@
       max-width: 800px;
       max-height: 90vh;
       border-radius: var(--radius-md);
-      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+      box-shadow: 0 12px 36px rgba(0,0,0,0.25);
       display: flex;
       flex-direction: column;
       overflow: hidden;
     }
     .modal-header {
-      background: #1c1917;
+      background: #181615;
       color: #fff;
       padding: 10px 16px;
       display: flex;
@@ -999,151 +1161,70 @@
       gap: 10px;
     }
 
-    /* MODO ZEN */
-    body.zen-mode { padding: 0; background: #ffffff; }
-    body.zen-mode .app-window { max-width: 100%; height: 100vh; height: 100dvh; border-radius: 0; box-shadow: none; }
-    body.zen-mode header,
-    body.zen-mode .sidebar,
-    body.zen-mode .toolbar-wrapper { display: none !important; }
-    body.zen-mode .paper-sheet { margin: 0 auto; box-shadow: none; min-height: 100vh; min-height: 100dvh; }
-    
+    /* MODO MEMORIAL */
+    body.memorial-mode { padding: 0; background: #fdfbf7; }
+    body.memorial-mode .app-window { max-width: 960px; margin: 0 auto; box-shadow: none; background: #fdfbf7; }
+    body.memorial-mode header,
+    body.memorial-mode .sidebar,
+    body.memorial-mode .toolbar-wrapper,
+    body.memorial-mode .ignition-box,
+    body.memorial-mode .btn-suggest-title,
+    body.memorial-mode .page-tags-bar { display: none !important; }
+    body.memorial-mode .paper-sheet { box-shadow: none; padding: 60px 40px; background: transparent; }
+    body.memorial-mode .text-flow-area { font-family: var(--font-reading); font-size: 22px; line-height: 36px; color: #1f1d1a; }
+
     .zen-exit-btn {
       position: fixed;
-      top: 12px;
-      right: 14px;
+      top: 14px; right: 16px;
       z-index: 9999;
       display: none;
-      background: #1c1917;
+      background: #181615;
       color: #fef08a;
       border: 1px solid #78716c;
-      padding: 5px 12px;
+      padding: 6px 14px;
       border-radius: 20px;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+      box-shadow: 0 3px 12px rgba(0,0,0,0.2);
     }
-    body.zen-mode .zen-exit-btn { display: inline-flex; }
+    body.memorial-mode .zen-exit-btn { display: inline-flex; }
 
     .recording-pulse { animation: pulse 1.2s infinite; color: #fff !important; background: #ef4444 !important; }
     @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
 
-    /* RESPONSIVIDADE MOBILE */
     @media (max-width: 860px) {
       body { padding: 0; }
       .app-window { border-radius: 0; }
-      
       .btn-menu-toggle { display: inline-flex; }
-      
-      .sidebar {
-        position: absolute;
-        top: 0;
-        left: 0;
-        height: 100%;
-        width: 270px;
-        transform: translateX(-100%);
-        box-shadow: 5px 0 20px rgba(0,0,0,0.3);
-      }
+      .sidebar { position: absolute; top: 0; left: 0; height: 100%; width: 280px; transform: translateX(-100%); }
       .sidebar.open { transform: translateX(0); }
-
-      header {
-        flex-direction: column;
-        align-items: stretch;
-        padding: 7px 10px;
-        gap: 6px;
-      }
-
-      .header-left {
-        width: 100%;
-        display: flex;
-        align-items: center;
-        gap: 5px;
-      }
-
-      .header-book-select {
-        max-width: 95px;
-        font-size: 14px;
-        padding: 3px 5px;
-      }
-
-      .header-book-input {
-        font-size: 18px;
-        flex: 1 1 auto;
-        min-width: 0;
-        width: auto;
-      }
-
-      .header-actions {
-        width: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 4px;
-        padding-top: 4px;
-        border-top: 1px solid rgba(255,255,255,0.08);
-      }
-
-      .header-actions button,
-      .header-actions .btn {
-        flex: 1 1 auto;
-        padding: 4px 5px;
-        font-size: 11px;
-        white-space: nowrap;
-        justify-content: center;
-        min-height: 26px;
-      }
-
-      .paper-sheet {
-        padding: 20px 16px 100px 16px;
-        margin: 6px auto;
-        box-shadow: none;
-        border-radius: 0;
-      }
-
-      .page-title {
-        font-size: 28px;
-        line-height: 34px;
-        margin-bottom: 4px;
-      }
-
-      .page-author-meta {
-        font-size: 11.5px;
-        gap: 6px;
-        margin-bottom: 16px;
-      }
-
-      .text-flow-area {
-        font-size: 20px;
-        line-height: 28px;
-      }
+      header { flex-direction: column; align-items: stretch; padding: 7px 10px; gap: 6px; }
+      .header-left { width: 100%; display: flex; align-items: center; gap: 5px; }
+      .header-actions { width: 100%; justify-content: space-between; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 4px; }
+      .paper-sheet { padding: 22px 18px 100px 18px; margin: 6px auto; }
+      .page-title { font-size: 28px; line-height: 34px; }
+      .text-flow-area { font-size: 21px; line-height: 29px; }
     }
   </style>
 </head>
 <body>
 
-  <button id="btnExitZen" class="zen-exit-btn" onclick="toggleZenMode()">✕ Sair do Modo Zen (Esc)</button>
+  <button id="btnExitZen" class="zen-exit-btn" onclick="toggleMemorialMode()">✕ Sair do Modo Leitura (Esc)</button>
 
   <div class="app-window" id="appWindow">
-    <!-- Top Bar com Gerenciador de Cadernos -->
     <header>
       <div class="header-left">
         <button type="button" class="btn-menu-toggle" id="btnToggleSidebar" title="Abrir Navegação">📚 Menu</button>
         <select id="bookSelect" class="header-book-select" title="Selecione o Caderno" onchange="switchBook(this.value)"></select>
-        <input 
-          type="text" 
-          id="bookTitleInput" 
-          class="header-book-input" 
-          value="Meu Caderno Artesanal" 
-          title="Clique para renomear este Caderno" 
-          placeholder="Nome do Caderno..."
-        />
+        <input type="text" id="bookTitleInput" class="header-book-input" value="Meu Caderno de Projetos & Pensamento" title="Clique para renomear este Caderno" />
         <button type="button" id="btnNewBook" class="btn-dark btn-icon" title="Criar Novo Caderno">➕</button>
         <button type="button" id="btnDeleteBook" class="btn-danger btn-icon" title="Excluir Caderno Atual">🗑️</button>
       </div>
 
       <div class="header-actions">
-        <button id="btnOpenSearch" class="btn-dark" title="Buscar (Ctrl+K)">🔍 Busca</button>
-        <button id="btnOpenInbox" class="btn-dark" title="Inbox de Pensamentos Rápidos">⚡ Inbox</button>
-        <button onclick="toggleZenMode()" title="Modo Foco Sem Distrações">🧘 Zen</button>
-        <button id="btnExport" title="Backup JSON">💾 Salvar</button>
-        <label class="btn" style="margin-bottom:0;" title="Importar caderno JSON">
+        <button id="btnOpenSearch" class="btn-dark" title="Buscar em tudo (Ctrl+K)">🔍 Busca</button>
+        <button id="btnOpenInbox" class="btn-dark" title="Inbox Rápido">⚡ Inbox</button>
+        <button onclick="toggleMemorialMode()" title="Leitura Solene sem Distrações">📖 Memorial</button>
+        <button id="btnExport" title="Exportar Backup JSON">💾 Backup</button>
+        <label class="btn" style="margin-bottom:0;" title="Importar JSON">
           📂 Importar
           <input type="file" id="inputImport" accept=".json" style="display:none;" />
         </label>
@@ -1152,44 +1233,34 @@
     </header>
 
     <div class="main-workspace">
-      <!-- Backdrop para Sidebar Mobile -->
       <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleMobileSidebar(false)"></div>
 
-      <!-- Navegação Lateral -->
+      <!-- SIDEBAR CRONOLÓGICA SEM CAPÍTULOS -->
       <aside class="sidebar" id="appSidebar">
-        <div class="sidebar-section">
-          <div class="sidebar-header">
-            <span>Capítulos (Domos)</span>
-            <button id="btnAddChapter" style="padding: 2px 6px; font-size:10px;">+ Novo</button>
-          </div>
-          <ul class="nav-list" id="chapterList"></ul>
+        <div class="sidebar-header">
+          <span>Páginas Cronológicas</span>
+          <button id="btnAddPage" class="btn-accent" style="padding: 2px 7px; font-size:10.5px;">+ Nova</button>
         </div>
 
-        <div class="sidebar-section">
-          <div class="sidebar-header">
-            <span>Páginas</span>
-            <button id="btnAddPage" style="padding: 2px 6px; font-size:10px;">+ Nova</button>
-          </div>
-          <ul class="nav-list" id="pageList"></ul>
-        </div>
+        <!-- BARRA DE FILTRO POR TAGS -->
+        <div class="tag-filter-bar" id="tagFilterBar"></div>
+
+        <!-- LISTAGEM DE PÁGINAS -->
+        <ul class="nav-list" id="pageList"></ul>
       </aside>
 
-      <!-- Viewport da Folha de Caderno -->
+      <!-- VIEWPORT -->
       <main class="page-viewport" id="viewport">
-        <!-- TOOLBAR COM NAVEGAÇÃO SUAVE E INTUITIVA -->
         <div class="toolbar-wrapper">
-          <button type="button" class="toolbar-scroll-btn" id="btnScrollToolbarLeft" title="Rolar para esquerda" onclick="scrollToolbar(-220)">‹</button>
+          <button type="button" class="toolbar-scroll-btn" id="btnScrollToolbarLeft" onclick="scrollToolbar(-220)">‹</button>
           
           <div class="paper-toolbar" id="paperToolbar">
             <div class="toolbar-cluster">
-              
-              <!-- Histórico -->
               <div class="toolbar-group">
                 <button type="button" id="btnUndo" title="Desfazer (Ctrl + Z)">↩</button>
                 <button type="button" id="btnRedo" title="Refazer (Ctrl + Y)">↪</button>
               </div>
 
-              <!-- Orientação -->
               <div class="toolbar-group">
                 <select id="paperOrientation" title="Orientação da Folha">
                   <option value="orientation-portrait">📄 Retrato</option>
@@ -1197,13 +1268,12 @@
                 </select>
               </div>
 
-              <!-- Formatação & Cabeçalhos -->
               <div class="toolbar-group">
-                <select id="headingSelect" onchange="insertHeading(this.value); this.value='';" title="Inserir Nível de Seção">
-                  <option value="" disabled selected>📑 Seções</option>
-                  <option value="h2">H2 - Seção Principal</option>
+                <select id="headingSelect" onchange="insertHeading(this.value); this.value='';" title="Inserir Título">
+                  <option value="" disabled selected>📑 Títulos</option>
+                  <option value="h2">H2 - Seção Maior</option>
                   <option value="h3">H3 - Subseção</option>
-                  <option value="h4">H4 - Tópico / Bloco</option>
+                  <option value="h4">H4 - Bloco / Nota</option>
                 </select>
                 <button type="button" onclick="formatDoc('bold')" title="Negrito"><b>B</b></button>
                 <button type="button" onclick="formatDoc('italic')" title="Itálico"><i>I</i></button>
@@ -1213,74 +1283,92 @@
                 <input type="color" id="inkColor" title="Cor do Texto" value="#1c1917" onchange="formatDoc('foreColor', this.value)" />
               </div>
 
-              <!-- Pincéis / Mesa / Desenho Livre e Móvel -->
-              <div class="toolbar-group" style="background:#f5f5f4; padding:2px 5px; border-radius:6px; border:1px solid #e7e5e4;">
-                <button type="button" id="toolSelect" class="btn active-tool" title="Digitar / Selecionar" onclick="setInkTool('select')">👆 Digitar</button>
-                <button type="button" id="toolPen" class="btn" title="Pincel Livre" onclick="setInkTool('pen')">🖊️ Pincel</button>
-                <button type="button" id="toolEraser" class="btn" title="Borracha" onclick="setInkTool('eraser')">🧹 Borracha</button>
-                <input type="color" id="brushColor" title="Cor do Pincel" value="#1c1917" />
+              <!-- Traço e Mesa -->
+              <div class="toolbar-group" style="background:#f5f4f0; padding:2px 5px; border-radius:6px;">
+                <button type="button" id="toolSelect" class="btn active-tool" onclick="setInkTool('select')">👆 Texto</button>
+                <button type="button" id="toolPen" class="btn" onclick="setInkTool('pen')">🖊️ Pincel</button>
+                <button type="button" id="toolEraser" class="btn" onclick="setInkTool('eraser')">🧹 Borracha</button>
+                <input type="color" id="brushColor" title="Cor do Traço" value="#1c1917" />
                 <input type="range" id="brushSize" min="1" max="30" value="3" title="Espessura" style="width:45px;" />
-                <button type="button" id="btnInkToCard" class="btn-dark" title="Converter o desenho da folha em um Card Móvel" onclick="convertInkToMovableCard()">✨ Card Móvel</button>
-                <button type="button" id="btnClearInk" class="btn-danger" style="font-size:10px; padding:2px 5px;" title="Limpar desenhos da folha" onclick="clearPageInk()">Limpar</button>
+                <button type="button" id="btnInkToCard" class="btn-dark" title="Converter desenho em card móvel" onclick="convertInkToMovableCard()">✨ Card Móvel</button>
+                <button type="button" id="btnClearInk" class="btn-danger" style="font-size:10px; padding:2px 5px;" onclick="clearPageInk()">Limpar</button>
               </div>
 
-              <!-- Inserção: Código Literado, Tabelas, Mídias e Diagramas -->
+              <!-- Inserções -->
               <div class="toolbar-group">
-                <button type="button" id="btnInsertCode" class="btn-dark" title="Inserir Bloco de Código Literado" onclick="insertCodeSnippet()">💻 Código</button>
-                <button type="button" class="btn-dark" title="Exportar projeto literado em arquivo .ZIP" onclick="tangleAndExportZip()">📦 Tangling (ZIP)</button>
-                <button type="button" id="btnInsertTable" title="Inserir Tabela">📊 Tabela</button>
-                <button type="button" id="btnInsertQuote" title="Inserir Citação">❝ Citação</button>
-                <button type="button" id="btnOpenDiagramModal" class="btn-accent" title="Criar Diagrama">📐 Diagrama</button>
-                <label class="btn" title="Adicionar Foto">
+                <button type="button" id="btnInsertCode" class="btn-dark" title="Inserir Módulo de Código Literado" onclick="insertCodeSnippet()">💻 Código</button>
+                <button type="button" class="btn-dark" title="Exportar projeto em ZIP" onclick="tangleAndExportZip()">📦 Compilar ZIP</button>
+                <button type="button" id="btnInsertTable" title="Tabela">📊 Tabela</button>
+                <button type="button" id="btnInsertQuote" title="Citação">❝ Citação</button>
+                <button type="button" id="btnOpenDiagramModal" class="btn-accent" title="Diagrama Mermaid">📐 Diagrama</button>
+                <label class="btn" title="Foto Instantânea">
                   🖼️ Foto
                   <input type="file" id="imageInput" accept="image/*" style="display:none;" />
                 </label>
-                <button id="btnAddSticky" type="button" title="Post-it">📌 Post-it</button>
-                <button id="recordAudioBtn" type="button" title="Gravar Áudio">🎙️ Gravar</button>
-                <label class="btn" title="Anexar arquivo">
+                <button id="btnAddSticky" type="button" title="Nota Adesiva">📌 Post-it</button>
+                <button id="recordAudioBtn" type="button" title="Gravar voz">🎙️ Gravar</button>
+                <label class="btn" title="Anexo">
                   📎 Anexo
                   <input type="file" id="fileAttachment" multiple style="display:none;" />
                 </label>
               </div>
-
             </div>
 
-            <!-- Gestão & Discussões -->
             <div class="toolbar-cluster">
-              <button id="btnSaveSnapshot" title="Salvar Versão">📸 Versão</button>
+              <button id="btnSaveSnapshot" title="Gravar Versão">📸 Versão</button>
               <button id="btnOpenSnapshots" title="Histórico">📜 Histórico</button>
-              <button id="toggleThreadsBtn" class="btn-accent" title="Discussões">
+              <button id="toggleThreadsBtn" class="btn-accent" title="Threads de Lapidação">
                 💬 <span id="openThreadsCount" style="background:#ef4444; color:#fff; font-size:10px; padding:1px 5px; border-radius:10px; font-weight:700; display:none;">0</span>
               </button>
             </div>
           </div>
 
-          <button type="button" class="toolbar-scroll-btn" id="btnScrollToolbarRight" title="Rolar para direita" onclick="scrollToolbar(220)">›</button>
+          <button type="button" class="toolbar-scroll-btn" id="btnScrollToolbarRight" onclick="scrollToolbar(220)">›</button>
         </div>
 
-        <!-- Tooltip flutuante de seleção de texto -->
+        <!-- Tooltip flutuante de seleção -->
         <div id="selectionTooltip" class="selection-tooltip">
-          <button id="btnTooltipComment">💬 Comentar</button>
+          <button id="btnTooltipComment">💬 Lapidar (Thread)</button>
           <button id="btnTooltipHighlight">🖍️ Grifar</button>
-          <button id="btnTooltipLink">🔗 Link</button>
+          <button id="btnTooltipLink">🔗 Link [[Pág]]</button>
         </div>
 
-        <!-- Folha de Papel Principal -->
+        <!-- FOLHA PRINCIPAL -->
         <div class="paper-sheet orientation-portrait" id="paperSheet">
           <canvas id="inkCanvas"></canvas>
-          <textarea id="pageTitle" class="page-title" rows="1" placeholder="Título da Página..." oninput="autoResizeTextarea(this)"></textarea>
           
-          <!-- Metadados / Assinatura & Modo Projeto Literado -->
-          <div class="page-author-meta" contenteditable="false">
+          <div class="title-wrapper">
+            <textarea id="pageTitle" class="page-title" rows="1" placeholder="Escreva aqui ou deixe em branco para auto-data..." oninput="autoResizeTextarea(this)"></textarea>
+            <button type="button" class="btn-suggest-title" id="btnAutoTitle" title="Gerar título automaticamente a partir do texto" onclick="suggestTitleFromContent()">✨ Sugerir Título</button>
+          </div>
+          
+          <div class="page-meta-row" contenteditable="false">
             <span class="author-tag">✍️ Leite, S. S.</span>
             <span>•</span>
             <span id="currentDateDisplay">📅 Carregando data...</span>
             <span>•</span>
             <span>📍 São Paulo - SP</span>
             <span>•</span>
-            <span id="projectModeToggle" class="project-badge-toggle" onclick="toggleProjectMode()" title="Ativar para tratar esta anotação como um Projeto de Software">
-              💻 Projeto Literado: <b id="projectModeLabel">Desativado</b>
+            <span id="projectModeToggle" class="project-badge-toggle" onclick="toggleProjectMode()" title="Ativar para tratar este documento como Código-Fonte / Engenharia Literada">
+              💻 Modo Engenharia: <b id="projectModeLabel">Desativado</b>
             </span>
+          </div>
+
+          <!-- TAGS DA PÁGINA -->
+          <div class="page-tags-bar" id="pageTagsContainer"></div>
+
+          <!-- GATILHOS DE IGNIÇÃO MENTAL (EMPTY STATE) -->
+          <div class="ignition-box" id="ignitionBox">
+            <div class="ignition-header">
+              <span>🚀 BLOQUEIO MENTAL? ESCOLHA UM PONTO DE PARTIDA (SEM PRESSÃO):</span>
+              <button onclick="dismissIgnition()" style="background:transparent; border:none; color:#a8a29e; font-size:14px; cursor:pointer;">✕</button>
+            </div>
+            <div class="ignition-buttons">
+              <button class="btn-ignition" onclick="applyTemplate('braindump')">⚡ Descarrego Livre (Braindump)</button>
+              <button class="btn-ignition" onclick="applyTemplate('devjournal')">🛠️ Diário de Engenharia / Dev</button>
+              <button class="btn-ignition" onclick="applyTemplate('projectpolish')">🎯 Lapidação de Projeto & Decisão</button>
+              <button class="btn-ignition" onclick="applyTemplate('randomprompt')">🎲 Pergunta Destravadora</button>
+            </div>
           </div>
 
           <div id="collageContainer">
@@ -1289,50 +1377,58 @@
         </div>
       </main>
 
-      <!-- Gavetas Retráteis -->
+      <!-- GAVETA: THREADS / LAPIDAÇÃO -->
       <aside class="side-drawer" id="threadDrawer">
         <div class="drawer-header">
-          <span style="font-weight:700; font-size:13px;">💬 Threads & Comentários</span>
-          <button onclick="closeDrawers()" style="background:transparent; color:#fff; border:none; font-size:16px;">✕</button>
+          <span style="font-weight:700; font-size:13px;">💬 Threads de Lapidação</span>
+          <button onclick="closeDrawers()" style="background:transparent; color:#fff; border:none; font-size:16px; cursor:pointer;">✕</button>
         </div>
-        <div style="display:flex; gap:4px; padding:6px 10px; background:#f5f5f4; border-bottom:1px solid #e7e5e4;">
+
+        <div style="padding:8px 12px; background:#fafaf9; border-bottom:1px solid #e7e5e4; font-size:11px; color:#57534e;">
+          Use as threads para questionar ideias, testar hipóteses e consolidar decisões do projeto.
+        </div>
+
+        <div style="display:flex; gap:4px; padding:6px 10px; background:#f5f4f0; border-bottom:1px solid #e7e5e4;">
           <button class="btn active" id="thFilterAll" onclick="setThreadFilter('all')">Todas</button>
           <button class="btn" id="thFilterOpen" onclick="setThreadFilter('open')">Pendentes</button>
           <button class="btn" id="thFilterResolved" onclick="setThreadFilter('resolved')">Resolvidas</button>
         </div>
+
         <div style="flex:1; overflow-y:auto; padding:10px; display:flex; flex-direction:column; gap:10px;" id="threadsListContainer"></div>
       </aside>
 
+      <!-- GAVETA: HISTÓRICO DE VERSÕES -->
       <aside class="side-drawer" id="snapshotDrawer">
         <div class="drawer-header">
           <span style="font-weight:700; font-size:13px;">📜 Histórico de Versões</span>
           <button onclick="closeDrawers()" style="background:transparent; color:#fff; border:none; font-size:16px;">✕</button>
         </div>
-        <div style="padding:8px 12px; background:#f5f5f4; font-size:11px; color:#57534e; border-bottom:1px solid #e7e5e4;">
-          Restaure ou compare pontos salvos desta página.
+        <div style="padding:8px 12px; background:#fafaf9; font-size:11px; color:#57534e; border-bottom:1px solid #e7e5e4;">
+          Guarde marcos para acompanhar a evolução do seu raciocínio.
         </div>
         <div style="flex:1; overflow-y:auto; padding:10px; display:flex; flex-direction:column; gap:6px;" id="snapshotListContainer"></div>
       </aside>
 
+      <!-- GAVETA: INBOX RÁPIDO -->
       <aside class="side-drawer" id="inboxDrawer">
         <div class="drawer-header">
           <span style="font-weight:700; font-size:13px;">⚡ Inbox Rápido</span>
           <button onclick="closeDrawers()" style="background:transparent; color:#fff; border:none; font-size:16px;">✕</button>
         </div>
         <div style="padding:10px; border-bottom:1px solid #e7e5e4; display:flex; flex-direction:column; gap:6px;">
-          <textarea id="quickInboxInput" style="width:100%; height:60px; padding:6px; border:1px solid #d6d3d1; border-radius:4px; font-family:'Inter'; font-size:12px; resize:none;" placeholder="Despeje um pensamento rápido..."></textarea>
-          <button class="btn-accent" onclick="saveInboxNote()">Salvar no Inbox</button>
+          <textarea id="quickInboxInput" style="width:100%; height:64px; padding:8px; border:1px solid #d6d3d1; border-radius:4px; font-family:var(--font-sans); font-size:12px; resize:none;" placeholder="Despeje um pensamento aqui sem se preocupar onde categorizar..."></textarea>
+          <button class="btn-accent" onclick="saveInboxNote()">Guardar no Inbox</button>
         </div>
         <div style="flex:1; overflow-y:auto; padding:10px; display:flex; flex-direction:column; gap:6px;" id="inboxListContainer"></div>
       </aside>
     </div>
   </div>
 
-  <!-- Modal de Diagramação -->
+  <!-- MODAL MERMAID -->
   <div class="modal-backdrop" id="diagramModal">
     <div class="modal-box">
       <div class="modal-header">
-        <span style="font-weight:700; font-size:15px;">📐 Estúdio de Diagramação</span>
+        <span style="font-weight:700; font-size:15px;">📐 Estúdio Mermaid de Diagramação</span>
         <button onclick="closeDiagramModal()" style="background:transparent; color:#fff; border:none; font-size:16px;">✕</button>
       </div>
       <div class="modal-body">
@@ -1340,12 +1436,11 @@
           <div style="display:flex; align-items:center; gap:6px;">
             <label style="font-size:11px; font-weight:600;">Modelo:</label>
             <select id="diagramTemplateSelect" onchange="loadDiagramTemplate(this.value)">
-              <option value="flowchart">Fluxograma / Processo</option>
+              <option value="flowchart">Fluxograma / Decisão</option>
               <option value="sequence">UML - Sequência</option>
               <option value="class">UML - Classes</option>
-              <option value="erd">ERD - Banco de Dados</option>
-              <option value="state">UML - Estados</option>
-              <option value="mindmap">Mapa Mental</option>
+              <option value="erd">Banco de Dados (ERD)</option>
+              <option value="mindmap">Mapa de Raciocínio</option>
             </select>
           </div>
           <button class="btn-accent" onclick="renderDiagramPreview()">🔄 Atualizar</button>
@@ -1354,7 +1449,7 @@
         <div style="display:flex; gap:10px; flex:1; min-height:240px; flex-wrap:wrap;">
           <div style="flex:1; min-width:240px; display:flex; flex-direction:column; gap:3px;">
             <label style="font-size:10px; font-weight:700; color:#57534e;">CÓDIGO MERMAID:</label>
-            <textarea id="mermaidCodeInput" style="flex:1; min-height:180px; font-family:'Fira Code', monospace; font-size:11.5px; padding:8px; border:1px solid #cbd5e1; border-radius:4px; background:#fafaf9; outline:none; resize:none;"></textarea>
+            <textarea id="mermaidCodeInput" style="flex:1; min-height:180px; font-family:var(--font-code); font-size:11.5px; padding:8px; border:1px solid #cbd5e1; border-radius:4px; background:#fafaf9; outline:none; resize:none;"></textarea>
           </div>
 
           <div style="flex:1; min-width:240px; display:flex; flex-direction:column; gap:3px;">
@@ -1373,143 +1468,128 @@
     </div>
   </div>
 
-  <!-- Modal de Busca Global -->
+  <!-- MODAL BUSCA GLOBAL -->
   <div class="modal-backdrop" id="searchModal">
     <div class="modal-box" style="max-width:580px;">
       <div class="modal-header">
-        <span style="font-weight:700; font-size:14px;">🔍 Buscar em todos os Cadernos</span>
+        <span style="font-weight:700; font-size:14px;">🔍 Buscar em todas as anotações</span>
         <button onclick="closeSearchModal()" style="background:transparent; color:#fff; border:none; font-size:16px;">✕</button>
       </div>
       <div class="modal-body">
-        <input type="text" id="globalSearchInput" placeholder="Digite termos, notas, tags..." style="width:100%; padding:8px 12px; border:2px solid var(--accent); border-radius:6px; font-size:13.5px; outline:none;" oninput="executeGlobalSearch(this.value)" />
+        <input type="text" id="globalSearchInput" placeholder="Termos, trechos de código, decisões, tags..." style="width:100%; padding:8px 12px; border:2px solid var(--accent); border-radius:6px; font-size:13.5px; outline:none;" oninput="executeGlobalSearch(this.value)" />
         <div id="searchResultsContainer" style="display:flex; flex-direction:column; gap:6px; max-height:300px; overflow-y:auto; margin-top:6px;"></div>
       </div>
     </div>
   </div>
 
   <script>
+    /* ==========================================================================
+       1. ARMAZENAMENTO ROBUSTO COM INDEXEDDB (SEM LIMITE DE 5MB)
+       ========================================================================== */
+    const DB_NAME = 'CraftNotebookDB_v2';
+    const DB_STORE = 'app_state';
+
+    function initDatabase() {
+      return new Promise((resolve, reject) => {
+        const req = indexedDB.open(DB_NAME, 1);
+        req.onupgradeneeded = () => {
+          const db = req.result;
+          if (!db.objectStoreNames.contains(DB_STORE)) {
+            db.createObjectStore(DB_STORE);
+          }
+        };
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      });
+    }
+
+    async function dbSet(key, val) {
+      try {
+        const db = await initDatabase();
+        return new Promise((resolve, reject) => {
+          const tx = db.transaction(DB_STORE, 'readwrite');
+          tx.objectStore(DB_STORE).put(val, key);
+          tx.oncomplete = () => resolve();
+          tx.onerror = () => reject(tx.error);
+        });
+      } catch (err) {
+        console.warn('Fallback para localStorage:', err);
+        try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) {}
+      }
+    }
+
+    async function dbGet(key) {
+      try {
+        const db = await initDatabase();
+        return new Promise((resolve, reject) => {
+          const tx = db.transaction(DB_STORE, 'readonly');
+          const req = tx.objectStore(DB_STORE).get(key);
+          req.onsuccess = () => resolve(req.result);
+          req.onerror = () => reject(req.error);
+        });
+      } catch (err) {
+        const raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : null;
+      }
+    }
+
+    /* ==========================================================================
+       2. INICIALIZAÇÃO & MODELO DE DADOS PLANO (SCHEMA V2)
+       ========================================================================== */
     mermaid.initialize({ startOnLoad: false, theme: 'neutral', securityLevel: 'loose' });
 
     const templates = {
-      flowchart: `graph TD\n    A[Início] --> B{Decisão}\n    B -- Sim --> C[Resultado 1]\n    B -- Não --> D[Resultado 2]`,
-      sequence: `sequenceDiagram\n    autonumber\n    Alice->>Bob: Olá Bob\n    Bob-->>Alice: Olá Alice`,
-      class: `classDiagram\n    class Animal{\n      +String name\n      +makeSound()\n    }`,
-      erd: `erDiagram\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|{ LINE-ITEM : contains`,
-      state: `stateDiagram-v2\n    [*] --> Still\n    Still --> [*]`,
-      mindmap: `mindmap\n  root((Projeto))\n    Origem\n      Ideia\n    Desenvolvimento`
+      flowchart: `graph TD\n    A[Problema / Hipótese] --> B{Faz sentido?}\n    B -- Sim --> C[Implementar Protótipo]\n    B -- Não --> D[Descartar / Ajustar Escopo]`,
+      sequence: `sequenceDiagram\n    autonumber\n    Cliente->>Backend: Requisição de Dados\n    Backend->>Banco: Query Otimizada\n    Banco-->>Backend: Resultado\n    Backend-->>Cliente: Resposta JSON`,
+      class: `classDiagram\n    class ModuloCore{\n      +String status\n      +executar()\n    }`,
+      erd: `erDiagram\n    USUARIO ||--o{ PROJETO : cria\n    PROJETO ||--|{ MODULO : contem`,
+      mindmap: `mindmap\n  root((Visão Geral))\n    Arquitetura\n      Backend\n      Frontend\n    Gargalos\n      Latência\n      Complexidade`
     };
 
-    function setTodayDate() {
-      const dateEl = document.getElementById('currentDateDisplay');
-      if (dateEl) {
-        const today = new Date();
-        const options = { day: 'numeric', month: 'long', year: 'numeric' };
-        dateEl.innerHTML = '📅 ' + today.toLocaleDateString('pt-BR', options);
-      }
+    const PROMPTS = [
+      "Qual é o único gargalo técnico que, se resolvido hoje, destrava todo o resto?",
+      "Se você tivesse que explicar esse problema para uma criança de 10 anos, como resumiria?",
+      "O que você está evitando implementar por receio de complexidade desnecessária?",
+      "Qual hipótese você assumiu como verdadeira mas ainda não testou?",
+      "Escreva 3 linhas soltas sobre como você quer ver esse projeto finalizado no futuro."
+    ];
+
+    function formatDefaultDate(d = new Date()) {
+      return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
     }
 
-    function autoResizeTextarea(el) {
-      if (!el) return;
-      el.style.height = 'auto';
-      el.style.height = (el.scrollHeight) + 'px';
-    }
+    function createInitialBook(title = 'Meu Caderno de Projetos & Pensamento') {
+      const bId = 'b_' + Date.now();
+      const pId = 'p_' + Date.now();
+      const todayFormatted = formatDefaultDate();
 
-    const paperToolbar = document.getElementById('paperToolbar');
-    const btnScrollLeft = document.getElementById('btnScrollToolbarLeft');
-    const btnScrollRight = document.getElementById('btnScrollToolbarRight');
-
-    function updateToolbarNavButtons() {
-      if (!paperToolbar) return;
-      const maxScrollLeft = paperToolbar.scrollWidth - paperToolbar.clientWidth;
-      btnScrollLeft.classList.toggle('disabled', paperToolbar.scrollLeft <= 5);
-      btnScrollRight.classList.toggle('disabled', paperToolbar.scrollLeft >= maxScrollLeft - 5);
-    }
-
-    window.scrollToolbar = (distance) => {
-      paperToolbar.scrollBy({ left: distance, behavior: 'smooth' });
-    };
-
-    paperToolbar.addEventListener('scroll', updateToolbarNavButtons);
-    window.addEventListener('resize', updateToolbarNavButtons);
-
-    paperToolbar.addEventListener('wheel', (e) => {
-      if (e.deltaY !== 0) {
-        e.preventDefault();
-        paperToolbar.scrollLeft += e.deltaY * 1.2;
-      }
-    }, { passive: false });
-
-    let isToolbarDragging = false;
-    let toolbarStartX = 0;
-    let toolbarScrollLeftStart = 0;
-
-    paperToolbar.addEventListener('mousedown', (e) => {
-      if (e.target.closest('button, select, input, label')) return;
-      isToolbarDragging = true;
-      paperToolbar.classList.add('grabbing');
-      toolbarStartX = e.pageX - paperToolbar.offsetLeft;
-      toolbarScrollLeftStart = paperToolbar.scrollLeft;
-    });
-
-    window.addEventListener('mousemove', (e) => {
-      if (!isToolbarDragging) return;
-      e.preventDefault();
-      const x = e.pageX - paperToolbar.offsetLeft;
-      const walk = (x - toolbarStartX) * 1.5;
-      paperToolbar.scrollLeft = toolbarScrollLeftStart - walk;
-    });
-
-    window.addEventListener('mouseup', () => {
-      if (isToolbarDragging) {
-        isToolbarDragging = false;
-        paperToolbar.classList.remove('grabbing');
-      }
-    });
-
-    const sidebar = document.getElementById('appSidebar');
-    const sidebarBackdrop = document.getElementById('sidebarBackdrop');
-
-    function toggleMobileSidebar(show = null) {
-      const isOpen = show !== null ? show : !sidebar.classList.contains('open');
-      sidebar.classList.toggle('open', isOpen);
-      sidebarBackdrop.classList.toggle('active', isOpen);
-    }
-
-    document.getElementById('btnToggleSidebar').onclick = () => toggleMobileSidebar();
-
-    function createInitialBook(title = 'Meu Caderno Artesanal') {
-      const bId = 'b_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
-      const cId = 'c_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
-      const pId = 'p_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
       return {
         id: bId,
         bookTitle: title,
-        activeChapterId: cId,
         activePageId: pId,
         inboxNotes: [],
-        chapters: [{
-          id: cId,
-          title: 'Domo 1 - Ideias & Arquitetura',
-          pages: [{
-            id: pId,
-            title: 'Página 1',
-            paperOrientation: 'orientation-portrait',
-            fontSize: 24,
-            contentHTML: '',
-            elements: [],
-            inkDataURL: null,
-            threads: [],
-            snapshots: [],
-            isSoftwareProject: false,
-            createdAt: new Date().toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' })
-          }]
+        pages: [{
+          id: pId,
+          title: `Diário - ${todayFormatted}`,
+          tags: ['journal', 'engenharia'],
+          paperOrientation: 'orientation-portrait',
+          fontSize: 24,
+          contentHTML: '',
+          elements: [],
+          inkDataURL: null,
+          threads: [],
+          snapshots: [],
+          isSoftwareProject: false,
+          createdAt: new Date().toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' }),
+          updatedAt: new Date().toISOString()
         }]
       };
     }
 
     function createInitialAppState() {
-      const firstBook = createInitialBook('Meu Caderno Artesanal');
+      const firstBook = createInitialBook();
       return {
+        version: 2,
         activeBookId: firstBook.id,
         books: [firstBook]
       };
@@ -1517,44 +1597,32 @@
 
     let appState = createInitialAppState();
     let currentThreadFilter = 'all';
+    let currentTagFilter = 'all';
     let activeSelectionRange = null;
 
     function getActiveBook() {
       let book = appState.books.find(b => b.id === appState.activeBookId);
       if (!book) {
-        if (!appState.books || appState.books.length === 0) {
-          const newB = createInitialBook();
-          appState.books = [newB];
-          appState.activeBookId = newB.id;
-          return newB;
-        }
-        book = appState.books[0];
+        book = appState.books[0] || createInitialBook();
         appState.activeBookId = book.id;
       }
       if (!book.inboxNotes) book.inboxNotes = [];
-      if (!book.chapters || book.chapters.length === 0) {
-        const initial = createInitialBook(book.bookTitle || 'Meu Caderno');
-        book.chapters = initial.chapters;
-        book.activeChapterId = initial.activeChapterId;
-        book.activePageId = initial.activePageId;
+      if (!book.pages || book.pages.length === 0) {
+        const init = createInitialBook(book.bookTitle);
+        book.pages = init.pages;
+        book.activePageId = init.activePageId;
       }
       return book;
     }
 
-    function getActiveChapter() {
-      const book = getActiveBook();
-      return book.chapters.find(c => c.id === book.activeChapterId) || book.chapters[0];
-    }
-
     function getActivePage() {
-      const chap = getActiveChapter();
-      if (!chap) return null;
       const book = getActiveBook();
-      const page = chap.pages.find(p => p.id === book.activePageId) || chap.pages[0];
+      let page = book.pages.find(p => p.id === book.activePageId) || book.pages[0];
       if (page) {
         if (!page.threads) page.threads = [];
         if (!page.snapshots) page.snapshots = [];
         if (!page.elements) page.elements = [];
+        if (!page.tags) page.tags = [];
         if (!page.paperOrientation) page.paperOrientation = 'orientation-portrait';
         if (!page.fontSize) page.fontSize = 24;
         if (page.isSoftwareProject === undefined) page.isSoftwareProject = false;
@@ -1562,63 +1630,109 @@
       return page;
     }
 
+    /* ==========================================================================
+       3. SINCRONIZAÇÃO E PERSISTÊNCIA
+       ========================================================================== */
     let isCanvasDirtySinceLoad = false;
     let currentLoadedInkPageId = null;
 
     function syncCurrentPageToState() {
       const book = getActiveBook();
-      book.bookTitle = document.getElementById('bookTitleInput').value || 'Meu Caderno Artesanal';
+      book.bookTitle = document.getElementById('bookTitleInput').value.trim() || 'Meu Caderno';
       const page = getActivePage();
       if (!page) return;
-      page.title = document.getElementById('pageTitle').value;
+
+      const titleInput = document.getElementById('pageTitle').value.trim();
+      page.title = titleInput || `Anotação - ${formatDefaultDate()}`;
       page.contentHTML = document.getElementById('textEditor').innerHTML;
       page.paperOrientation = document.getElementById('paperOrientation').value;
-      
+      page.updatedAt = new Date().toISOString();
+
       const canvas = document.getElementById('inkCanvas');
       if (canvas && canvas.width > 0 && canvas.height > 0 && isCanvasDirtySinceLoad && currentLoadedInkPageId === page.id) {
         page.inkDataURL = canvas.toDataURL();
       }
     }
 
-    let undoStack = [];
-    let redoStack = [];
-    let isPerformingUndoRedo = false;
-    let historyDebounceTimeout = null;
-
-    function initHistory(initialHTML = '') {
-      undoStack = [initialHTML];
-      redoStack = [];
+    let saveDebounceTimer = null;
+    function saveToStorage() {
+      syncCurrentPageToState();
+      clearTimeout(saveDebounceTimer);
+      saveDebounceTimer = setTimeout(() => {
+        dbSet('craft_notebook_v2_data', appState);
+      }, 300);
     }
 
+    /* MIGRADOR AUTOMÁTICO (Capítulos -> Tags) */
+    function migrateLegacyData(parsed) {
+      if (!parsed) return createInitialAppState();
+
+      if (parsed.version === 2 && Array.isArray(parsed.books)) {
+        return parsed;
+      }
+
+      // Migração se possuir capítulos
+      if (parsed.books && Array.isArray(parsed.books)) {
+        parsed.books.forEach(b => {
+          if (b.chapters && Array.isArray(b.chapters)) {
+            b.pages = [];
+            b.chapters.forEach(c => {
+              const tagFromChap = (c.title || '').replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚãõÃÕâêîôûÂÊÎÔÛçÇ_-]/g, '').toLowerCase() || 'geral';
+              (c.pages || []).forEach(p => {
+                if (!p.tags) p.tags = [];
+                if (!p.tags.includes(tagFromChap)) p.tags.push(tagFromChap);
+                b.pages.push(p);
+              });
+            });
+            delete b.chapters;
+            delete b.activeChapterId;
+          }
+        });
+        parsed.version = 2;
+        return parsed;
+      }
+
+      return createInitialAppState();
+    }
+
+    async function loadFromStorage() {
+      let data = await dbGet('craft_notebook_v2_data');
+      if (!data) {
+        // Tenta recuperar do localStorage legado
+        const legacyRaw = localStorage.getItem('scrapbook_craft_data');
+        if (legacyRaw) {
+          try { data = JSON.parse(legacyRaw); } catch (e) {}
+        }
+      }
+
+      appState = migrateLegacyData(data);
+      renderAll();
+    }
+
+    /* ==========================================================================
+       4. HISTÓRICO UNDO / REDO
+       ========================================================================== */
+    let undoStack = [], redoStack = [], isPerformingUndoRedo = false, historyDebounce = null;
+    function initHistory(html = '') { undoStack = [html]; redoStack = []; }
     function pushHistoryState(html, immediate = false) {
       if (isPerformingUndoRedo) return;
       const record = () => {
-        const last = undoStack[undoStack.length - 1];
-        if (last !== html) {
+        if (undoStack[undoStack.length - 1] !== html) {
           undoStack.push(html);
           if (undoStack.length > 50) undoStack.shift();
           redoStack = [];
         }
       };
-      if (immediate) {
-        if (historyDebounceTimeout) clearTimeout(historyDebounceTimeout);
-        record();
-      } else {
-        if (historyDebounceTimeout) clearTimeout(historyDebounceTimeout);
-        historyDebounceTimeout = setTimeout(record, 300);
-      }
+      if (immediate) { clearTimeout(historyDebounce); record(); }
+      else { clearTimeout(historyDebounce); historyDebounce = setTimeout(record, 250); }
     }
 
     function executeUndo() {
       if (undoStack.length > 1) {
         isPerformingUndoRedo = true;
-        const current = undoStack.pop();
-        redoStack.push(current);
-        const previous = undoStack[undoStack.length - 1];
-        
-        const editor = document.getElementById('textEditor');
-        editor.innerHTML = previous;
-        
+        redoStack.push(undoStack.pop());
+        const prev = undoStack[undoStack.length - 1];
+        document.getElementById('textEditor').innerHTML = prev;
         highlightAllCodeBlocks();
         syncCurrentPageToState();
         updateInfinitePageHeight();
@@ -1633,10 +1747,7 @@
         isPerformingUndoRedo = true;
         const next = redoStack.pop();
         undoStack.push(next);
-        
-        const editor = document.getElementById('textEditor');
-        editor.innerHTML = next;
-        
+        document.getElementById('textEditor').innerHTML = next;
         highlightAllCodeBlocks();
         syncCurrentPageToState();
         updateInfinitePageHeight();
@@ -1646,25 +1757,28 @@
       }
     }
 
+    function autoResizeTextarea(el) {
+      if (!el) return;
+      el.style.height = 'auto';
+      el.style.height = (el.scrollHeight) + 'px';
+    }
+
     function updateInfinitePageHeight() {
       const collage = document.getElementById('collageContainer');
       const page = getActivePage();
       if (!collage) return;
 
       let maxBottom = 550;
-
-      const freeDoms = collage.querySelectorAll('.craft-media-card.mode-free');
-      freeDoms.forEach(dom => {
-        const bottom = dom.offsetTop + dom.offsetHeight + 100;
-        if (bottom > maxBottom) maxBottom = bottom;
+      collage.querySelectorAll('.craft-media-card.mode-free').forEach(dom => {
+        const b = dom.offsetTop + dom.offsetHeight + 100;
+        if (b > maxBottom) maxBottom = b;
       });
 
       if (page && page.elements) {
         page.elements.forEach(el => {
           if (el.mode === 'free') {
-            const h = el.height || 260;
-            const bottom = (el.y || 0) + h + 100;
-            if (bottom > maxBottom) maxBottom = bottom;
+            const b = (el.y || 0) + (el.height || 260) + 100;
+            if (b > maxBottom) maxBottom = b;
           }
         });
       }
@@ -1673,11 +1787,10 @@
       syncInkCanvasDimensions();
     }
 
-    /* PINCEL E TINTA */
-    let currentInkTool = 'select';
-    let isDrawingInk = false;
-    let lastInkX = 0, lastInkY = 0;
-
+    /* ==========================================================================
+       5. DESENHO LIVRE & PINCEL
+       ========================================================================== */
+    let currentInkTool = 'select', isDrawingInk = false, lastInkX = 0, lastInkY = 0;
     const inkCanvas = document.getElementById('inkCanvas');
     const inkCtx = inkCanvas.getContext('2d');
     const viewport = document.getElementById('viewport');
@@ -1685,7 +1798,6 @@
     function setInkTool(tool) {
       currentInkTool = tool;
       document.querySelectorAll('#toolSelect, #toolPen, #toolEraser').forEach(b => b.classList.remove('active-tool'));
-      
       if (tool === 'select') {
         document.getElementById('toolSelect').classList.add('active-tool');
         inkCanvas.classList.remove('drawing-active');
@@ -1701,10 +1813,8 @@
     function syncInkCanvasDimensions() {
       const sheet = document.getElementById('paperSheet');
       if (!sheet || !inkCanvas) return;
-
       const targetW = sheet.clientWidth;
       const targetH = sheet.clientHeight;
-
       if (targetW === 0 || targetH === 0) return;
 
       if (inkCanvas.width !== targetW || inkCanvas.height !== targetH) {
@@ -1712,26 +1822,19 @@
         temp.width = inkCanvas.width;
         temp.height = inkCanvas.height;
         const tempCtx = temp.getContext('2d');
-        if (inkCanvas.width > 0 && inkCanvas.height > 0) {
-          tempCtx.drawImage(inkCanvas, 0, 0);
-        }
+        if (inkCanvas.width > 0 && inkCanvas.height > 0) tempCtx.drawImage(inkCanvas, 0, 0);
 
         inkCanvas.width = targetW;
         inkCanvas.height = targetH;
-
-        if (temp.width > 0 && temp.height > 0) {
-          inkCtx.drawImage(temp, 0, 0);
-        }
+        if (temp.width > 0 && temp.height > 0) inkCtx.drawImage(temp, 0, 0);
       }
     }
 
     function loadInkFromState() {
       const page = getActivePage();
       if (!page) return;
-
       currentLoadedInkPageId = page.id;
       isCanvasDirtySinceLoad = false;
-
       syncInkCanvasDimensions();
       inkCtx.clearRect(0, 0, inkCanvas.width, inkCanvas.height);
 
@@ -1739,40 +1842,31 @@
         const targetPageId = page.id;
         const img = new Image();
         img.onload = () => {
-          const currentPage = getActivePage();
-          if (currentPage && currentPage.id === targetPageId) {
-            inkCtx.drawImage(img, 0, 0);
-          }
+          const cur = getActivePage();
+          if (cur && cur.id === targetPageId) inkCtx.drawImage(img, 0, 0);
         };
         img.src = page.inkDataURL;
       }
     }
 
     function clearPageInk() {
-      if (!confirm('Deseja apagar todos os desenhos feitos à mão nesta página?')) return;
+      if (!confirm('Deseja apagar todos os traços feitos à mão nesta página?')) return;
       inkCtx.clearRect(0, 0, inkCanvas.width, inkCanvas.height);
       const page = getActivePage();
-      if (page) {
-        page.inkDataURL = null;
-        isCanvasDirtySinceLoad = true;
-      }
+      if (page) { page.inkDataURL = null; isCanvasDirtySinceLoad = true; }
       saveToStorage();
     }
 
     window.convertInkToMovableCard = () => {
-      const w = inkCanvas.width;
-      const h = inkCanvas.height;
+      const w = inkCanvas.width, h = inkCanvas.height;
       if (w === 0 || h === 0) return;
-
       const imgData = inkCtx.getImageData(0, 0, w, h);
       const data = imgData.data;
-      let minX = w, minY = h, maxX = 0, maxY = 0;
-      let hasPixels = false;
+      let minX = w, minY = h, maxX = 0, maxY = 0, hasPixels = false;
 
       for (let y = 0; y < h; y++) {
         for (let x = 0; x < w; x++) {
-          const alpha = data[(y * w + x) * 4 + 3];
-          if (alpha > 10) {
+          if (data[(y * w + x) * 4 + 3] > 10) {
             hasPixels = true;
             if (x < minX) minX = x;
             if (x > maxX) maxX = x;
@@ -1782,64 +1876,46 @@
         }
       }
 
-      if (!hasPixels) {
-        alert('Nenhum traço de pincel encontrado nesta página para converter em card.');
-        return;
-      }
+      if (!hasPixels) return alert('Nenhum traço livre foi desenhado para converter em card.');
 
-      const padding = 10;
-      minX = Math.max(0, minX - padding);
-      minY = Math.max(0, minY - padding);
-      maxX = Math.min(w, maxX + padding);
-      maxY = Math.min(h, maxY + padding);
-
+      minX = Math.max(0, minX - 10);
+      minY = Math.max(0, minY - 10);
+      maxX = Math.min(w, maxX + 10);
+      maxY = Math.min(h, maxY + 10);
       const cropW = Math.max(20, maxX - minX);
       const cropH = Math.max(20, maxY - minY);
 
       const tempCanvas = document.createElement('canvas');
       tempCanvas.width = cropW;
       tempCanvas.height = cropH;
-      const tempCtx = tempCanvas.getContext('2d');
-      tempCtx.drawImage(inkCanvas, minX, minY, cropW, cropH, 0, 0, cropW, cropH);
-
-      const croppedDataUrl = tempCanvas.toDataURL('image/png');
+      tempCanvas.getContext('2d').drawImage(inkCanvas, minX, minY, cropW, cropH, 0, 0, cropW, cropH);
 
       inkCtx.clearRect(0, 0, w, h);
       const page = getActivePage();
-      if (page) {
-        page.inkDataURL = null;
-        isCanvasDirtySinceLoad = true;
-      }
+      if (page) { page.inkDataURL = null; isCanvasDirtySinceLoad = true; }
 
-      addMediaElement('drawing', croppedDataUrl, '', {
+      addMediaElement('drawing', tempCanvas.toDataURL('image/png'), '', {
         mode: 'free',
         x: minX,
         y: minY,
         width: Math.max(140, cropW)
       });
-
       setInkTool('select');
       saveToStorage();
     };
 
     function getCanvasCoords(clientX, clientY) {
       const rect = inkCanvas.getBoundingClientRect();
-      const scaleX = inkCanvas.width / (rect.width || 1);
-      const scaleY = inkCanvas.height / (rect.height || 1);
       return {
-        x: (clientX - rect.left) * scaleX,
-        y: (clientY - rect.top) * scaleY
+        x: (clientX - rect.left) * (inkCanvas.width / (rect.width || 1)),
+        y: (clientY - rect.top) * (inkCanvas.height / (rect.height || 1))
       };
     }
 
     function drawInkSegment(clientX, clientY, pressureInput, pointerType, isDot = false) {
       isCanvasDirtySinceLoad = true;
       const baseSize = parseFloat(document.getElementById('brushSize').value) || 3;
-      let pressure = 0.5;
-      
-      if (pressureInput && pressureInput > 0) pressure = pressureInput;
-      if (pointerType === 'touch' && (!pressureInput || pressureInput === 0 || pressureInput < 0.1)) pressure = 0.5;
-
+      let pressure = (pressureInput && pressureInput > 0) ? pressureInput : 0.5;
       const color = document.getElementById('brushColor').value;
       const coords = getCanvasCoords(clientX, clientY);
 
@@ -1874,62 +1950,40 @@
       lastInkY = coords.y;
     }
 
-    inkCanvas.addEventListener('touchstart', (e) => {
-      if (currentInkTool !== 'select') e.preventDefault();
-    }, { passive: false });
-
-    inkCanvas.addEventListener('touchmove', (e) => {
-      if (currentInkTool !== 'select') e.preventDefault();
-    }, { passive: false });
-
-    inkCanvas.addEventListener('touchend', (e) => {
-      if (currentInkTool !== 'select') e.preventDefault();
-    }, { passive: false });
-
     inkCanvas.addEventListener('pointerdown', (e) => {
       if (currentInkTool === 'select') return;
       e.preventDefault();
       isDrawingInk = true;
-      try { inkCanvas.setPointerCapture(e.pointerId); } catch (err) {}
-
+      try { inkCanvas.setPointerCapture(e.pointerId); } catch {}
       const coords = getCanvasCoords(e.clientX, e.clientY);
       lastInkX = coords.x;
       lastInkY = coords.y;
-
       drawInkSegment(e.clientX, e.clientY, e.pressure, e.pointerType, true);
     });
 
     inkCanvas.addEventListener('pointermove', (e) => {
       if (!isDrawingInk || currentInkTool === 'select') return;
       e.preventDefault();
-
-      const events = (e.getCoalescedEvents && typeof e.getCoalescedEvents === 'function' && e.getCoalescedEvents().length > 0)
-        ? e.getCoalescedEvents()
-        : [e];
-
-      for (const ev of events) {
-        drawInkSegment(ev.clientX, ev.clientY, ev.pressure, ev.pointerType, false);
-      }
+      const events = (e.getCoalescedEvents && e.getCoalescedEvents().length > 0) ? e.getCoalescedEvents() : [e];
+      for (const ev of events) drawInkSegment(ev.clientX, ev.clientY, ev.pressure, ev.pointerType, false);
     });
 
     function stopInkDrawing(e) {
       if (isDrawingInk) {
         isDrawingInk = false;
         if (e && e.pointerId) {
-          try {
-            if (inkCanvas.hasPointerCapture(e.pointerId)) {
-              inkCanvas.releasePointerCapture(e.pointerId);
-            }
-          } catch (err) {}
+          try { if (inkCanvas.hasPointerCapture(e.pointerId)) inkCanvas.releasePointerCapture(e.pointerId); } catch {}
         }
         syncCurrentPageToState();
         saveToStorage();
       }
     }
-
     inkCanvas.addEventListener('pointerup', stopInkDrawing);
     inkCanvas.addEventListener('pointercancel', stopInkDrawing);
 
+    /* ==========================================================================
+       6. RENDERIZAÇÃO DA INTERFACE PLANO: PÁGINAS & TAGS
+       ========================================================================== */
     function renderBookSelector() {
       const select = document.getElementById('bookSelect');
       select.innerHTML = '';
@@ -1940,118 +1994,128 @@
         if (b.id === appState.activeBookId) opt.selected = true;
         select.appendChild(opt);
       });
-
-      const btnDelete = document.getElementById('btnDeleteBook');
-      if (btnDelete) {
-        btnDelete.style.display = appState.books.length > 1 ? 'inline-flex' : 'none';
-      }
+      document.getElementById('btnDeleteBook').style.display = appState.books.length > 1 ? 'inline-flex' : 'none';
     }
 
-    window.switchBook = (bookId) => {
-      syncCurrentPageToState();
-      inkCtx.clearRect(0, 0, inkCanvas.width, inkCanvas.height);
-      isCanvasDirtySinceLoad = false;
+    function renderTagFilterBar() {
+      const bar = document.getElementById('tagFilterBar');
+      bar.innerHTML = '';
+      const book = getActiveBook();
 
-      appState.activeBookId = bookId;
-      renderAll();
-      saveToStorage();
-    };
+      // Agrupa todas as tags únicas usadas nas páginas
+      const allTags = new Set();
+      book.pages.forEach(p => (p.tags || []).forEach(t => allTags.add(t)));
 
-    document.getElementById('btnNewBook').onclick = () => {
-      const title = prompt('Nome do novo Caderno:', `Caderno ${appState.books.length + 1}`);
-      if (!title || !title.trim()) return;
-      syncCurrentPageToState();
-      inkCtx.clearRect(0, 0, inkCanvas.width, inkCanvas.height);
-      isCanvasDirtySinceLoad = false;
+      const allBtn = document.createElement('button');
+      allBtn.className = `tag-chip ${currentTagFilter === 'all' ? 'active' : ''}`;
+      allBtn.textContent = 'Todas';
+      allBtn.onclick = () => { currentTagFilter = 'all'; renderNavigation(); };
+      bar.appendChild(allBtn);
 
-      const newBook = createInitialBook(title.trim());
-      appState.books.push(newBook);
-      appState.activeBookId = newBook.id;
-      renderAll();
-      saveToStorage();
-    };
-
-    document.getElementById('btnDeleteBook').onclick = () => {
-      if (appState.books.length <= 1) {
-        alert('Você precisa ter pelo menos um caderno ativo.');
-        return;
-      }
-      const currentBook = getActiveBook();
-      if (!confirm(`Excluir o caderno "${currentBook.bookTitle}" e todas as suas anotações?`)) return;
-      
-      syncCurrentPageToState();
-      inkCtx.clearRect(0, 0, inkCanvas.width, inkCanvas.height);
-      isCanvasDirtySinceLoad = false;
-
-      appState.books = appState.books.filter(b => b.id !== currentBook.id);
-      appState.activeBookId = appState.books[0].id;
-      renderAll();
-      saveToStorage();
-    };
+      allTags.forEach(tag => {
+        const btn = document.createElement('button');
+        btn.className = `tag-chip ${currentTagFilter === tag ? 'active' : ''}`;
+        btn.textContent = '#' + tag;
+        btn.onclick = () => { currentTagFilter = tag; renderNavigation(); };
+        bar.appendChild(btn);
+      });
+    }
 
     function renderNavigation() {
       renderBookSelector();
-      const book = getActiveBook();
-      const cList = document.getElementById('chapterList');
-      const pList = document.getElementById('pageList');
+      renderTagFilterBar();
 
-      cList.innerHTML = '';
-      book.chapters.forEach(c => {
+      const book = getActiveBook();
+      const pList = document.getElementById('pageList');
+      pList.innerHTML = '';
+
+      let filteredPages = book.pages;
+      if (currentTagFilter !== 'all') {
+        filteredPages = filteredPages.filter(p => (p.tags || []).includes(currentTagFilter));
+      }
+
+      if (filteredPages.length === 0) {
+        pList.innerHTML = '<li style="padding:12px 10px; font-size:11px; color:#a8a29e; text-align:center;">Nenhuma página encontrada para esta tag.</li>';
+        return;
+      }
+
+      filteredPages.forEach(p => {
         const li = document.createElement('li');
-        li.className = `nav-item ${c.id === book.activeChapterId ? 'active' : ''}`;
+        li.className = `nav-item ${p.id === book.activePageId ? 'active' : ''}`;
+
+        const tagBadges = (p.tags || []).slice(0, 3).map(t => `<span class="mini-tag">#${escapeHTML(t)}</span>`).join('');
+
         li.innerHTML = `
-          <span title="Duplo clique para renomear" ondblclick="renameChapter('${c.id}')">📁 ${escapeHTML(c.title)}</span>
-          <div class="nav-actions">
-            <button class="btn-icon" title="Renomear Domo" onclick="renameChapter('${c.id}')">✏️</button>
-            ${book.chapters.length > 1 ? `<button class="btn-danger btn-icon" title="Excluir" onclick="deleteChapter(event, '${c.id}')">✕</button>` : ''}
+          <div class="nav-item-top">
+            <span>${p.isSoftwareProject ? '💻' : '📄'} ${escapeHTML(p.title || 'Sem título')}</span>
+            <div class="nav-actions">
+              ${book.pages.length > 1 ? `<button class="btn-danger btn-icon" title="Excluir página" onclick="deletePage(event, '${p.id}')">✕</button>` : ''}
+            </div>
+          </div>
+          <div class="nav-item-meta">
+            <span>${p.createdAt || ''}</span>
+            <div class="nav-item-tags">${tagBadges}</div>
           </div>
         `;
+
         li.onclick = (e) => {
           if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
           syncCurrentPageToState();
-          inkCtx.clearRect(0, 0, inkCanvas.width, inkCanvas.height);
-          isCanvasDirtySinceLoad = false;
-
-          book.activeChapterId = c.id;
-          book.activePageId = c.pages[0]?.id || null;
+          book.activePageId = p.id;
           renderAll();
           saveToStorage();
+          if (window.innerWidth <= 860) toggleMobileSidebar(false);
         };
-        cList.appendChild(li);
+        pList.appendChild(li);
+      });
+    }
+
+    function renderPageTags() {
+      const container = document.getElementById('pageTagsContainer');
+      container.innerHTML = '';
+      const page = getActivePage();
+      if (!page) return;
+
+      (page.tags || []).forEach((tag, idx) => {
+        const chip = document.createElement('span');
+        chip.className = 'page-tag-chip';
+        chip.innerHTML = `#${escapeHTML(tag)} <button onclick="removePageTag(${idx})" title="Remover tag">✕</button>`;
+        container.appendChild(chip);
       });
 
-      pList.innerHTML = '';
-      const currentChap = getActiveChapter();
-      if (currentChap) {
-        currentChap.pages.forEach(p => {
-          const li = document.createElement('li');
-          li.className = `nav-item ${p.id === book.activePageId ? 'active' : ''}`;
-          li.innerHTML = `
-            <span>${p.isSoftwareProject ? '💻' : '📄'} ${escapeHTML(p.title || 'Sem título')}</span>
-            <div class="nav-actions">
-              ${currentChap.pages.length > 1 ? `<button class="btn-danger btn-icon" title="Excluir" onclick="deletePage(event, '${p.id}')">✕</button>` : ''}
-            </div>
-          `;
-          li.onclick = (e) => {
-            if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
-            syncCurrentPageToState();
-            inkCtx.clearRect(0, 0, inkCanvas.width, inkCanvas.height);
-            isCanvasDirtySinceLoad = false;
-
-            book.activePageId = p.id;
-            renderAll();
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'page-tag-input';
+      input.placeholder = '+ #tag e Enter';
+      input.onkeydown = (e) => {
+        if (e.key === 'Enter' && input.value.trim()) {
+          e.preventDefault();
+          const cleanTag = input.value.trim().replace(/^#/, '').toLowerCase();
+          if (!page.tags.includes(cleanTag)) {
+            page.tags.push(cleanTag);
             saveToStorage();
-            if (window.innerWidth <= 860) toggleMobileSidebar(false);
-          };
-          pList.appendChild(li);
-        });
-      }
+            renderPageTags();
+            renderNavigation();
+          }
+          input.value = '';
+        }
+      };
+      container.appendChild(input);
     }
+
+    window.removePageTag = (idx) => {
+      const page = getActivePage();
+      if (!page) return;
+      page.tags.splice(idx, 1);
+      saveToStorage();
+      renderPageTags();
+      renderNavigation();
+    };
 
     function renderPageContent() {
       const book = getActiveBook();
-      document.getElementById('bookTitleInput').value = book.bookTitle || 'Meu Caderno Artesanal';
-      document.title = `${book.bookTitle || 'Caderno Artesanal'} - Scrapbook`;
+      document.getElementById('bookTitleInput').value = book.bookTitle || 'Meu Caderno';
+      document.title = `${book.bookTitle || 'Caderno'} - Journaling & Engenharia`;
 
       const page = getActivePage();
       if (!page) return;
@@ -2060,36 +2124,34 @@
       pageTitleEl.value = page.title || '';
       autoResizeTextarea(pageTitleEl);
 
-      document.getElementById('textEditor').innerHTML = page.contentHTML || '';
-      
+      const editor = document.getElementById('textEditor');
+      editor.innerHTML = page.contentHTML || '';
+      editor.style.fontSize = (page.fontSize || 24) + 'px';
+      editor.style.lineHeight = ((page.fontSize || 24) + 9) + 'px';
+
       const paper = document.getElementById('paperSheet');
       const orientation = page.paperOrientation || 'orientation-portrait';
-
       paper.className = `paper-sheet ${orientation}`;
       document.getElementById('paperOrientation').value = orientation;
-      
-      const editor = document.getElementById('textEditor');
-      editor.style.fontSize = (page.fontSize || 24) + 'px';
-      editor.style.lineHeight = ((page.fontSize || 24) + 8) + 'px';
 
       const dateEl = document.getElementById('currentDateDisplay');
       if (dateEl) {
-        if (!page.createdAt) {
-            page.createdAt = new Date().toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' });
-        }
+        if (!page.createdAt) page.createdAt = new Date().toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' });
         dateEl.innerHTML = '📅 ' + page.createdAt;
       }
 
+      const isBlank = !editor.innerText.trim() && (!page.elements || page.elements.length === 0);
+      document.getElementById('ignitionBox').classList.toggle('hidden', !isBlank);
+
+      renderPageTags();
       renderCollageElements();
       renderThreads();
       initHistory(page.contentHTML || '');
       setInkTool('select');
       highlightAllCodeBlocks();
-      
       updateInfinitePageHeight();
       loadInkFromState();
       updateToolbarNavButtons();
-
       updateProjectModeUI();
       renderProjectFooter();
     }
@@ -2099,50 +2161,156 @@
       renderPageContent();
     }
 
-    document.getElementById('paperOrientation').onchange = (e) => {
-      const page = getActivePage();
-      if (page) {
-        page.paperOrientation = e.target.value;
-        const paper = document.getElementById('paperSheet');
-        paper.classList.remove('orientation-portrait', 'orientation-landscape');
-        paper.classList.add(e.target.value);
-        setTimeout(() => {
-          updateInfinitePageHeight();
-          loadInkFromState();
-        }, 100);
-        saveToStorage();
-      }
+    /* ==========================================================================
+       7. GESTÃO DE PÁGINAS & CADERNOS
+       ========================================================================== */
+    document.getElementById('btnAddPage').onclick = () => {
+      const book = getActiveBook();
+      syncCurrentPageToState();
+      const nPid = 'p_' + Date.now();
+      const today = formatDefaultDate();
+
+      book.pages.unshift({
+        id: nPid,
+        title: `Diário - ${today}`,
+        tags: currentTagFilter !== 'all' ? [currentTagFilter] : ['journal'],
+        paperOrientation: 'orientation-portrait',
+        fontSize: 24,
+        contentHTML: '',
+        elements: [],
+        inkDataURL: null,
+        threads: [],
+        snapshots: [],
+        isSoftwareProject: false,
+        createdAt: new Date().toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' }),
+        updatedAt: new Date().toISOString()
+      });
+
+      book.activePageId = nPid;
+      renderAll();
+      saveToStorage();
+      if (window.innerWidth <= 860) toggleMobileSidebar(false);
     };
 
-    window.changeFontSize = (delta) => {
-      const page = getActivePage();
-      if (!page) return;
-      page.fontSize = Math.max(16, Math.min((page.fontSize || 24) + delta, 44));
-      const editor = document.getElementById('textEditor');
-      editor.style.fontSize = page.fontSize + 'px';
-      editor.style.lineHeight = (page.fontSize + 8) + 'px';
-      updateInfinitePageHeight();
+    window.deletePage = (e, pId) => {
+      e.stopPropagation();
+      const book = getActiveBook();
+      if (book.pages.length <= 1) return alert('Você precisa manter ao menos uma página.');
+      if (!confirm('Excluir esta página permanentemente?')) return;
+      book.pages = book.pages.filter(p => p.id !== pId);
+      book.activePageId = book.pages[0].id;
+      renderAll();
       saveToStorage();
     };
 
-    window.insertHeading = (tag) => {
-      if (!tag) return;
-      const text = window.getSelection().toString().trim() || 'Nova Seção';
-      insertHtmlAtCursor(`<${tag} class="craft-${tag}">${escapeHTML(text)}</${tag}><p><br></p>`);
+    window.switchBook = (bookId) => {
+      syncCurrentPageToState();
+      inkCtx.clearRect(0, 0, inkCanvas.width, inkCanvas.height);
+      isCanvasDirtySinceLoad = false;
+      appState.activeBookId = bookId;
+      renderAll();
+      saveToStorage();
     };
 
-    /* PROGRAMAÇÃO LITERADA & TANGLING */
+    document.getElementById('btnNewBook').onclick = () => {
+      const title = prompt('Nome do novo Caderno / Projeto:', `Projeto ${appState.books.length + 1}`);
+      if (!title || !title.trim()) return;
+      syncCurrentPageToState();
+      const newBook = createInitialBook(title.trim());
+      appState.books.push(newBook);
+      appState.activeBookId = newBook.id;
+      renderAll();
+      saveToStorage();
+    };
+
+    document.getElementById('btnDeleteBook').onclick = () => {
+      if (appState.books.length <= 1) return alert('Você deve manter pelo menos um caderno.');
+      const book = getActiveBook();
+      if (!confirm(`Excluir caderno "${book.bookTitle}"?`)) return;
+      appState.books = appState.books.filter(b => b.id !== book.id);
+      appState.activeBookId = appState.books[0].id;
+      renderAll();
+      saveToStorage();
+    };
+
+    window.suggestTitleFromContent = () => {
+      const editor = document.getElementById('textEditor');
+      const rawText = editor.innerText.trim();
+      if (!rawText) return alert('Escreva algumas frases no caderno primeiro para extrair o título.');
+
+      const firstLine = rawText.split('\n')[0].replace(/[#*>\-]/g, '').trim();
+      let candidate = firstLine.slice(0, 48);
+      if (candidate.length === 48) candidate += '...';
+
+      const pageTitleEl = document.getElementById('pageTitle');
+      pageTitleEl.value = candidate;
+      autoResizeTextarea(pageTitleEl);
+      syncCurrentPageToState();
+      renderNavigation();
+      saveToStorage();
+    };
+
+    /* ==========================================================================
+       8. TEMPLATES & ANTI-BLOQUEIO
+       ========================================================================== */
+    window.dismissIgnition = () => document.getElementById('ignitionBox').classList.add('hidden');
+
+    window.applyTemplate = (key) => {
+      const editor = document.getElementById('textEditor');
+      let tplHTML = '';
+
+      if (key === 'braindump') {
+        tplHTML = `
+          <h2 class="craft-h2">⚡ Descarrego Mental Livre</h2>
+          <p><i>(Escreva sem censura nem ordem, apenas esvaziando a mente)</i></p>
+          <p>• O que está ocupando espaço na cabeça hoje: </p>
+          <p>• O que está me travando: </p>
+          <p><br></p>
+        `;
+      } else if (key === 'devjournal') {
+        tplHTML = `
+          <h2 class="craft-h2">🛠️ Diário de Engenharia & Arquitetura</h2>
+          <h3 class="craft-h3">1. O Gargalo / Desafio Atual</h3>
+          <p>O que está acontecendo vs o que deveria acontecer?</p>
+          <h3 class="craft-h3">2. Alternativas e Hipóteses</h3>
+          <p>• Opção 1: </p>
+          <p>• Opção 2: </p>
+          <h3 class="craft-h3">3. Próximo Passo Prático</h3>
+          <p>O que será testado agora: </p>
+          <p><br></p>
+        `;
+      } else if (key === 'projectpolish') {
+        tplHTML = `
+          <h2 class="craft-h2">🎯 Lapidação do Projeto</h2>
+          <h3 class="craft-h3">Objetivo Central</h3>
+          <p>Qual é a regra de ouro ou o propósito desta entrega?</p>
+          <h3 class="craft-h3">O que NÃO faremos (Eliminar Complexidade)</h3>
+          <p>• Fora do escopo para manter a simplicidade: </p>
+          <p><br></p>
+        `;
+      } else if (key === 'randomprompt') {
+        const p = PROMPTS[Math.floor(Math.random() * PROMPTS.length)];
+        tplHTML = `
+          <blockquote class="craft-quote">“${p}”<cite>— Pergunta Destravadora</cite></blockquote>
+          <p>Minha resposta sincera: </p>
+          <p><br></p>
+        `;
+      }
+
+      editor.innerHTML = tplHTML;
+      dismissIgnition();
+      syncCurrentPageToState();
+      pushHistoryState(editor.innerHTML, true);
+      saveToStorage();
+      editor.focus();
+    };
+
+    /* ==========================================================================
+       9. PROGRAMAÇÃO LITERADA, TANGLING & CÓDIGO
+       ========================================================================== */
     const LANG_EXTENSIONS = {
-      python: '.py',
-      javascript: '.js',
-      typescript: '.ts',
-      sql: '.sql',
-      cpp: '.cpp',
-      rust: '.rs',
-      go: '.go',
-      html: '.html',
-      bash: '.sh',
-      json: '.json'
+      python: '.py', javascript: '.js', typescript: '.ts', sql: '.sql',
+      cpp: '.cpp', rust: '.rs', go: '.go', html: '.html', bash: '.sh', json: '.json'
     };
 
     window.insertCodeSnippet = () => {
@@ -2162,20 +2330,14 @@
                 <option value="bash">Shell/Bash</option>
                 <option value="json">JSON</option>
               </select>
-              <input 
-                type="text" 
-                class="code-filepath-input" 
-                placeholder="ex: src/app.py (caminho relativo)" 
-                title="Caminho relativo para este módulo"
-                oninput="this.setAttribute('value', this.value); syncCurrentPageToState(); saveToStorage(); renderProjectFooter();"
-              />
+              <input type="text" class="code-filepath-input" placeholder="ex: src/modulo.py" oninput="this.setAttribute('value', this.value); syncCurrentPageToState(); saveToStorage(); renderProjectFooter();" />
             </div>
             <div style="display:flex; align-items:center; gap:4px; flex-shrink:0;">
-              <button type="button" class="code-download-btn" title="Baixar apenas este arquivo" onclick="downloadSingleBlock(this)">💾 Salvar</button>
+              <button type="button" class="code-download-btn" onclick="downloadSingleBlock(this)">💾 Baixar</button>
               <button type="button" class="code-copy-btn" onclick="copyCodeFromBlock(this)">📋 Copiar</button>
             </div>
           </div>
-          <pre class="craft-pre-override"><code class="code-snippet-area language-python" contenteditable="true" spellcheck="false" onkeydown="handleCodeKeyDown(event)" onblur="highlightSingleCodeBlock(this)"># Escreva seu código aqui...</code></pre>
+          <pre class="craft-pre-override"><code class="code-snippet-area language-python" contenteditable="true" spellcheck="false" onkeydown="handleCodeKeyDown(event)" onblur="highlightSingleCodeBlock(this)"># Implementação...</code></pre>
         </div>
         <p><br></p>
       `;
@@ -2188,12 +2350,6 @@
       const block = selectEl.closest('.craft-code-block');
       const codeEl = block.querySelector('.code-snippet-area');
       const lang = selectEl.value;
-      
-      Array.from(selectEl.options).forEach(opt => {
-        if (opt.value === lang) opt.setAttribute('selected', 'selected');
-        else opt.removeAttribute('selected');
-      });
-
       codeEl.className = `code-snippet-area language-${lang}`;
       highlightSingleCodeBlock(codeEl);
       syncCurrentPageToState();
@@ -2203,12 +2359,9 @@
     window.highlightSingleCodeBlock = (codeEl) => {
       if (!codeEl || !window.Prism) return;
       const block = codeEl.closest('.craft-code-block');
-      const selectEl = block ? block.querySelector('.code-lang-select') : null;
-      const lang = selectEl ? selectEl.value : 'javascript';
-      const rawCode = codeEl.innerText;
-
+      const lang = block ? block.querySelector('.code-lang-select').value : 'javascript';
       if (Prism.languages[lang]) {
-        codeEl.innerHTML = Prism.highlight(rawCode, Prism.languages[lang], lang);
+        codeEl.innerHTML = Prism.highlight(codeEl.innerText, Prism.languages[lang], lang);
       }
     };
 
@@ -2217,13 +2370,9 @@
       document.querySelectorAll('.craft-code-block').forEach(block => {
         const select = block.querySelector('.code-lang-select');
         const code = block.querySelector('.code-snippet-area');
-        if (select && code) {
-          const lang = select.value;
-          code.className = `code-snippet-area language-${lang}`;
-          const raw = code.innerText;
-          if (Prism.languages[lang]) {
-            code.innerHTML = Prism.highlight(raw, Prism.languages[lang], lang);
-          }
+        if (select && code && Prism.languages[select.value]) {
+          code.className = `code-snippet-area language-${select.value}`;
+          code.innerHTML = Prism.highlight(code.innerText, Prism.languages[select.value], select.value);
         }
       });
     }
@@ -2239,9 +2388,9 @@
       const codeArea = btn.closest('.craft-code-block').querySelector('.code-snippet-area');
       if (codeArea) {
         navigator.clipboard.writeText(codeArea.innerText);
-        const original = btn.textContent;
-        btn.textContent = '✓ Copiado!';
-        setTimeout(() => btn.textContent = original, 1800);
+        const orig = btn.textContent;
+        btn.textContent = '✓ Copiado';
+        setTimeout(() => btn.textContent = orig, 1500);
       }
     };
 
@@ -2253,19 +2402,13 @@
 
       let filePath = (pathInput ? pathInput.value : '').trim();
       const lang = langSelect ? langSelect.value : 'text';
-      const defaultExt = LANG_EXTENSIONS[lang] || '.txt';
+      const ext = LANG_EXTENSIONS[lang] || '.txt';
+      if (!filePath) filePath = `script_${Date.now()}${ext}`;
 
-      if (!filePath) {
-        filePath = `modulo_${Date.now()}${defaultExt}`;
-      }
-
-      const fileName = filePath.split('/').pop() || `codigo${defaultExt}`;
-      const codeContent = codeArea.innerText;
-
-      const blob = new Blob([codeContent], { type: 'text/plain;charset=utf-8' });
+      const blob = new Blob([codeArea.innerText], { type: 'text/plain;charset=utf-8' });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
-      a.download = fileName;
+      a.download = filePath.split('/').pop();
       a.click();
       URL.revokeObjectURL(a.href);
     };
@@ -2280,27 +2423,15 @@
         const pathInput = block.querySelector('.code-filepath-input');
         const langSelect = block.querySelector('.code-lang-select');
         const codeArea = block.querySelector('.code-snippet-area');
-
         if (!codeArea) return;
 
-        const rawCode = codeArea.innerText;
-        let path = (pathInput ? pathInput.value : '').trim();
+        let path = (pathInput ? pathInput.value : '').trim().replace(/^[\\\/]+/, '').replace(/\\/g, '/');
         const lang = langSelect ? langSelect.value : 'text';
-
-        path = path.replace(/^[\\\/]+/, '').replace(/\\/g, '/');
-
         if (!path) {
-          const ext = LANG_EXTENSIONS[lang] || '.txt';
-          path = `src/modulo_${autoCount}${ext}`;
+          path = `src/modulo_${autoCount}${LANG_EXTENSIONS[lang] || '.txt'}`;
           autoCount++;
         }
-
-        // Concatena blocos que compartilham o mesmo caminho de arquivo (Tangling)
-        if (filesMap[path]) {
-          filesMap[path] += '\n\n' + rawCode;
-        } else {
-          filesMap[path] = rawCode;
-        }
+        filesMap[path] = filesMap[path] ? (filesMap[path] + '\n\n' + codeArea.innerText) : codeArea.innerText;
       });
 
       return filesMap;
@@ -2308,27 +2439,15 @@
 
     window.tangleAndExportZip = async () => {
       const files = extractProjectFiles();
-      const fileKeys = Object.keys(files);
-
-      if (fileKeys.length === 0) {
-        alert('Nenhum bloco de código encontrado nesta página para empacotar.');
-        return;
-      }
-
-      if (typeof JSZip === 'undefined') {
-        alert('Biblioteca JSZip não encontrada. Verifique sua conexão com a internet.');
-        return;
-      }
+      const keys = Object.keys(files);
+      if (keys.length === 0) return alert('Nenhum bloco de código encontrado nesta página para compilar.');
+      if (typeof JSZip === 'undefined') return alert('JSZip indisponível.');
 
       const zip = new JSZip();
-      fileKeys.forEach(filePath => {
-        zip.file(filePath, files[filePath]);
-      });
+      keys.forEach(p => zip.file(p, files[p]));
 
       const page = getActivePage();
-      const projName = (page && page.title ? page.title : 'projeto')
-        .toLowerCase()
-        .replace(/[^a-z0-9]/gi, '_');
+      const projName = (page && page.title ? page.title : 'projeto').toLowerCase().replace(/[^a-z0-9]/gi, '_');
 
       try {
         const zipBlob = await zip.generateAsync({ type: 'blob' });
@@ -2338,7 +2457,7 @@
         a.click();
         URL.revokeObjectURL(a.href);
       } catch (err) {
-        alert('Erro ao gerar o arquivo ZIP: ' + err.message);
+        alert('Erro ao gerar ZIP: ' + err.message);
       }
     };
 
@@ -2357,422 +2476,89 @@
       const badge = document.getElementById('projectModeToggle');
       const label = document.getElementById('projectModeLabel');
       if (!badge || !label) return;
-
-      const isActive = !!(page && page.isSoftwareProject);
-      badge.classList.toggle('is-active', isActive);
-      label.textContent = isActive ? 'Ativado ✓' : 'Desativado';
+      const act = !!(page && page.isSoftwareProject);
+      badge.classList.toggle('is-active', act);
+      label.textContent = act ? 'Ativado ✓' : 'Desativado';
     }
 
     function renderProjectFooter() {
-      const existingFooter = document.getElementById('tangleProjectFooter');
-      if (existingFooter) existingFooter.remove();
+      const exist = document.getElementById('tangleProjectFooter');
+      if (exist) exist.remove();
 
       const page = getActivePage();
       if (!page || !page.isSoftwareProject) return;
 
-      const collageContainer = document.getElementById('collageContainer');
       const files = extractProjectFiles();
-      const fileCount = Object.keys(files).length;
-
       const footer = document.createElement('div');
       footer.id = 'tangleProjectFooter';
       footer.className = 'tangle-project-footer';
       footer.contentEditable = 'false';
       footer.innerHTML = `
         <div>
-          <div style="font-size:14px; font-weight:700; color:#a3e635; display:flex; align-items:center; gap:6px;">
-            ⚙️ Projeto de Software Configurado
-          </div>
-          <div style="font-size:12px; color:#a8a29e; margin-top:2px;">
-            ${fileCount} arquivo(s) mapeado(s) prontos para compilação/tangling em lote.
-          </div>
+          <div style="font-size:14px; font-weight:700; color:#a3e635;">⚙️ Projeto de Software Configurado</div>
+          <div style="font-size:12px; color:#a8a29e; margin-top:2px;">${Object.keys(files).length} arquivo(s) prontos para compilação/tangling.</div>
         </div>
-        <button class="btn-accent" style="padding:6px 14px; font-size:12px;" onclick="tangleAndExportZip()">
-          📦 Compilar & Baixar Projeto (.ZIP)
-        </button>
+        <button class="btn-accent" style="padding:6px 14px;" onclick="tangleAndExportZip()">📦 Baixar Projeto (.ZIP)</button>
       `;
-      collageContainer.appendChild(footer);
+      document.getElementById('collageContainer').appendChild(footer);
     }
 
-    document.getElementById('textEditor').addEventListener('click', (e) => {
-      const target = e.target.closest('.wiki-link');
-      if (target) {
-        const pageName = target.getAttribute('data-target-page');
-        navigateToPageByName(pageName);
-      }
-    });
-
-    function navigateToPageByName(pageName) {
-      const book = getActiveBook();
-      for (const chap of book.chapters) {
-        const found = chap.pages.find(p => p.title.trim().toLowerCase() === pageName.trim().toLowerCase());
-        if (found) {
-          syncCurrentPageToState();
-          inkCtx.clearRect(0, 0, inkCanvas.width, inkCanvas.height);
-          isCanvasDirtySinceLoad = false;
-
-          book.activeChapterId = chap.id;
-          book.activePageId = found.id;
-          renderAll();
-          saveToStorage();
-          return;
-        }
-      }
-      alert(`Página "${pageName}" não encontrada no caderno atual.`);
-    }
-
-    function parseWikiLinks() {
-      const editor = document.getElementById('textEditor');
-      const html = editor.innerHTML;
-      const regex = /\[\[(.*?)\]\]/g;
-      if (regex.test(html)) {
-        editor.innerHTML = html.replace(regex, (match, p1) => {
-          return `<span class="wiki-link" data-target-page="${escapeHTML(p1)}" title="Ir para: ${escapeHTML(p1)}">🔗 ${escapeHTML(p1)}</span>`;
-        });
-        syncCurrentPageToState();
-        pushHistoryState(editor.innerHTML, true);
-        saveToStorage();
-        updateInfinitePageHeight();
-      }
-    }
-    document.getElementById('textEditor').addEventListener('blur', parseWikiLinks);
-
-    const diagramModal = document.getElementById('diagramModal');
-    const mermaidCodeInput = document.getElementById('mermaidCodeInput');
-    const mermaidOutput = document.getElementById('mermaidOutput');
-
-    document.getElementById('btnOpenDiagramModal').onclick = () => {
-      loadDiagramTemplate('flowchart');
-      diagramModal.classList.add('open');
-    };
-
-    function closeDiagramModal() {
-      diagramModal.classList.remove('open');
-    }
-
-    function loadDiagramTemplate(key) {
-      mermaidCodeInput.value = templates[key] || templates.flowchart;
-      renderDiagramPreview();
-    }
-
-    async function renderDiagramPreview() {
-      const code = mermaidCodeInput.value;
-      try {
-        mermaidOutput.innerHTML = '';
-        const id = 'mermaid_' + Date.now();
-        const { svg } = await mermaid.render(id, code);
-        mermaidOutput.innerHTML = svg;
-      } catch (err) {
-        mermaidOutput.innerHTML = `<span style="color:#dc2626; font-size:12px;">Erro no diagrama: ${escapeHTML(err.message || '')}</span>`;
-      }
-    }
-
-    async function insertDiagramToPage() {
-      const code = mermaidCodeInput.value;
-      try {
-        const id = 'mm_svg_' + Date.now();
-        const { svg } = await mermaid.render(id, code);
-        addMediaElement('diagram', svg, 'Diagrama Arquitetural');
-        closeDiagramModal();
-      } catch {
-        alert('Corrija os erros de sintaxe no diagrama antes de inserir.');
-      }
-    }
-
-    const snapshotDrawer = document.getElementById('snapshotDrawer');
-
-    document.getElementById('btnSaveSnapshot').onclick = () => {
-      const page = getActivePage();
-      const label = prompt('Nome para esta versão:', `Versão ${new Date().toLocaleTimeString()}`);
-      if (!label) return;
-
-      syncCurrentPageToState();
-      page.snapshots.unshift({
-        id: 'snp_' + Date.now(),
-        label: label.trim(),
-        title: page.title,
-        contentHTML: page.contentHTML,
-        inkDataURL: page.inkDataURL,
-        isSoftwareProject: page.isSoftwareProject,
-        date: new Date().toLocaleString()
-      });
-
-      saveToStorage();
-      alert('Versão salva com sucesso!');
-    };
-
-    document.getElementById('btnOpenSnapshots').onclick = () => {
-      closeDrawers();
-      renderSnapshots();
-      snapshotDrawer.classList.add('open');
-    };
-
-    function renderSnapshots() {
-      const page = getActivePage();
-      const container = document.getElementById('snapshotListContainer');
-      container.innerHTML = '';
-
-      if (!page || !page.snapshots || page.snapshots.length === 0) {
-        container.innerHTML = '<div style="text-align:center; color:#a8a29e; font-size:11px; margin-top:20px;">Nenhuma versão gravada.</div>';
-        return;
-      }
-
-      page.snapshots.forEach((s, idx) => {
-        const item = document.createElement('div');
-        item.style.cssText = 'background:#fafaf9; border:1px solid #e7e5e4; padding:8px; border-radius:4px; display:flex; flex-direction:column; gap:4px;';
-        item.innerHTML = `
-          <div style="display:flex; justify-content:space-between; align-items:center;">
-            <b style="font-size:12px; color:#1c1917;">${escapeHTML(s.label)}</b>
-            <span style="font-size:9px; color:#a8a29e;">${s.date}</span>
-          </div>
-          <div style="display:flex; justify-content:flex-end; gap:4px; margin-top:2px;">
-            <button class="btn-accent" style="padding:1px 6px; font-size:10px;" onclick="restoreSnapshot(${idx})">Restaurar</button>
-            <button class="btn-danger btn-icon" onclick="deleteSnapshot(${idx})">✕</button>
-          </div>
-        `;
-        container.appendChild(item);
-      });
-    }
-
-    window.restoreSnapshot = (idx) => {
-      if (!confirm('Restaurar esta versão?')) return;
-      const page = getActivePage();
-      const s = page.snapshots[idx];
-      page.title = s.title;
-      page.contentHTML = s.contentHTML;
-      page.isSoftwareProject = s.isSoftwareProject || false;
-      if (s.inkDataURL !== undefined) {
-        page.inkDataURL = s.inkDataURL;
-      }
-      renderPageContent();
-      saveToStorage();
-      closeDrawers();
-    };
-
-    window.deleteSnapshot = (idx) => {
-      const page = getActivePage();
-      page.snapshots.splice(idx, 1);
-      renderSnapshots();
-      saveToStorage();
-    };
-
-    const inboxDrawer = document.getElementById('inboxDrawer');
-
-    document.getElementById('btnOpenInbox').onclick = () => {
-      closeDrawers();
-      renderInbox();
-      inboxDrawer.classList.add('open');
-    };
-
-    window.saveInboxNote = () => {
-      const txt = document.getElementById('quickInboxInput');
-      if (!txt.value.trim()) return;
-
-      const book = getActiveBook();
-      if (!book.inboxNotes) book.inboxNotes = [];
-      book.inboxNotes.unshift({
-        id: 'inb_' + Date.now(),
-        text: txt.value.trim(),
-        date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-      });
-
-      txt.value = '';
-      renderInbox();
-      saveToStorage();
-    };
-
-    function renderInbox() {
-      const list = document.getElementById('inboxListContainer');
-      list.innerHTML = '';
-      const book = getActiveBook();
-      if (!book.inboxNotes || book.inboxNotes.length === 0) {
-        list.innerHTML = '<div style="text-align:center; color:#a8a29e; font-size:11px; margin-top:20px;">Inbox limpo.</div>';
-        return;
-      }
-
-      book.inboxNotes.forEach((note, idx) => {
-        const card = document.createElement('div');
-        card.style.cssText = 'background:#fef08a; padding:10px; border-radius:4px; box-shadow:0 1px 4px rgba(0,0,0,0.08); font-family:"Patrick Hand"; font-size:18px; display:flex; flex-direction:column; gap:4px;';
-        card.innerHTML = `
-          <div>${escapeHTML(note.text)}</div>
-          <div style="display:flex; justify-content:space-between; align-items:center; font-family:'Inter'; font-size:9.5px; color:#854d0e;">
-            <span>${note.date}</span>
-            <div style="display:flex; gap:3px;">
-              <button style="padding:1px 5px; font-size:9.5px;" onclick="sendInboxToSticky(${idx})">📌 Colar</button>
-              <button class="btn-danger btn-icon" onclick="removeInboxNote(${idx})">✕</button>
-            </div>
-          </div>
-        `;
-        list.appendChild(card);
-      });
-    }
-
-    window.sendInboxToSticky = (idx) => {
-      const book = getActiveBook();
-      const note = book.inboxNotes[idx];
-      addMediaElement('sticky', note.text, '');
-      book.inboxNotes.splice(idx, 1);
-      renderInbox();
-      saveToStorage();
-    };
-
-    window.removeInboxNote = (idx) => {
-      const book = getActiveBook();
-      book.inboxNotes.splice(idx, 1);
-      renderInbox();
-      saveToStorage();
-    };
-
-    const searchModal = document.getElementById('searchModal');
-    document.getElementById('btnOpenSearch').onclick = () => {
-      searchModal.classList.add('open');
-      document.getElementById('globalSearchInput').focus();
-    };
-    function closeSearchModal() { searchModal.classList.remove('open'); }
-
-    window.executeGlobalSearch = (query) => {
-      const container = document.getElementById('searchResultsContainer');
-      container.innerHTML = '';
-      const q = query.trim().toLowerCase();
-      if (!q) return;
-
-      let resultsCount = 0;
-      appState.books.forEach(book => {
-        book.chapters.forEach(chap => {
-          chap.pages.forEach(page => {
-            const matchTitle = (page.title || '').toLowerCase().includes(q);
-            const matchContent = (page.contentHTML || '').toLowerCase().includes(q);
-            const matchScrap = (page.elements || []).some(el => (el.caption || '').toLowerCase().includes(q) || (el.text || '').toLowerCase().includes(q));
-
-            if (matchTitle || matchContent || matchScrap) {
-              resultsCount++;
-              const div = document.createElement('div');
-              div.style.cssText = 'padding:6px 10px; background:#fafaf9; border:1px solid #e7e5e4; border-radius:4px; cursor:pointer;';
-              div.innerHTML = `
-                <div style="font-weight:700; color:var(--accent); font-size:12.5px;">${escapeHTML(page.title || 'Sem título')}</div>
-                <div style="font-size:10.5px; color:#78716c;">${escapeHTML(book.bookTitle)} > ${escapeHTML(chap.title)}</div>
-              `;
-              div.onclick = () => {
-                syncCurrentPageToState();
-                inkCtx.clearRect(0, 0, inkCanvas.width, inkCanvas.height);
-                isCanvasDirtySinceLoad = false;
-
-                appState.activeBookId = book.id;
-                book.activeChapterId = chap.id;
-                book.activePageId = page.id;
-                renderAll();
-                saveToStorage();
-                closeSearchModal();
-              };
-              container.appendChild(div);
-            }
-          });
-        });
-      });
-
-      if (resultsCount === 0) {
-        container.innerHTML = '<div style="font-size:11px; color:#a8a29e; text-align:center; padding:10px;">Nenhum resultado encontrado.</div>';
-      }
-    };
-
-    window.toggleZenMode = () => {
-      document.body.classList.toggle('zen-mode');
-    };
-
-    window.addEventListener('keydown', (e) => {
-      const isCtrlOrCmd = e.ctrlKey || e.metaKey;
-      
-      if (isCtrlOrCmd && !e.altKey) {
-        if (e.key.toLowerCase() === 'z') {
-          e.preventDefault();
-          if (e.shiftKey) executeRedo();
-          else executeUndo();
-          return;
-        }
-        if (e.key.toLowerCase() === 'y') {
-          e.preventDefault();
-          executeRedo();
-          return;
-        }
-      }
-
-      if (isCtrlOrCmd && e.key.toLowerCase() === 'k') {
-        e.preventDefault();
-        searchModal.classList.add('open');
-        document.getElementById('globalSearchInput').focus();
-        return;
-      }
-
-      if (e.key === 'Escape') {
-        document.body.classList.remove('zen-mode');
-        closeDrawers();
-        closeDiagramModal();
-        closeSearchModal();
-        toggleMobileSidebar(false);
-      }
-    });
-
-    document.getElementById('btnUndo').onclick = () => executeUndo();
-    document.getElementById('btnRedo').onclick = () => executeRedo();
-
-    function closeDrawers() {
-      document.querySelectorAll('.side-drawer').forEach(d => d.classList.remove('open'));
-    }
-
-    const textEditor = document.getElementById('textEditor');
-    const selectionTooltip = document.getElementById('selectionTooltip');
-    const threadDrawer = document.getElementById('threadDrawer');
-
+    /* ==========================================================================
+       10. MODO THREAD EVOLUÍDO & CONSOLIDAÇÃO DE DECISÕES
+       ========================================================================== */
     document.addEventListener('selectionchange', () => {
-      const selection = window.getSelection();
-      if (!selection.rangeCount || selection.isCollapsed) {
-        if (!selectionTooltip.matches(':hover')) selectionTooltip.style.display = 'none';
+      const sel = window.getSelection();
+      const tooltip = document.getElementById('selectionTooltip');
+      const editor = document.getElementById('textEditor');
+
+      if (!sel.rangeCount || sel.isCollapsed) {
+        if (!tooltip.matches(':hover')) tooltip.style.display = 'none';
         return;
       }
-      const range = selection.getRangeAt(0);
-      if (!textEditor.contains(range.commonAncestorContainer)) {
-        selectionTooltip.style.display = 'none';
+      const range = sel.getRangeAt(0);
+      if (!editor.contains(range.commonAncestorContainer)) {
+        tooltip.style.display = 'none';
         return;
       }
-      const text = selection.toString().trim();
-      if (text.length > 0) {
+      const txt = sel.toString().trim();
+      if (txt.length > 0) {
         activeSelectionRange = range.cloneRange();
         const rect = range.getBoundingClientRect();
-        selectionTooltip.style.display = 'flex';
-        selectionTooltip.style.left = `${rect.left + (rect.width / 2)}px`;
-        selectionTooltip.style.top = `${rect.top + window.scrollY}px`;
+        tooltip.style.display = 'flex';
+        tooltip.style.left = `${rect.left + (rect.width / 2)}px`;
+        tooltip.style.top = `${rect.top + window.scrollY}px`;
       } else {
-        selectionTooltip.style.display = 'none';
+        tooltip.style.display = 'none';
       }
     });
 
     document.getElementById('btnTooltipHighlight').onclick = () => {
       createThreadFromSelection(false);
-      selectionTooltip.style.display = 'none';
+      document.getElementById('selectionTooltip').style.display = 'none';
     };
 
     document.getElementById('btnTooltipComment').onclick = () => {
       createThreadFromSelection(true);
-      selectionTooltip.style.display = 'none';
+      document.getElementById('selectionTooltip').style.display = 'none';
     };
 
     document.getElementById('btnTooltipLink').onclick = () => {
       if (!activeSelectionRange) return;
-      const text = activeSelectionRange.toString().trim();
-      if (!text) return;
+      const txt = activeSelectionRange.toString().trim();
+      if (!txt) return;
       const span = document.createElement('span');
       span.className = 'wiki-link';
-      span.setAttribute('data-target-page', text);
-      span.textContent = `🔗 ${text}`;
+      span.setAttribute('data-target-page', txt);
+      span.textContent = `🔗 ${txt}`;
       activeSelectionRange.deleteContents();
       activeSelectionRange.insertNode(span);
-      selectionTooltip.style.display = 'none';
+      document.getElementById('selectionTooltip').style.display = 'none';
       syncCurrentPageToState();
-      pushHistoryState(textEditor.innerHTML, true);
+      pushHistoryState(document.getElementById('textEditor').innerHTML, true);
       saveToStorage();
     };
 
-    function createThreadFromSelection(openDrawerWithComment = false) {
+    function createThreadFromSelection(openWithComment = false) {
       if (!activeSelectionRange) return;
       const selectedText = activeSelectionRange.toString().trim();
       if (!selectedText) return;
@@ -2781,7 +2567,7 @@
       const mark = document.createElement('mark');
       mark.className = 'craft-highlight';
       mark.setAttribute('data-thread-id', threadId);
-      mark.title = 'Clique para ver a discussão';
+      mark.title = 'Clique para ver a discussão / hipótese';
 
       try {
         activeSelectionRange.surroundContents(mark);
@@ -2797,13 +2583,14 @@
       const newThread = {
         id: threadId,
         snippet: selectedText,
-        createdAt: new Date().toLocaleString(),
+        createdAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        category: 'idea',
         resolved: false,
         comments: []
       };
 
-      if (openDrawerWithComment) {
-        const comment = prompt(`Comentário para "${selectedText.slice(0, 30)}...":`);
+      if (openWithComment) {
+        const comment = prompt(`Comentário / Pergunta sobre "${selectedText.slice(0, 32)}...":`);
         if (comment && comment.trim()) {
           newThread.comments.push({
             id: 'c_' + Date.now(),
@@ -2818,45 +2605,49 @@
       page.threads.push(newThread);
       window.getSelection().removeAllRanges();
       syncCurrentPageToState();
-      pushHistoryState(textEditor.innerHTML, true);
+      pushHistoryState(document.getElementById('textEditor').innerHTML, true);
       saveToStorage();
       renderThreads();
 
-      if (openDrawerWithComment || newThread.comments.length > 0) openThreadDrawer(threadId);
+      openThreadDrawer(threadId);
     }
 
-    textEditor.addEventListener('click', (e) => {
+    document.getElementById('textEditor').addEventListener('click', (e) => {
       const mark = e.target.closest('mark.craft-highlight');
       if (mark) openThreadDrawer(mark.getAttribute('data-thread-id'));
     });
 
     function openThreadDrawer(focusThreadId = null) {
       closeDrawers();
-      threadDrawer.classList.add('open');
+      const drawer = document.getElementById('threadDrawer');
+      drawer.classList.add('open');
       renderThreads();
+
       if (focusThreadId) {
         setTimeout(() => {
           const card = document.getElementById(`card_${focusThreadId}`);
           if (card) {
             card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            card.style.borderColor = 'var(--accent)';
+            card.classList.add('highlight-target');
+            setTimeout(() => card.classList.remove('highlight-target'), 2000);
           }
         }, 150);
       }
     }
 
     document.getElementById('toggleThreadsBtn').onclick = () => {
-      const isOpen = threadDrawer.classList.contains('open');
+      const drawer = document.getElementById('threadDrawer');
+      const isOpen = drawer.classList.contains('open');
       closeDrawers();
-      if (!isOpen) threadDrawer.classList.add('open');
+      if (!isOpen) drawer.classList.add('open');
       renderThreads();
     };
 
-    window.setThreadFilter = (filter) => {
-      currentThreadFilter = filter;
-      document.getElementById('thFilterAll').classList.toggle('active', filter === 'all');
-      document.getElementById('thFilterOpen').classList.toggle('active', filter === 'open');
-      document.getElementById('thFilterResolved').classList.toggle('active', filter === 'resolved');
+    window.setThreadFilter = (f) => {
+      currentThreadFilter = f;
+      document.getElementById('thFilterAll').classList.toggle('active', f === 'all');
+      document.getElementById('thFilterOpen').classList.toggle('active', f === 'open');
+      document.getElementById('thFilterResolved').classList.toggle('active', f === 'resolved');
       renderThreads();
     };
 
@@ -2871,34 +2662,42 @@
       badge.textContent = openCount;
       badge.style.display = openCount > 0 ? 'inline-block' : 'none';
 
-      let filtered = page.threads;
-      if (currentThreadFilter === 'open') filtered = filtered.filter(t => !t.resolved);
-      if (currentThreadFilter === 'resolved') filtered = filtered.filter(t => t.resolved);
+      let list = page.threads;
+      if (currentThreadFilter === 'open') list = list.filter(t => !t.resolved);
+      if (currentThreadFilter === 'resolved') list = list.filter(t => t.resolved);
 
-      if (filtered.length === 0) {
-        container.innerHTML = `<div style="text-align:center; color:#a8a29e; font-size:11px; margin-top:30px;">Nenhuma discussão ${currentThreadFilter === 'resolved' ? 'resolvida' : 'aqui'}.</div>`;
+      if (list.length === 0) {
+        container.innerHTML = `<div style="text-align:center; color:#a8a29e; font-size:11px; margin-top:40px;">Nenhuma discussão ${currentThreadFilter === 'resolved' ? 'resolvida' : 'neste filtro'}.</div>`;
         return;
       }
 
-      filtered.forEach(th => {
+      list.forEach(th => {
         const card = document.createElement('div');
-        card.style.cssText = `background:#fafaf9; border:1px solid ${th.resolved ? '#cbd5e1' : '#e7e5e4'}; border-radius:6px; padding:10px; display:flex; flex-direction:column; gap:6px; opacity:${th.resolved ? 0.75 : 1};`;
+        card.className = 'thread-card';
         card.id = `card_${th.id}`;
+        card.style.opacity = th.resolved ? '0.75' : '1';
+
+        const categoryBadges = {
+          idea: '<span class="thread-type-badge thread-type-idea">💡 Insight</span>',
+          doubt: '<span class="thread-type-badge thread-type-doubt">❓ Dúvida</span>',
+          refactor: '<span class="thread-type-badge thread-type-refactor">🛠️ Refatoração</span>',
+          decision: '<span class="thread-type-badge thread-type-decision">⚖️ Decisão</span>'
+        };
 
         let commentsHTML = '';
         (th.comments || []).forEach(c => {
           commentsHTML += `
-            <div style="background:#fff; border:1px solid #f0eee9; border-radius:4px; padding:6px; font-size:11.5px; display:flex; flex-direction:column; gap:3px;">
+            <div style="background:#fff; border:1px solid #f0eee9; border-radius:4px; padding:6px; font-size:12px; display:flex; flex-direction:column; gap:2px;">
               <div style="display:flex; justify-content:space-between; font-size:9.5px; color:#a8a29e; font-weight:600;">
-                <span><b>${escapeHTML(c.author)}</b></span>
+                <span>${escapeHTML(c.author)}</span>
                 <span>${c.time || ''}</span>
               </div>
-              <div style="color:#292524;">${escapeHTML(c.text)}</div>
+              <div style="color:#292524; white-space:pre-wrap;">${escapeHTML(c.text)}</div>
               <div style="text-align:right;">
-                <button style="border:none; background:transparent; font-size:9.5px; color:#b45309; cursor:pointer;" onclick="replyToComment('${th.id}', '${c.id}')">↳ Responder</button>
+                <button style="border:none; background:transparent; font-size:9.5px; color:var(--accent); cursor:pointer;" onclick="replyToComment('${th.id}', '${c.id}')">↳ Responder</button>
               </div>
               ${(c.replies || []).map(r => `
-                <div style="margin-left:8px; border-left:2px solid #cbd5e1; padding-left:5px; font-size:10.5px; margin-top:2px;">
+                <div style="margin-left:8px; border-left:2px solid #cbd5e1; padding-left:6px; font-size:11px; margin-top:2px;">
                   <b>${escapeHTML(r.author)}</b>: ${escapeHTML(r.text)}
                 </div>
               `).join('')}
@@ -2907,23 +2706,53 @@
         });
 
         card.innerHTML = `
-          <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-            <div style="font-size:11.5px; font-style:italic; color:#78716c; border-left:3px solid #facc15; padding-left:6px;">"${escapeHTML(th.snippet)}"</div>
-            <button class="btn-danger btn-icon" onclick="deleteThread('${th.id}')">✕</button>
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div style="display:flex; align-items:center; gap:6px;">
+              ${categoryBadges[th.category || 'idea']}
+              <select style="font-size:9.5px; padding:1px;" onchange="updateThreadCategory('${th.id}', this.value)">
+                <option value="idea" ${th.category === 'idea' ? 'selected' : ''}>Insight</option>
+                <option value="doubt" ${th.category === 'doubt' ? 'selected' : ''}>Dúvida</option>
+                <option value="refactor" ${th.category === 'refactor' ? 'selected' : ''}>Refatoração</option>
+                <option value="decision" ${th.category === 'decision' ? 'selected' : ''}>Decisão</option>
+              </select>
+            </div>
+            <button class="btn-danger btn-icon" title="Excluir thread" onclick="deleteThread('${th.id}')">✕</button>
           </div>
-          <div style="display:flex; flex-direction:column; gap:4px;">${commentsHTML || '<small style="color:#a8a29e; font-size:10px;">Sem comentários.</small>'}</div>
+
+          <div style="font-size:12px; font-style:italic; color:#78716c; border-left:3px solid #facc15; padding-left:6px;">
+            "${escapeHTML(th.snippet)}"
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:4px;">
+            ${commentsHTML || '<small style="color:#a8a29e; font-size:10px;">Nenhuma anotação nesta thread ainda.</small>'}
+          </div>
+
           <div style="display:flex; gap:3px;">
-            <input type="text" id="input_${th.id}" placeholder="Responder..." style="flex:1; padding:3px 6px; border:1px solid #d6d3d1; border-radius:4px; font-size:11px;" onkeydown="if(event.key==='Enter') addComment('${th.id}')" />
-            <button class="btn-accent" style="padding:3px 6px; font-size:10px;" onclick="addComment('${th.id}')">Enviar</button>
+            <input type="text" id="input_${th.id}" placeholder="Lapidar ideia..." style="flex:1; padding:4px 8px; border:1px solid #d6d3d1; border-radius:4px; font-size:11px;" onkeydown="if(event.key==='Enter') addComment('${th.id}')" />
+            <button class="btn-accent" style="padding:4px 8px; font-size:11px;" onclick="addComment('${th.id}')">Postar</button>
           </div>
-          <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px dashed #e7e5e4; padding-top:4px;">
-            <button style="font-size:10px; padding:1px 5px;" onclick="toggleResolveThread('${th.id}')">${th.resolved ? '🔄 Reabrir' : '✓ Resolver'}</button>
-            <span style="font-size:9px; color:#a8a29e;">${th.createdAt}</span>
+
+          <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px dashed #e7e5e4; padding-top:6px; margin-top:2px;">
+            <div style="display:flex; gap:4px;">
+              <button style="font-size:10px; padding:2px 6px;" onclick="toggleResolveThread('${th.id}')">
+                ${th.resolved ? '🔄 Reabrir' : '✓ Resolver'}
+              </button>
+              <button style="font-size:10px; padding:2px 6px;" class="btn-dark" title="Inserir a conclusão desta discussão diretamente no texto como uma decisão consolidada" onclick="consolidateThreadToDocument('${th.id}')">
+                📌 Consolidar Decisão
+              </button>
+            </div>
+            <span style="font-size:9.5px; color:#a8a29e;">${th.createdAt}</span>
           </div>
         `;
         container.appendChild(card);
       });
     }
+
+    window.updateThreadCategory = (threadId, cat) => {
+      const page = getActivePage();
+      const th = page.threads.find(t => t.id === threadId);
+      if (th) { th.category = cat; saveToStorage(); renderThreads(); }
+    };
 
     window.addComment = (threadId) => {
       const input = document.getElementById(`input_${threadId}`);
@@ -2945,15 +2774,15 @@
     };
 
     window.replyToComment = (threadId, commentId) => {
-      const reply = prompt('Sua resposta:');
+      const reply = prompt('Sua resposta / desdobramento:');
       if (!reply || !reply.trim()) return;
       const page = getActivePage();
       const thread = page.threads.find(t => t.id === threadId);
       if (thread) {
-        const comment = thread.comments.find(c => c.id === commentId);
-        if (comment) {
-          if (!comment.replies) comment.replies = [];
-          comment.replies.push({
+        const c = thread.comments.find(item => item.id === commentId);
+        if (c) {
+          if (!c.replies) c.replies = [];
+          c.replies.push({
             id: 'r_' + Date.now(),
             author: 'Você',
             text: reply.trim(),
@@ -2970,29 +2799,61 @@
       const thread = page.threads.find(t => t.id === threadId);
       if (!thread) return;
       thread.resolved = !thread.resolved;
-      const mark = textEditor.querySelector(`mark[data-thread-id="${threadId}"]`);
+      const mark = document.getElementById('textEditor').querySelector(`mark[data-thread-id="${threadId}"]`);
       if (mark) mark.classList.toggle('resolved', thread.resolved);
       syncCurrentPageToState();
       saveToStorage();
       renderThreads();
     };
 
+    window.consolidateThreadToDocument = (threadId) => {
+      const page = getActivePage();
+      const thread = page.threads.find(t => t.id === threadId);
+      if (!thread) return;
+
+      const lastComment = (thread.comments && thread.comments.length > 0)
+        ? thread.comments[thread.comments.length - 1].text
+        : 'Decisão validada e consolidada após análise.';
+
+      const blockHTML = `
+        <blockquote class="craft-quote craft-decision" contenteditable="false">
+          <span class="decision-tag">⚖️ Decisão Registrada</span><br/>
+          <b>Contexto:</b> "${escapeHTML(thread.snippet)}"<br/>
+          <b>Resolução:</b> ${escapeHTML(lastComment)}
+          <cite>— Consolidado em ${new Date().toLocaleDateString('pt-BR')}</cite>
+        </blockquote>
+        <p><br></p>
+      `;
+
+      insertHtmlAtCursor(blockHTML);
+      thread.resolved = true;
+      const mark = document.getElementById('textEditor').querySelector(`mark[data-thread-id="${threadId}"]`);
+      if (mark) mark.classList.add('resolved');
+
+      saveToStorage();
+      renderThreads();
+      alert('Decisão consolidada e anexada ao corpo do documento com sucesso!');
+    };
+
     window.deleteThread = (threadId) => {
       if (!confirm('Remover esta discussão?')) return;
       const page = getActivePage();
       page.threads = page.threads.filter(t => t.id !== threadId);
-      const mark = textEditor.querySelector(`mark[data-thread-id="${threadId}"]`);
+      const mark = document.getElementById('textEditor').querySelector(`mark[data-thread-id="${threadId}"]`);
       if (mark) {
         const parent = mark.parentNode;
         while (mark.firstChild) parent.insertBefore(mark.firstChild, mark);
         parent.removeChild(mark);
       }
       syncCurrentPageToState();
-      pushHistoryState(textEditor.innerHTML, true);
+      pushHistoryState(document.getElementById('textEditor').innerHTML, true);
       saveToStorage();
       renderThreads();
     };
 
+    /* ==========================================================================
+       11. CARDS, MÍDIAS & ANEXOS
+       ========================================================================== */
     function renderCollageElements() {
       const container = document.getElementById('collageContainer');
       const editor = document.getElementById('textEditor');
@@ -3003,11 +2864,8 @@
 
       page.elements.forEach(item => {
         const el = createCraftMediaCard(item);
-        if (item.mode === 'free') {
-          container.appendChild(el);
-        } else {
-          container.insertBefore(el, editor);
-        }
+        if (item.mode === 'free') container.appendChild(el);
+        else container.insertBefore(el, editor);
       });
       updateInfinitePageHeight();
     }
@@ -3031,99 +2889,51 @@
       if (isFree) {
         div.style.left = (item.x || 20) + 'px';
         div.style.top = (item.y || 30) + 'px';
-      } else {
-        div.style.left = '';
-        div.style.top = '';
       }
 
-      let innerCardHTML = '';
-
+      let inner = '';
       if (type === 'drawing') {
-        innerCardHTML = `
-          <div class="drawing-media-box" style="width:100%; display:flex; justify-content:center; align-items:center;">
-            <img src="${item.src}" alt="Desenho Recortado" style="width:100%; height:auto; display:block; pointer-events:none; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.12));" />
-          </div>
-        `;
+        inner = `<div class="drawing-media-box" style="width:100%; display:flex; justify-content:center;"><img src="${item.src}" style="width:100%; height:auto; display:block; pointer-events:none;" /></div>`;
       } else if (type === 'image') {
-        innerCardHTML = `
-          <div class="polaroid-media-box">
-            <img src="${item.src}" alt="Foto" />
-          </div>
-          <input 
-            type="text" 
-            class="polaroid-caption" 
-            value="${escapeHTML(item.caption || '')}" 
-            placeholder="Legenda..." 
-            oninput="updateItemCaption('${item.id}', this.value)"
-          />
+        inner = `
+          <div class="polaroid-media-box"><img src="${item.src}" alt="Foto" /></div>
+          <input type="text" class="polaroid-caption" value="${escapeHTML(item.caption || '')}" placeholder="Legenda..." oninput="updateItemCaption('${item.id}', this.value)" />
         `;
       } else if (type === 'sticky') {
-        innerCardHTML = `
-          <div 
-            class="sticky-content-area" 
-            contenteditable="true" 
-            oninput="updateStickyContent('${item.id}', this.innerHTML)"
-          >${item.text || ''}</div>
-        `;
+        inner = `<div class="sticky-content-area" contenteditable="true" oninput="updateStickyContent('${item.id}', this.innerHTML)">${item.text || ''}</div>`;
       } else if (type === 'audio') {
-        innerCardHTML = `
-          <div class="cassette-label-header">
-            <span>📼</span>
-            <input 
-              type="text" 
-              class="cassette-title-input" 
-              value="${escapeHTML(item.caption || 'Áudio')}" 
-              placeholder="Gravação..." 
-              oninput="updateItemCaption('${item.id}', this.value)"
-            />
-          </div>
-          <div class="cassette-reels">
-            <span>● SIDE A ●</span>
-            <span>VOICE RECORDER</span>
-          </div>
+        inner = `
+          <div class="cassette-label-header"><span>📼</span><input type="text" class="cassette-title-input" value="${escapeHTML(item.caption || 'Áudio')}" oninput="updateItemCaption('${item.id}', this.value)" /></div>
+          <div class="cassette-reels"><span>● SIDE A ●</span><span>VOICE MEMO</span></div>
           <audio controls src="${item.src}" style="width:100%; height:30px; filter:invert(0.9); border-radius:4px;"></audio>
         `;
       } else if (type === 'file') {
-        innerCardHTML = `
+        inner = `
           <div class="filetag-paperclip">📎</div>
           <div class="filetag-body">
-            <input 
-              type="text" 
-              class="filetag-name-input" 
-              value="${escapeHTML(item.caption || item.fileName || 'Arquivo')}" 
-              placeholder="Nome..." 
-              oninput="updateItemCaption('${item.id}', this.value)"
-            />
+            <input type="text" class="filetag-name-input" value="${escapeHTML(item.caption || item.fileName || 'Arquivo')}" oninput="updateItemCaption('${item.id}', this.value)" />
             <div class="filetag-footer">
               <span style="font-size:10px; color:#78716c; font-weight:600;">${item.fileSize || 'Arquivo'}</span>
-              <a href="${item.src}" download="${item.fileName || 'arquivo'}" class="btn" style="padding:1px 6px; font-size:9.5px; background:#fafaf9;">⬇ Baixar</a>
+              <a href="${item.src}" download="${item.fileName || 'arquivo'}" class="btn" style="padding:1px 6px; font-size:9.5px;">⬇ Baixar</a>
             </div>
           </div>
         `;
       } else if (type === 'diagram') {
-        innerCardHTML = `
-          <div class="diagram-viewport">
-            ${item.svgData}
-          </div>
-          <input 
-            type="text" 
-            class="diagram-caption" 
-            value="${escapeHTML(item.caption || 'Diagrama')}" 
-            placeholder="Título..." 
-            oninput="updateItemCaption('${item.id}', this.value)"
-          />
+        inner = `
+          <div class="diagram-viewport">${item.svgData}</div>
+          <input type="text" class="diagram-caption" value="${escapeHTML(item.caption || 'Diagrama')}" placeholder="Título..." oninput="updateItemCaption('${item.id}', this.value)" />
         `;
       }
 
       div.innerHTML = `
         <div class="frame-quick-actions">
-          <button class="frame-drag-handle" title="Arrastar Livremente (✥)">✥</button>
+          <button class="frame-drag-handle" title="Arrastar">✥</button>
           <button title="Flutuar à Esquerda" onclick="setItemAlign('${item.id}', 'left')">⇦</button>
           <button title="Centralizado" onclick="setItemAlign('${item.id}', 'center')">◽</button>
           <button title="Flutuar à Direita" onclick="setItemAlign('${item.id}', 'right')">⇨</button>
           <button class="btn-danger" title="Excluir" onclick="deleteMediaElement('${item.id}')">✕</button>
         </div>
-        ${innerCardHTML}
+        ${inner}
         <div class="resize-handle" title="Redimensionar"></div>
       `;
 
@@ -3131,92 +2941,68 @@
       return div;
     }
 
-    function setupCardInteractions(cardElement, itemData) {
-      const dragHandle = cardElement.querySelector('.frame-drag-handle');
-      const resizeHandle = cardElement.querySelector('.resize-handle');
+    function setupCardInteractions(card, item) {
+      const drag = card.querySelector('.frame-drag-handle');
+      const resize = card.querySelector('.resize-handle');
 
-      if (dragHandle) {
-        dragHandle.addEventListener('pointerdown', (e) => {
+      if (drag) {
+        drag.addEventListener('pointerdown', (e) => {
           e.preventDefault();
           e.stopPropagation();
-
-          if (itemData.mode !== 'free') {
-            itemData.mode = 'free';
-            itemData.x = cardElement.offsetLeft;
-            itemData.y = cardElement.offsetTop;
+          if (item.mode !== 'free') {
+            item.mode = 'free';
+            item.x = card.offsetLeft;
+            item.y = card.offsetTop;
             renderCollageElements();
             return;
           }
+          card.classList.add('dragging');
+          try { drag.setPointerCapture(e.pointerId); } catch {}
+          const startX = e.clientX, startY = e.clientY;
+          const origL = card.offsetLeft, origT = card.offsetTop;
 
-          cardElement.classList.add('dragging');
-          try { dragHandle.setPointerCapture(e.pointerId); } catch (err) {}
-
-          const startX = e.clientX;
-          const startY = e.clientY;
-          const origLeft = cardElement.offsetLeft;
-          const origTop = cardElement.offsetTop;
-
-          function onPointerMove(moveEvent) {
-            const deltaX = moveEvent.clientX - startX;
-            const deltaY = moveEvent.clientY - startY;
-            const newLeft = Math.max(0, origLeft + deltaX);
-            const newTop = Math.max(0, origTop + deltaY);
-
-            cardElement.style.left = newLeft + 'px';
-            cardElement.style.top = newTop + 'px';
-            itemData.x = newLeft;
-            itemData.y = newTop;
+          function onMove(ev) {
+            const nl = Math.max(0, origL + (ev.clientX - startX));
+            const nt = Math.max(0, origT + (ev.clientY - startY));
+            card.style.left = nl + 'px';
+            card.style.top = nt + 'px';
+            item.x = nl; item.y = nt;
             updateInfinitePageHeight();
           }
-
-          function onPointerUp(upEvent) {
-            cardElement.classList.remove('dragging');
-            try {
-              if (dragHandle.hasPointerCapture(upEvent.pointerId)) {
-                dragHandle.releasePointerCapture(upEvent.pointerId);
-              }
-            } catch (err) {}
-            window.removeEventListener('pointermove', onPointerMove);
-            window.removeEventListener('pointerup', onPointerUp);
+          function onUp(ev) {
+            card.classList.remove('dragging');
+            try { if (drag.hasPointerCapture(ev.pointerId)) drag.releasePointerCapture(ev.pointerId); } catch {}
+            window.removeEventListener('pointermove', onMove);
+            window.removeEventListener('pointerup', onUp);
             updateInfinitePageHeight();
             saveToStorage();
           }
-
-          window.addEventListener('pointermove', onPointerMove);
-          window.addEventListener('pointerup', onPointerUp);
+          window.addEventListener('pointermove', onMove);
+          window.addEventListener('pointerup', onUp);
         });
       }
 
-      if (resizeHandle) {
-        resizeHandle.addEventListener('pointerdown', (e) => {
+      if (resize) {
+        resize.addEventListener('pointerdown', (e) => {
           e.preventDefault();
           e.stopPropagation();
-          try { resizeHandle.setPointerCapture(e.pointerId); } catch (err) {}
+          try { resize.setPointerCapture(e.pointerId); } catch {}
+          const startX = e.clientX, startW = card.offsetWidth;
 
-          const startX = e.clientX;
-          const startWidth = cardElement.offsetWidth;
-
-          function onResizeMove(moveEvent) {
-            const deltaX = moveEvent.clientX - startX;
-            const newWidth = Math.max(100, Math.min(startWidth + deltaX, 1200));
-            cardElement.style.width = newWidth + 'px';
-            itemData.width = newWidth;
+          function onResize(ev) {
+            const nw = Math.max(120, Math.min(startW + (ev.clientX - startX), 1200));
+            card.style.width = nw + 'px';
+            item.width = nw;
           }
-
-          function onResizeUp(upEvent) {
-            try {
-              if (resizeHandle.hasPointerCapture(upEvent.pointerId)) {
-                resizeHandle.releasePointerCapture(upEvent.pointerId);
-              }
-            } catch (err) {}
-            window.removeEventListener('pointermove', onResizeMove);
-            window.removeEventListener('pointerup', onResizeUp);
+          function onUpResize(ev) {
+            try { if (resize.hasPointerCapture(ev.pointerId)) resize.releasePointerCapture(ev.pointerId); } catch {}
+            window.removeEventListener('pointermove', onResize);
+            window.removeEventListener('pointerup', onUpResize);
             updateInfinitePageHeight();
             saveToStorage();
           }
-
-          window.addEventListener('pointermove', onResizeMove);
-          window.addEventListener('pointerup', onResizeUp);
+          window.addEventListener('pointermove', onResize);
+          window.addEventListener('pointerup', onUpResize);
         });
       }
     }
@@ -3246,34 +3032,17 @@
     }
 
     window.setItemAlign = (id, align) => {
-      const page = getActivePage();
-      const item = page.elements.find(el => el.id === id);
-      if (item) {
-        item.mode = 'flow';
-        item.align = align;
-        renderCollageElements();
-        saveToStorage();
-      }
+      const item = getActivePage().elements.find(el => el.id === id);
+      if (item) { item.mode = 'flow'; item.align = align; renderCollageElements(); saveToStorage(); }
     };
-
-    window.updateItemCaption = (id, caption) => {
-      const page = getActivePage();
-      const item = page.elements.find(el => el.id === id);
-      if (item) {
-        item.caption = caption;
-        saveToStorage();
-      }
+    window.updateItemCaption = (id, cap) => {
+      const item = getActivePage().elements.find(el => el.id === id);
+      if (item) { item.caption = cap; saveToStorage(); }
     };
-
-    window.updateStickyContent = (id, text) => {
-      const page = getActivePage();
-      const item = page.elements.find(el => el.id === id);
-      if (item) {
-        item.text = text;
-        saveToStorage();
-      }
+    window.updateStickyContent = (id, txt) => {
+      const item = getActivePage().elements.find(el => el.id === id);
+      if (item) { item.text = txt; saveToStorage(); }
     };
-
     window.deleteMediaElement = (id) => {
       const page = getActivePage();
       page.elements = page.elements.filter(el => el.id !== id);
@@ -3281,6 +3050,9 @@
       saveToStorage();
     };
 
+    /* ==========================================================================
+       12. FORMATAÇÃO DO EDITOR
+       ========================================================================== */
     function formatDoc(cmd, val = null) {
       document.execCommand(cmd, false, val);
       document.getElementById('textEditor').focus();
@@ -3320,6 +3092,12 @@
       saveToStorage();
     }
 
+    window.insertHeading = (tag) => {
+      if (!tag) return;
+      const text = window.getSelection().toString().trim() || 'Nova Seção';
+      insertHtmlAtCursor(`<${tag} class="craft-${tag}">${escapeHTML(text)}</${tag}><p><br></p>`);
+    };
+
     document.getElementById('btnInsertTable').onclick = () => {
       const r = parseInt(prompt('Linhas:', '3'), 10) || 3;
       const c = parseInt(prompt('Colunas:', '3'), 10) || 3;
@@ -3336,30 +3114,29 @@
     };
 
     document.getElementById('btnInsertQuote').onclick = () => {
-      const sel = window.getSelection().toString().trim();
-      const text = sel || 'Sua citação marcante aqui...';
-      insertHtmlAtCursor(`<blockquote class="craft-quote">“${escapeHTML(text)}”<cite>— Autor</cite></blockquote><p><br></p>`);
+      const sel = window.getSelection().toString().trim() || 'Citação ou princípio importante...';
+      insertHtmlAtCursor(`<blockquote class="craft-quote">“${escapeHTML(sel)}”<cite>— Autor</cite></blockquote><p><br></p>`);
     };
 
+    /* INSERÇÕES: IMAGEM, ÁUDIO, ANEXOS */
     window.addEventListener('paste', (e) => {
       const items = (e.clipboardData || e.originalEvent.clipboardData).items;
       for (let item of items) {
         if (item.type.indexOf('image') !== -1) {
-          const blob = item.getAsFile();
           const reader = new FileReader();
-          reader.onload = (evt) => addMediaElement('image', evt.target.result, 'Foto Instantânea');
-          reader.readAsDataURL(blob);
+          reader.onload = (evt) => addMediaElement('image', evt.target.result, 'Instantânea');
+          reader.readAsDataURL(item.getAsFile());
           e.preventDefault();
         }
       }
     });
 
     document.getElementById('imageInput').onchange = (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = (evt) => addMediaElement('image', evt.target.result, file.name.replace(/\.[^/.]+$/, ""));
-      reader.readAsDataURL(file);
+      const f = e.target.files[0];
+      if (!f) return;
+      const r = new FileReader();
+      r.onload = (evt) => addMediaElement('image', evt.target.result, f.name.replace(/\.[^/.]+$/, ""));
+      r.readAsDataURL(f);
       e.target.value = '';
     };
 
@@ -3376,13 +3153,11 @@
           const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
           mediaRecorder = new MediaRecorder(stream);
           audioChunks = [];
-          mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+          mediaRecorder.ondataavailable = ev => audioChunks.push(ev.data);
           mediaRecorder.onstop = () => {
-            const reader = new FileReader();
-            reader.readAsDataURL(new Blob(audioChunks, { type: 'audio/webm' }));
-            reader.onloadend = () => {
-              addMediaElement('audio', reader.result, `Gravação ${new Date().toLocaleTimeString()}`);
-            };
+            const r = new FileReader();
+            r.readAsDataURL(new Blob(audioChunks, { type: 'audio/webm' }));
+            r.onloadend = () => addMediaElement('audio', r.result, `Nota de Voz ${new Date().toLocaleTimeString()}`);
           };
           mediaRecorder.start();
           this.classList.add('recording-pulse');
@@ -3394,235 +3169,330 @@
     };
 
     document.getElementById('fileAttachment').onchange = (e) => {
-      const files = Array.from(e.target.files);
-      files.forEach(f => {
-        const reader = new FileReader();
-        reader.onload = (evt) => {
-          addMediaElement('file', evt.target.result, f.name, {
-            fileName: f.name,
-            fileSize: (f.size / 1024).toFixed(1) + ' KB'
-          });
-        };
-        reader.readAsDataURL(f);
+      Array.from(e.target.files).forEach(f => {
+        const r = new FileReader();
+        r.onload = (evt) => addMediaElement('file', evt.target.result, f.name, {
+          fileName: f.name,
+          fileSize: (f.size / 1024).toFixed(1) + ' KB'
+        });
+        r.readAsDataURL(f);
       });
       e.target.value = '';
     };
 
-    document.getElementById('btnAddChapter').onclick = () => {
-      const book = getActiveBook();
-      const name = prompt('Nome do novo Capítulo (Domo):', `Capítulo ${book.chapters.length + 1}`);
-      if (!name) return;
+    /* ==========================================================================
+       13. SNAPSHOTS, INBOX & BUSCA GLOBAL
+       ========================================================================== */
+    const snapshotDrawer = document.getElementById('snapshotDrawer');
+    document.getElementById('btnSaveSnapshot').onclick = () => {
+      const page = getActivePage();
+      const label = prompt('Nome desta versão / marco:', `Versão ${new Date().toLocaleTimeString()}`);
+      if (!label) return;
       syncCurrentPageToState();
-      inkCtx.clearRect(0, 0, inkCanvas.width, inkCanvas.height);
-      isCanvasDirtySinceLoad = false;
-
-      const newPid = 'p_' + Date.now();
-      const newCid = 'c_' + Date.now();
-      book.chapters.push({
-        id: newCid,
-        title: name,
-        pages: [{ id: newPid, title: 'Página 1', paperOrientation: 'orientation-portrait', fontSize: 24, contentHTML: '', elements: [], inkDataURL: null, threads: [], snapshots: [], isSoftwareProject: false }]
+      page.snapshots.unshift({
+        id: 'snp_' + Date.now(),
+        label: label.trim(),
+        title: page.title,
+        contentHTML: page.contentHTML,
+        inkDataURL: page.inkDataURL,
+        isSoftwareProject: page.isSoftwareProject,
+        date: new Date().toLocaleString()
       });
-      book.activeChapterId = newCid;
-      book.activePageId = newPid;
-      renderAll();
       saveToStorage();
+      alert('Versão arquivada com sucesso!');
     };
 
-    document.getElementById('btnAddPage').onclick = () => {
-      const book = getActiveBook();
-      const chap = getActiveChapter();
-      if (!chap) return;
-      syncCurrentPageToState();
-      inkCtx.clearRect(0, 0, inkCanvas.width, inkCanvas.height);
-      isCanvasDirtySinceLoad = false;
-
-      const newPid = 'p_' + Date.now();
-      chap.pages.push({
-        id: newPid,
-        title: `Página ${chap.pages.length + 1}`,
-        paperOrientation: 'orientation-portrait',
-        fontSize: 24,
-        contentHTML: '',
-        elements: [],
-        inkDataURL: null,
-        threads: [],
-        snapshots: [],
-        isSoftwareProject: false,
-        createdAt: new Date().toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' })
-      });
-      book.activePageId = newPid;
-      renderAll();
-      saveToStorage();
-      if (window.innerWidth <= 860) toggleMobileSidebar(false);
+    document.getElementById('btnOpenSnapshots').onclick = () => {
+      closeDrawers();
+      renderSnapshots();
+      snapshotDrawer.classList.add('open');
     };
 
-    window.renameChapter = (cId) => {
-      const book = getActiveBook();
-      const chapter = book.chapters.find(c => c.id === cId);
-      if (!chapter) return;
-      const newTitle = prompt('Novo nome para o Capítulo:', chapter.title);
-      if (newTitle && newTitle.trim()) {
-        chapter.title = newTitle.trim();
-        renderNavigation();
-        saveToStorage();
-      }
-    };
-
-    window.deleteChapter = (e, cId) => {
-      e.stopPropagation();
-      const book = getActiveBook();
-      if (book.chapters.length <= 1) {
-        alert('O caderno precisa ter pelo menos um capítulo.');
+    function renderSnapshots() {
+      const page = getActivePage();
+      const c = document.getElementById('snapshotListContainer');
+      c.innerHTML = '';
+      if (!page || !page.snapshots || page.snapshots.length === 0) {
+        c.innerHTML = '<div style="text-align:center; color:#a8a29e; font-size:11px; margin-top:20px;">Nenhuma versão gravada.</div>';
         return;
       }
-      if (!confirm('Excluir este capítulo e todas as suas páginas?')) return;
-      syncCurrentPageToState();
-      inkCtx.clearRect(0, 0, inkCanvas.width, inkCanvas.height);
-      isCanvasDirtySinceLoad = false;
-
-      book.chapters = book.chapters.filter(c => c.id !== cId);
-      book.activeChapterId = book.chapters[0].id;
-      book.activePageId = book.chapters[0].pages[0]?.id || null;
-      renderAll();
-      saveToStorage();
-    };
-
-    window.deletePage = (e, pId) => {
-      e.stopPropagation();
-      const book = getActiveBook();
-      const chap = getActiveChapter();
-      if (chap.pages.length <= 1) {
-        alert('O capítulo precisa ter pelo menos uma página.');
-        return;
-      }
-      if (!confirm('Excluir esta página?')) return;
-      syncCurrentPageToState();
-      inkCtx.clearRect(0, 0, inkCanvas.width, inkCanvas.height);
-      isCanvasDirtySinceLoad = false;
-
-      chap.pages = chap.pages.filter(p => p.id !== pId);
-      book.activePageId = chap.pages[0].id;
-      renderAll();
-      saveToStorage();
-    };
-
-    function saveToStorage() {
-      syncCurrentPageToState();
-      try {
-        localStorage.setItem('scrapbook_craft_data', JSON.stringify(appState));
-      } catch (err) {
-        console.warn('Armazenamento local cheio.');
-      }
+      page.snapshots.forEach((s, idx) => {
+        const d = document.createElement('div');
+        d.style.cssText = 'background:#fafaf9; border:1px solid #e7e5e4; padding:8px; border-radius:4px; display:flex; flex-direction:column; gap:4px;';
+        d.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <b style="font-size:12px; color:#1c1917;">${escapeHTML(s.label)}</b>
+            <span style="font-size:9.5px; color:#a8a29e;">${s.date}</span>
+          </div>
+          <div style="display:flex; justify-content:flex-end; gap:4px; margin-top:2px;">
+            <button class="btn-accent" style="padding:2px 7px; font-size:10px;" onclick="restoreSnapshot(${idx})">Restaurar</button>
+            <button class="btn-danger btn-icon" onclick="deleteSnapshot(${idx})">✕</button>
+          </div>
+        `;
+        c.appendChild(d);
+      });
     }
 
-    function loadFromStorage() {
-      const raw = localStorage.getItem('scrapbook_craft_data');
-      if (raw) {
-        try {
-          const parsed = JSON.parse(raw);
-          if (parsed.books && Array.isArray(parsed.books)) {
-            appState = parsed;
-          } else if (parsed.chapters && Array.isArray(parsed.chapters)) {
-            const legacyBook = {
-              id: 'b_' + Date.now(),
-              bookTitle: parsed.bookTitle || 'Meu Caderno Artesanal',
-              activeChapterId: parsed.activeChapterId || parsed.chapters[0]?.id,
-              activePageId: parsed.activePageId || parsed.chapters[0]?.pages[0]?.id,
-              inboxNotes: parsed.inboxNotes || [],
-              chapters: parsed.chapters
+    window.restoreSnapshot = (idx) => {
+      if (!confirm('Restaurar esta versão da página?')) return;
+      const s = getActivePage().snapshots[idx];
+      const page = getActivePage();
+      page.title = s.title;
+      page.contentHTML = s.contentHTML;
+      page.isSoftwareProject = s.isSoftwareProject || false;
+      if (s.inkDataURL !== undefined) page.inkDataURL = s.inkDataURL;
+      renderPageContent();
+      saveToStorage();
+      closeDrawers();
+    };
+
+    window.deleteSnapshot = (idx) => {
+      getActivePage().snapshots.splice(idx, 1);
+      renderSnapshots();
+      saveToStorage();
+    };
+
+    const inboxDrawer = document.getElementById('inboxDrawer');
+    document.getElementById('btnOpenInbox').onclick = () => {
+      closeDrawers();
+      renderInbox();
+      inboxDrawer.classList.add('open');
+    };
+
+    window.saveInboxNote = () => {
+      const txt = document.getElementById('quickInboxInput');
+      if (!txt.value.trim()) return;
+      const b = getActiveBook();
+      if (!b.inboxNotes) b.inboxNotes = [];
+      b.inboxNotes.unshift({
+        id: 'inb_' + Date.now(),
+        text: txt.value.trim(),
+        date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      });
+      txt.value = '';
+      renderInbox();
+      saveToStorage();
+    };
+
+    function renderInbox() {
+      const list = document.getElementById('inboxListContainer');
+      list.innerHTML = '';
+      const b = getActiveBook();
+      if (!b.inboxNotes || b.inboxNotes.length === 0) {
+        list.innerHTML = '<div style="text-align:center; color:#a8a29e; font-size:11px; margin-top:20px;">Inbox livre de pendências.</div>';
+        return;
+      }
+      b.inboxNotes.forEach((note, idx) => {
+        const card = document.createElement('div');
+        card.style.cssText = 'background:#fef08a; padding:10px; border-radius:4px; box-shadow:0 1px 4px rgba(0,0,0,0.08); font-family:var(--font-hand); font-size:18px; display:flex; flex-direction:column; gap:4px;';
+        card.innerHTML = `
+          <div>${escapeHTML(note.text)}</div>
+          <div style="display:flex; justify-content:space-between; align-items:center; font-family:var(--font-sans); font-size:9.5px; color:#854d0e;">
+            <span>${note.date}</span>
+            <div style="display:flex; gap:3px;">
+              <button style="padding:1px 5px; font-size:9.5px;" onclick="sendInboxToSticky(${idx})">📌 Colar</button>
+              <button class="btn-danger btn-icon" onclick="removeInboxNote(${idx})">✕</button>
+            </div>
+          </div>
+        `;
+        list.appendChild(card);
+      });
+    }
+
+    window.sendInboxToSticky = (idx) => {
+      const b = getActiveBook();
+      addMediaElement('sticky', b.inboxNotes[idx].text, '');
+      b.inboxNotes.splice(idx, 1);
+      renderInbox();
+      saveToStorage();
+    };
+
+    window.removeInboxNote = (idx) => {
+      getActiveBook().inboxNotes.splice(idx, 1);
+      renderInbox();
+      saveToStorage();
+    };
+
+    const searchModal = document.getElementById('searchModal');
+    document.getElementById('btnOpenSearch').onclick = () => {
+      searchModal.classList.add('open');
+      document.getElementById('globalSearchInput').focus();
+    };
+    function closeSearchModal() { searchModal.classList.remove('open'); }
+
+    window.executeGlobalSearch = (query) => {
+      const c = document.getElementById('searchResultsContainer');
+      c.innerHTML = '';
+      const q = query.trim().toLowerCase();
+      if (!q) return;
+
+      let count = 0;
+      appState.books.forEach(b => {
+        b.pages.forEach(p => {
+          const matchTitle = (p.title || '').toLowerCase().includes(q);
+          const matchContent = (p.contentHTML || '').toLowerCase().includes(q);
+          const matchTags = (p.tags || []).some(t => t.toLowerCase().includes(q));
+
+          if (matchTitle || matchContent || matchTags) {
+            count++;
+            const d = document.createElement('div');
+            d.style.cssText = 'padding:6px 10px; background:#fafaf9; border:1px solid #e7e5e4; border-radius:4px; cursor:pointer;';
+            d.innerHTML = `
+              <div style="font-weight:700; color:var(--accent); font-size:12.5px;">${escapeHTML(p.title || 'Sem título')}</div>
+              <div style="font-size:10.5px; color:#78716c;">${escapeHTML(b.bookTitle)} • ${p.createdAt || ''}</div>
+            `;
+            d.onclick = () => {
+              syncCurrentPageToState();
+              appState.activeBookId = b.id;
+              b.activePageId = p.id;
+              renderAll();
+              saveToStorage();
+              closeSearchModal();
             };
-            appState = {
-              activeBookId: legacyBook.id,
-              books: [legacyBook]
-            };
-          } else {
-            appState = createInitialAppState();
+            c.appendChild(d);
           }
-        } catch {
-          appState = createInitialAppState();
-        }
-      } else {
-        appState = createInitialAppState();
-      }
-      renderAll();
-    }
+        });
+      });
 
-    document.getElementById('pageTitle').oninput = (e) => {
-      autoResizeTextarea(e.target);
-      syncCurrentPageToState();
-      renderNavigation();
-      saveToStorage();
+      if (count === 0) c.innerHTML = '<div style="font-size:11px; color:#a8a29e; text-align:center; padding:10px;">Nenhuma anotação encontrada.</div>';
     };
 
-    document.getElementById('textEditor').addEventListener('input', () => {
-      pushHistoryState(document.getElementById('textEditor').innerHTML);
-      renderProjectFooter();
-      saveToStorage();
+    /* MODAL DE DIAGRAMAS */
+    const diagramModal = document.getElementById('diagramModal');
+    const mermaidCodeInput = document.getElementById('mermaidCodeInput');
+    const mermaidOutput = document.getElementById('mermaidOutput');
+    document.getElementById('btnOpenDiagramModal').onclick = () => {
+      loadDiagramTemplate('flowchart');
+      diagramModal.classList.add('open');
+    };
+    function closeDiagramModal() { diagramModal.classList.remove('open'); }
+    function loadDiagramTemplate(k) {
+      mermaidCodeInput.value = templates[k] || templates.flowchart;
+      renderDiagramPreview();
+    }
+    async function renderDiagramPreview() {
+      try {
+        mermaidOutput.innerHTML = '';
+        const { svg } = await mermaid.render('mm_' + Date.now(), mermaidCodeInput.value);
+        mermaidOutput.innerHTML = svg;
+      } catch (err) {
+        mermaidOutput.innerHTML = `<span style="color:#dc2626; font-size:12px;">Erro de sintaxe no diagrama</span>`;
+      }
+    }
+    async function insertDiagramToPage() {
+      try {
+        const { svg } = await mermaid.render('mm_ins_' + Date.now(), mermaidCodeInput.value);
+        addMediaElement('diagram', svg, 'Diagrama Mermaid');
+        closeDiagramModal();
+      } catch {
+        alert('Corrija os erros de sintaxe antes de inserir.');
+      }
+    }
+
+    function closeDrawers() {
+      document.querySelectorAll('.side-drawer').forEach(d => d.classList.remove('open'));
+    }
+
+    /* MODO MEMORIAL & ATALHOS */
+    window.toggleMemorialMode = () => document.body.classList.toggle('memorial-mode');
+
+    window.addEventListener('keydown', (e) => {
+      const isCmdOrCtrl = e.ctrlKey || e.metaKey;
+
+      if (isCmdOrCtrl && !e.altKey) {
+        if (e.key.toLowerCase() === 'z') {
+          e.preventDefault();
+          if (e.shiftKey) executeRedo(); else executeUndo();
+          return;
+        }
+        if (e.key.toLowerCase() === 'y') {
+          e.preventDefault();
+          executeRedo();
+          return;
+        }
+        if (e.key.toLowerCase() === 'k') {
+          e.preventDefault();
+          searchModal.classList.add('open');
+          document.getElementById('globalSearchInput').focus();
+          return;
+        }
+      }
+
+      if (isCmdOrCtrl && e.shiftKey && e.key.toLowerCase() === 'c') {
+        const sel = window.getSelection();
+        if (sel && !sel.isCollapsed) {
+          e.preventDefault();
+          createThreadFromSelection(true);
+          return;
+        }
+      }
+
+      if (e.key === 'Escape') {
+        document.body.classList.remove('memorial-mode');
+        closeDrawers();
+        closeDiagramModal();
+        closeSearchModal();
+        toggleMobileSidebar(false);
+      }
     });
 
-    document.getElementById('bookTitleInput').addEventListener('input', (e) => {
-      const book = getActiveBook();
-      book.bookTitle = e.target.value.trim() || 'Meu Caderno Artesanal';
-      document.title = `${book.bookTitle} - Scrapbook`;
-      renderBookSelector();
-      saveToStorage();
-    });
+    document.getElementById('btnUndo').onclick = () => executeUndo();
+    document.getElementById('btnRedo').onclick = () => executeRedo();
 
+    /* ==========================================================================
+       14. EXPORTAR E IMPORTAR JSON (SCHEMA V2)
+       ========================================================================== */
     document.getElementById('btnExport').onclick = () => {
       syncCurrentPageToState();
       const currentBook = getActiveBook();
-      const blob = new Blob([JSON.stringify(currentBook, null, 2)], { type: 'application/json' });
+      const exportObject = {
+        version: 2,
+        exportedAt: new Date().toISOString(),
+        ...currentBook
+      };
+
+      const blob = new Blob([JSON.stringify(exportObject, null, 2)], { type: 'application/json' });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
-      const name = (currentBook.bookTitle || 'caderno').toLowerCase().replace(/[^a-z0-9]/gi, '_');
-      a.download = `${name}_${new Date().toISOString().slice(0, 10)}.json`;
+      a.download = `${(currentBook.bookTitle || 'caderno').toLowerCase().replace(/[^a-z0-9]/gi, '_')}_v2_${new Date().toISOString().slice(0, 10)}.json`;
       a.click();
     };
 
     document.getElementById('inputImport').onchange = (e) => {
       const file = e.target.files[0];
       if (!file) return;
-      const reader = new FileReader();
-      reader.onload = (evt) => {
+      const r = new FileReader();
+      r.onload = (evt) => {
         try {
-          const importedData = JSON.parse(evt.target.result);
-          if (importedData.books && Array.isArray(importedData.books)) {
-            appState = importedData;
-          } else if (importedData.chapters && Array.isArray(importedData.chapters)) {
-            if (!importedData.id) importedData.id = 'b_' + Date.now();
-            const existingIdx = appState.books.findIndex(b => b.id === importedData.id);
-            if (existingIdx >= 0) {
-              if (confirm(`Já existe um caderno com este ID ("${appState.books[existingIdx].bookTitle}"). Substituir?`)) {
-                appState.books[existingIdx] = importedData;
-              } else {
-                importedData.id = 'b_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
-                importedData.bookTitle = (importedData.bookTitle || 'Caderno') + ' (Cópia)';
-                appState.books.push(importedData);
-              }
-            } else {
-              appState.books.push(importedData);
-            }
-            appState.activeBookId = importedData.id;
-          } else {
-            throw new Error('Formato inválido');
+          const imported = JSON.parse(evt.target.result);
+          const migrated = migrateLegacyData(imported);
+
+          if (migrated.books && Array.isArray(migrated.books)) {
+            appState = migrated;
+          } else if (migrated.pages && Array.isArray(migrated.pages)) {
+            // Importando um caderno único
+            const newBId = 'b_' + Date.now();
+            migrated.id = newBId;
+            appState.books.push(migrated);
+            appState.activeBookId = newBId;
           }
-          
+
           inkCtx.clearRect(0, 0, inkCanvas.width, inkCanvas.height);
           isCanvasDirtySinceLoad = false;
           renderAll();
           saveToStorage();
-          alert('Caderno importado com sucesso!');
-        } catch {
-          alert('Arquivo JSON inválido.');
+          alert('Caderno importado e migrado para Schema v2 com sucesso!');
+        } catch (err) {
+          alert('Arquivo JSON inválido ou corrompido.');
         }
       };
-      reader.readAsText(file);
+      r.readAsText(file);
       e.target.value = '';
     };
 
     document.getElementById('btnResetAll').onclick = () => {
-      if (confirm('Atenção: Isso apagará TODOS os cadernos do navegador!')) {
+      if (confirm('Atenção: Isso restaurará o caderno padrão e limpará todo o banco de dados!')) {
+        dbSet('craft_notebook_v2_data', null);
         localStorage.removeItem('scrapbook_craft_data');
         appState = createInitialAppState();
         renderAll();
@@ -3631,12 +3501,48 @@
 
     function escapeHTML(str) {
       if (!str) return '';
-      return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag));
+      return str.replace(/[&<>'"]/g, t => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[t] || t));
     }
+
+    document.getElementById('textEditor').addEventListener('input', () => {
+      dismissIgnition();
+      pushHistoryState(document.getElementById('textEditor').innerHTML);
+      renderProjectFooter();
+      saveToStorage();
+    });
+
+    document.getElementById('pageTitle').oninput = (e) => {
+      autoResizeTextarea(e.target);
+      syncCurrentPageToState();
+      renderNavigation();
+      saveToStorage();
+    };
+
+    /* TOOLBAR NAVEGAÇÃO HORIZONTAL */
+    const paperToolbar = document.getElementById('paperToolbar');
+    const btnScrollLeft = document.getElementById('btnScrollToolbarLeft');
+    const btnScrollRight = document.getElementById('btnScrollToolbarRight');
+
+    function updateToolbarNavButtons() {
+      if (!paperToolbar) return;
+      const maxScrollLeft = paperToolbar.scrollWidth - paperToolbar.clientWidth;
+      btnScrollLeft.classList.toggle('disabled', paperToolbar.scrollLeft <= 5);
+      btnScrollRight.classList.toggle('disabled', paperToolbar.scrollLeft >= maxScrollLeft - 5);
+    }
+    window.scrollToolbar = (dist) => paperToolbar.scrollBy({ left: dist, behavior: 'smooth' });
+    paperToolbar.addEventListener('scroll', updateToolbarNavButtons);
+
+    const sidebar = document.getElementById('appSidebar');
+    const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+    function toggleMobileSidebar(show = null) {
+      const isOpen = show !== null ? show : !sidebar.classList.contains('open');
+      sidebar.classList.toggle('open', isOpen);
+      sidebarBackdrop.classList.toggle('active', isOpen);
+    }
+    document.getElementById('btnToggleSidebar').onclick = () => toggleMobileSidebar();
 
     window.onload = () => {
       loadFromStorage();
-      //setTodayDate();
     };
   </script>
 </body>
