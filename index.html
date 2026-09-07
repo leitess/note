@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>Caderno de Engenharia & Journaling</title>
+  <title>Journey</title>
   
   <!-- Fontes -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -48,7 +48,7 @@
       --font-reading: 'Newsreader', serif;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
     body {
       font-family: var(--font-sans);
@@ -85,7 +85,8 @@
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      z-index: 50;
+      z-index: 250;
+      position: relative;
       flex-shrink: 0;
       border-bottom: 1px solid #2d2a26;
     }
@@ -103,47 +104,144 @@
       background: #2d2a26;
       color: #fef08a;
       border: 1px solid #44403c;
-      padding: 5px 9px;
+      padding: 6px 10px;
       border-radius: var(--radius-sm);
       font-size: 13px;
       font-weight: 600;
       flex-shrink: 0;
+      cursor: pointer;
     }
 
-    .header-book-select {
+    /* DROPDOWN & TÍTULO UNIFICADOS */
+    .book-dropdown-container {
+      position: relative;
+      display: flex;
+      align-items: center;
+      max-width: 460px;
+      flex: 1 1 auto;
+      min-width: 130px;
+    }
+
+    .book-input-pill {
+      display: flex;
+      align-items: center;
       background: #282420;
-      color: #fef08a;
       border: 1px solid #44403c;
       border-radius: var(--radius-sm);
-      font-family: var(--font-hand);
-      font-size: 17px;
-      padding: 3px 8px;
-      outline: none;
+      padding: 2px 6px 2px 8px;
+      width: 100%;
+      gap: 6px;
+      transition: border-color 0.2s, background 0.2s;
       cursor: pointer;
-      max-width: 150px;
-      flex-shrink: 0;
     }
+    .book-input-pill:hover {
+      border-color: #78716c;
+      background: #302b26;
+    }
+    .book-input-pill:focus-within {
+      border-color: #fef08a;
+      background: #1f1b18;
+    }
+
+    .book-icon { font-size: 16px; user-select: none; }
 
     .header-book-input {
       font-family: var(--font-hand);
-      font-size: 22px;
-      line-height: 26px;
+      font-size: 20px;
+      line-height: 24px;
       font-weight: 700;
       color: #fef08a;
       background: transparent;
-      border: 1px dashed transparent;
-      border-radius: var(--radius-sm);
-      padding: 3px 8px;
+      border: none;
       outline: none;
-      transition: all 0.2s ease;
-      flex: 1 1 auto;
-      min-width: 100px;
+      flex: 1;
+      min-width: 60px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      cursor: text;
     }
-    .header-book-input:hover { border-color: #78716c; background: rgba(255, 255, 255, 0.05); }
-    .header-book-input:focus { border-color: #fef08a; background: rgba(0, 0, 0, 0.4); }
+
+    .btn-book-dropdown-arrow {
+      background: transparent;
+      border: none;
+      color: #fef08a;
+      font-size: 14px;
+      cursor: pointer;
+      padding: 3px 6px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s;
+    }
+    .btn-book-dropdown-arrow.open { transform: rotate(180deg); }
+
+    /* POPOVER FLUTUANTE */
+    .book-dropdown-popover {
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      width: 330px;
+      max-width: 90vw;
+      background: #23201d;
+      border: 1px solid #57534e;
+      border-radius: 8px;
+      box-shadow: 0 16px 36px rgba(0,0,0,0.55);
+      z-index: 1000;
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .book-dropdown-popover.open { display: flex; animation: popFade 0.15s ease-out; }
+    @keyframes popFade {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .book-popover-header {
+      padding: 8px 12px;
+      background: #181615;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: #a8a29e;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #332f2b;
+    }
+
+    .book-popover-list {
+      max-height: 230px;
+      overflow-y: auto;
+      padding: 4px;
+    }
+
+    .book-popover-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 10px;
+      border-radius: var(--radius-sm);
+      color: #d6d3d1;
+      font-size: 13px;
+      cursor: pointer;
+      gap: 8px;
+      transition: background 0.15s;
+    }
+    .book-popover-item:hover { background: #35302c; color: #fff; }
+    .book-popover-item.active { background: #443e39; color: #fef08a; font-weight: 600; }
+    .book-popover-item span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    .book-popover-footer {
+      padding: 6px 8px;
+      background: #181615;
+      border-top: 1px solid #332f2b;
+      display: flex;
+      justify-content: flex-end;
+    }
 
     .header-actions {
       display: flex;
@@ -152,7 +250,6 @@
       flex-shrink: 0;
     }
 
-    /* BOTÕES */
     button, .btn {
       background: #fcfbf9;
       color: #1c1917;
@@ -190,7 +287,6 @@
       box-shadow: inset 0 2px 4px rgba(0,0,0,0.25);
     }
 
-    /* WORKSPACE */
     .main-workspace {
       display: flex;
       flex: 1;
@@ -199,7 +295,7 @@
       position: relative;
     }
 
-    /* SIDEBAR CRONOLÓGICA COM TAGS */
+    /* SIDEBAR CRONOLÓGICA */
     .sidebar {
       width: 280px;
       min-width: 240px;
@@ -227,7 +323,6 @@
       border-bottom: 1px solid #282420;
     }
 
-    /* CHIPS DE FILTRO DE TAGS NA SIDEBAR */
     .tag-filter-bar {
       padding: 6px 8px;
       background: #23201d;
@@ -291,11 +386,7 @@
       font-size: 10px;
       color: #a8a29e;
     }
-    .nav-item-tags {
-      display: flex;
-      gap: 3px;
-      overflow: hidden;
-    }
+    .nav-item-tags { display: flex; gap: 3px; overflow: hidden; }
     .mini-tag {
       background: rgba(254, 240, 138, 0.15);
       color: #fef08a;
@@ -377,6 +468,7 @@
       scrollbar-color: #c7c0b3 transparent;
       cursor: grab;
       scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
     }
     .paper-toolbar.grabbing { cursor: grabbing; }
     .paper-toolbar::-webkit-scrollbar { height: 4px; }
@@ -401,7 +493,7 @@
       height: 26px;
     }
 
-    /* FOLHA DE PAPEL */
+    /* FOLHA */
     .paper-sheet {
       width: 100%;
       margin: 16px auto 140px auto;
@@ -419,7 +511,6 @@
     .paper-sheet.orientation-portrait { max-width: 1020px; }
     .paper-sheet.orientation-landscape { max-width: 1480px; }
 
-    /* CANVAS DE TINTA */
     #inkCanvas {
       position: absolute;
       top: 0; left: 0;
@@ -436,7 +527,6 @@
       z-index: 35;
     }
 
-    /* HEADER DA PÁGINA: TÍTULO, DATA E TAGS */
     .title-wrapper {
       display: flex;
       align-items: flex-start;
@@ -518,13 +608,13 @@
       border-color: #166534;
     }
 
-    /* CAMPO DE TAGS NA FOLHA */
+    /* BARRA DE HÁBITOS & TAGS */
     .page-tags-bar {
       display: flex;
       align-items: center;
       flex-wrap: wrap;
       gap: 6px;
-      margin-bottom: 22px;
+      margin-bottom: 16px;
       position: relative;
       z-index: 5;
     }
@@ -538,6 +628,12 @@
       display: inline-flex;
       align-items: center;
       gap: 4px;
+    }
+    .page-tag-chip.habit-tag {
+      background: #dcfce7;
+      color: #166534;
+      border-color: #86efac;
+      font-weight: 600;
     }
     .page-tag-chip button {
       background: transparent;
@@ -556,16 +652,50 @@
       border-radius: 12px;
       font-size: 11px;
       outline: none;
-      width: 110px;
+      width: 120px;
       transition: all 0.2s;
     }
     .page-tag-input:focus {
       border-color: var(--accent);
       background: #fff;
-      width: 150px;
+      width: 160px;
     }
 
-    /* PAINEL DE IGNIÇÃO / ANTE-BLOQUEIO MENTAL */
+    .quick-habits-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      flex-wrap: wrap;
+      padding: 6px 10px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: var(--radius-sm);
+      margin-bottom: 20px;
+      font-size: 11px;
+      color: #475569;
+    }
+    .btn-habit-verb {
+      background: #fff;
+      border: 1px solid #cbd5e1;
+      color: #0f172a;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-habit-verb:hover {
+      background: #22c55e;
+      color: #fff;
+      border-color: #16a34a;
+    }
+    .btn-habit-verb.active {
+      background: #16a34a;
+      color: #fff;
+      border-color: #15803d;
+    }
+
+    /* PAINEL DE IGNIÇÃO */
     .ignition-box {
       background: #faf8f5;
       border: 1px dashed #d6cebf;
@@ -586,11 +716,7 @@
       align-items: center;
       justify-content: space-between;
     }
-    .ignition-buttons {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
+    .ignition-buttons { display: flex; flex-wrap: wrap; gap: 8px; }
     .btn-ignition {
       background: #fff;
       border: 1px solid #d6d3d1;
@@ -654,96 +780,120 @@
       margin: 14px 0 6px 0;
     }
 
-    /* BLOCOS DE CÓDIGO */
-    .craft-code-block {
-      background: #201e1b !important;
-      border: 1px solid #3d3935;
-      border-radius: var(--radius-md);
-      margin: 18px 0;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.16);
-      overflow: hidden;
-      font-family: var(--font-code);
-    }
-    .code-block-header {
-      background: #171513;
-      padding: 6px 10px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-      border-bottom: 1px solid #2d2925;
-    }
-    .code-lang-select {
-      background: #2b2723;
-      color: #fef08a;
-      border: 1px solid #4d4742;
-      border-radius: 4px;
-      font-family: var(--font-code);
-      font-size: 11px;
-      padding: 2px 6px;
-      outline: none;
-      cursor: pointer;
-    }
-    .code-filepath-input {
-      background: #11100f;
-      color: #a3e635;
-      border: 1px solid #44403c;
-      border-radius: 4px;
-      font-family: var(--font-code);
-      font-size: 11px;
-      padding: 3px 8px;
-      flex: 1;
-      min-width: 140px;
-      max-width: 320px;
-      outline: none;
-    }
-    .code-download-btn, .code-copy-btn {
-      background: #2b2723;
-      color: #e7e5e4;
-      border: 1px solid #4d4742;
-      padding: 2px 7px;
-      border-radius: 4px;
-      font-size: 10px;
-      cursor: pointer;
-    }
-    .code-download-btn:hover, .code-copy-btn:hover { background: #3f3933; color: #a3e635; }
-
-    pre.craft-pre-override {
-      overflow-y: visible !important;
-      overflow-x: auto !important;
-      margin: 0 !important;
-      padding: 0 !important;
-      background: transparent !important;
-    }
-    .code-snippet-area {
-      display: block !important;
-      padding: 12px 14px !important;
-      color: #ccc;
-      font-family: var(--font-code);
-      font-size: 13.5px;
-      line-height: 20px;
-      white-space: pre-wrap !important;
-      overflow-wrap: break-word !important;
-      outline: none;
-      min-height: 60px;
-      tab-size: 2;
-    }
-
-    .tangle-project-footer {
-      margin-top: 40px;
-      padding: 16px 20px;
-      background: #1c1917;
-      color: #f5f5f4;
-      border-radius: var(--radius-md);
-      border-left: 5px solid #a3e635;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 12px;
-      box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+    /* REFERÊNCIAS ISOLADAS */
+    .page-references-section {
+      margin-top: 48px;
+      border-top: 2px dashed #d6cebf;
+      padding-top: 18px;
+      position: relative;
+      z-index: 10;
       user-select: none;
+    }
+    .references-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .references-title {
+      font-family: var(--font-sans);
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: #78716c;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .references-list { display: flex; flex-direction: column; gap: 8px; }
+    .reference-card {
+      background: #fbfbfa;
+      border: 1px solid #e7e5e4;
+      border-left: 4px solid var(--accent);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      font-family: var(--font-sans);
+    }
+    .ref-info { display: flex; flex-direction: column; gap: 3px; flex: 1; min-width: 0; }
+    .ref-title-text { font-size: 13.5px; font-weight: 600; color: #1c1917; }
+    .ref-author-text { font-size: 11.5px; color: #78716c; }
+    .ref-url-link { font-size: 11px; color: var(--accent); text-decoration: none; word-break: break-all; }
+    .ref-url-link:hover { text-decoration: underline; }
+    .ref-note-text { font-size: 12px; color: #44403c; font-style: italic; margin-top: 2px; }
+
+    /* CARD DE VÍDEO YOUTUBE */
+    .style-video {
+      background: #181615;
+      border: 1px solid #332f2b;
+      border-radius: 8px;
+      padding: 10px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+      color: #fafaf9;
+    }
+    .video-thumb-container {
+      position: relative;
+      width: 100%;
+      border-radius: 4px;
+      overflow: hidden;
+      background: #000;
+      aspect-ratio: 16 / 9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .video-thumb-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0.82;
+      pointer-events: none;
+    }
+    .video-play-overlay {
+      position: absolute;
+      width: 54px;
+      height: 54px;
+      background: rgba(220, 38, 38, 0.9);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      color: #fff;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+      transition: transform 0.15s ease, background 0.15s;
+    }
+    .video-play-overlay:hover { transform: scale(1.08); background: #ef4444; }
+    .video-player-frame {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      border: none;
+      border-radius: 4px;
+    }
+    .video-controls-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 8px;
+      gap: 6px;
+    }
+    .video-title-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      border-bottom: 1px dashed #44403c;
+      color: #fef08a;
+      font-family: var(--font-hand);
+      font-size: 16px;
+      outline: none;
+      padding: 2px 4px;
     }
 
     /* CARDS SCRAPBOOK */
@@ -951,7 +1101,98 @@
     }
     .craft-media-card:hover .resize-handle { opacity: 0.85; }
 
-    /* TABELAS E CITAÇÕES */
+    /* CÓDIGO & TABELAS */
+    .craft-code-block {
+      background: #201e1b !important;
+      border: 1px solid #3d3935;
+      border-radius: var(--radius-md);
+      margin: 18px 0;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.16);
+      overflow: hidden;
+      font-family: var(--font-code);
+    }
+    .code-block-header {
+      background: #171513;
+      padding: 6px 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      border-bottom: 1px solid #2d2925;
+    }
+    .code-lang-select {
+      background: #2b2723;
+      color: #fef08a;
+      border: 1px solid #4d4742;
+      border-radius: 4px;
+      font-family: var(--font-code);
+      font-size: 11px;
+      padding: 2px 6px;
+      outline: none;
+      cursor: pointer;
+    }
+    .code-filepath-input {
+      background: #11100f;
+      color: #a3e635;
+      border: 1px solid #44403c;
+      border-radius: 4px;
+      font-family: var(--font-code);
+      font-size: 11px;
+      padding: 3px 8px;
+      flex: 1;
+      min-width: 140px;
+      max-width: 320px;
+      outline: none;
+    }
+    .code-download-btn, .code-copy-btn {
+      background: #2b2723;
+      color: #e7e5e4;
+      border: 1px solid #4d4742;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 10px;
+      cursor: pointer;
+    }
+    .code-download-btn:hover, .code-copy-btn:hover { background: #3f3933; color: #a3e635; }
+
+    pre.craft-pre-override {
+      overflow-y: visible !important;
+      overflow-x: auto !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      background: transparent !important;
+    }
+    .code-snippet-area {
+      display: block !important;
+      padding: 12px 14px !important;
+      color: #ccc;
+      font-family: var(--font-code);
+      font-size: 13.5px;
+      line-height: 20px;
+      white-space: pre-wrap !important;
+      overflow-wrap: break-word !important;
+      outline: none;
+      min-height: 60px;
+      tab-size: 2;
+    }
+
+    .tangle-project-footer {
+      margin-top: 40px;
+      padding: 16px 20px;
+      background: #1c1917;
+      color: #f5f5f4;
+      border-radius: var(--radius-md);
+      border-left: 5px solid #a3e635;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+      user-select: none;
+    }
+
     .text-flow-area table.craft-table {
       width: 100%;
       border-collapse: collapse;
@@ -1040,7 +1281,6 @@
       color: #71717a;
     }
 
-    /* TOOLTIP DE SELEÇÃO */
     .selection-tooltip {
       position: absolute;
       display: none;
@@ -1067,8 +1307,8 @@
     .side-drawer {
       position: absolute;
       top: 0; right: 0;
-      width: 380px;
-      max-width: 92vw;
+      width: 440px;
+      max-width: 95vw;
       height: 100%;
       background: #ffffff;
       border-left: 1px solid #d6d3d1;
@@ -1089,6 +1329,39 @@
       align-items: center;
     }
 
+    /* TABELA HEATMAP MENSAL */
+    .habit-matrix-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+      user-select: none;
+    }
+    .habit-matrix-table th, .habit-matrix-table td {
+      border: 1px solid #e2e8f0;
+      padding: 5px 2px;
+      text-align: center;
+      min-width: 22px;
+    }
+    .habit-matrix-table th {
+      background: #f8fafc;
+      font-weight: 700;
+      color: #475569;
+      font-size: 10px;
+    }
+    .habit-cell-done {
+      background: #86efac;
+      color: #166534;
+      font-weight: 700;
+    }
+    .habit-cell-empty {
+      background: #ffffff;
+      color: #cbd5e1;
+    }
+    .habit-cell-future {
+      background: #f1f5f9;
+      color: #cbd5e1;
+    }
+
     .thread-card {
       background: #fafaf9;
       border: 1px solid #e7e5e4;
@@ -1097,11 +1370,6 @@
       display: flex;
       flex-direction: column;
       gap: 8px;
-      transition: border-color 0.2s, box-shadow 0.2s;
-    }
-    .thread-card.highlight-target {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 2px rgba(180, 83, 9, 0.2);
     }
     .thread-type-badge {
       font-size: 9px;
@@ -1169,7 +1437,8 @@
     body.memorial-mode .toolbar-wrapper,
     body.memorial-mode .ignition-box,
     body.memorial-mode .btn-suggest-title,
-    body.memorial-mode .page-tags-bar { display: none !important; }
+    body.memorial-mode .page-tags-bar,
+    body.memorial-mode .quick-habits-toolbar { display: none !important; }
     body.memorial-mode .paper-sheet { box-shadow: none; padding: 60px 40px; background: transparent; }
     body.memorial-mode .text-flow-area { font-family: var(--font-reading); font-size: 22px; line-height: 36px; color: #1f1d1a; }
 
@@ -1186,22 +1455,101 @@
       box-shadow: 0 3px 12px rgba(0,0,0,0.2);
     }
     body.memorial-mode .zen-exit-btn { display: inline-flex; }
-
     .recording-pulse { animation: pulse 1.2s infinite; color: #fff !important; background: #ef4444 !important; }
     @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
 
-    @media (max-width: 860px) {
+    /* RESPONSIVIDADE MOBILE */
+    @media (max-width: 768px) {
       body { padding: 0; }
-      .app-window { border-radius: 0; }
+      .app-window { border-radius: 0; height: 100dvh; }
+
+      header {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 8px 10px;
+        gap: 8px;
+      }
+
+      .header-left {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
       .btn-menu-toggle { display: inline-flex; }
-      .sidebar { position: absolute; top: 0; left: 0; height: 100%; width: 280px; transform: translateX(-100%); }
+
+      .book-dropdown-container {
+        max-width: none;
+        flex: 1;
+      }
+
+      .header-book-input {
+        font-size: 18px;
+        line-height: 22px;
+      }
+
+      .header-actions {
+        width: 100%;
+        display: flex;
+        overflow-x: auto;
+        padding-bottom: 2px;
+        gap: 4px;
+        border-top: 1px solid rgba(255,255,255,0.08);
+        padding-top: 6px;
+        scrollbar-width: none;
+      }
+      .header-actions::-webkit-scrollbar { display: none; }
+
+      .header-actions button,
+      .header-actions .btn {
+        flex: 0 0 auto;
+        padding: 5px 8px;
+        font-size: 11px;
+        white-space: nowrap;
+        min-height: 30px;
+      }
+
+      .sidebar {
+        position: absolute;
+        top: 0; left: 0;
+        height: 100%;
+        width: min(300px, 86vw);
+        transform: translateX(-100%);
+        box-shadow: 4px 0 20px rgba(0,0,0,0.5);
+      }
       .sidebar.open { transform: translateX(0); }
-      header { flex-direction: column; align-items: stretch; padding: 7px 10px; gap: 6px; }
-      .header-left { width: 100%; display: flex; align-items: center; gap: 5px; }
-      .header-actions { width: 100%; justify-content: space-between; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 4px; }
-      .paper-sheet { padding: 22px 18px 100px 18px; margin: 6px auto; }
-      .page-title { font-size: 28px; line-height: 34px; }
-      .text-flow-area { font-size: 21px; line-height: 29px; }
+
+      .toolbar-wrapper { padding: 3px 4px; }
+      .paper-toolbar { gap: 6px; }
+
+      .paper-sheet {
+        padding: 20px 14px 90px 14px !important;
+        margin: 4px auto 60px auto !important;
+        border-radius: 0;
+        box-shadow: none;
+        min-height: calc(100vh - 120px);
+      }
+
+      .page-title {
+        font-size: 26px !important;
+        line-height: 32px !important;
+      }
+
+      .text-flow-area {
+        font-size: 20px !important;
+        line-height: 28px !important;
+      }
+
+      .craft-media-card.mode-flow {
+        float: none !important;
+        margin: 14px auto !important;
+        width: 100% !important;
+        max-width: 100% !important;
+      }
+
+      .style-video, .style-diagram { width: 100% !important; }
+      .side-drawer { width: 100% !important; max-width: 100vw !important; }
     }
   </style>
 </head>
@@ -1212,14 +1560,38 @@
   <div class="app-window" id="appWindow">
     <header>
       <div class="header-left">
-        <button type="button" class="btn-menu-toggle" id="btnToggleSidebar" title="Abrir Navegação">📚 Menu</button>
-        <select id="bookSelect" class="header-book-select" title="Selecione o Caderno" onchange="switchBook(this.value)"></select>
-        <input type="text" id="bookTitleInput" class="header-book-input" value="Meu Caderno de Projetos & Pensamento" title="Clique para renomear este Caderno" />
-        <button type="button" id="btnNewBook" class="btn-dark btn-icon" title="Criar Novo Caderno">➕</button>
-        <button type="button" id="btnDeleteBook" class="btn-danger btn-icon" title="Excluir Caderno Atual">🗑️</button>
+        <button type="button" class="btn-menu-toggle" id="btnToggleSidebar" title="Abrir Páginas">📚 Páginas</button>
+        
+        <div class="book-dropdown-container" id="bookDropdownContainer">
+          <div class="book-input-pill" id="bookInputPill">
+            <span class="book-icon">📖</span>
+            <input 
+              type="text" 
+              id="bookTitleInput" 
+              class="header-book-input" 
+              value="Meu Caderno de Projetos & Pensamento" 
+              title="Digite para renomear ou clique na seta para trocar de caderno" 
+              placeholder="Nome do Caderno..."
+            />
+            <button type="button" id="btnBookDropdownArrow" class="btn-book-dropdown-arrow" title="Ver todos os cadernos">▾</button>
+          </div>
+
+          <!-- POPOVER DOS CADERNOS -->
+          <div class="book-dropdown-popover" id="bookDropdownPopover">
+            <div class="book-popover-header">
+              <span>Seus Cadernos</span>
+              <button type="button" id="btnNewBookPopover" class="btn-accent" style="padding:2px 8px; font-size:11px;">+ Novo</button>
+            </div>
+            <div class="book-popover-list" id="bookPopoverList"></div>
+            <div class="book-popover-footer">
+              <button type="button" id="btnDeleteBookPopover" class="btn-danger" style="width:100%; font-size:11px; padding:4px;">🗑️ Excluir Caderno Atual</button>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="header-actions">
+        <button id="btnOpenHabits" class="btn-dark" title="Rastreador Mensal de Hábitos">🌱 Hábitos</button>
         <button id="btnOpenSearch" class="btn-dark" title="Buscar em tudo (Ctrl+K)">🔍 Busca</button>
         <button id="btnOpenInbox" class="btn-dark" title="Inbox Rápido">⚡ Inbox</button>
         <button onclick="toggleMemorialMode()" title="Leitura Solene sem Distrações">📖 Memorial</button>
@@ -1235,17 +1607,13 @@
     <div class="main-workspace">
       <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleMobileSidebar(false)"></div>
 
-      <!-- SIDEBAR CRONOLÓGICA SEM CAPÍTULOS -->
+      <!-- SIDEBAR CRONOLÓGICA -->
       <aside class="sidebar" id="appSidebar">
         <div class="sidebar-header">
           <span>Páginas Cronológicas</span>
           <button id="btnAddPage" class="btn-accent" style="padding: 2px 7px; font-size:10.5px;">+ Nova</button>
         </div>
-
-        <!-- BARRA DE FILTRO POR TAGS -->
         <div class="tag-filter-bar" id="tagFilterBar"></div>
-
-        <!-- LISTAGEM DE PÁGINAS -->
         <ul class="nav-list" id="pageList"></ul>
       </aside>
 
@@ -1283,7 +1651,7 @@
                 <input type="color" id="inkColor" title="Cor do Texto" value="#1c1917" onchange="formatDoc('foreColor', this.value)" />
               </div>
 
-              <!-- Traço e Mesa -->
+              <!-- Desenho -->
               <div class="toolbar-group" style="background:#f5f4f0; padding:2px 5px; border-radius:6px;">
                 <button type="button" id="toolSelect" class="btn active-tool" onclick="setInkTool('select')">👆 Texto</button>
                 <button type="button" id="toolPen" class="btn" onclick="setInkTool('pen')">🖊️ Pincel</button>
@@ -1294,8 +1662,9 @@
                 <button type="button" id="btnClearInk" class="btn-danger" style="font-size:10px; padding:2px 5px;" onclick="clearPageInk()">Limpar</button>
               </div>
 
-              <!-- Inserções -->
+              <!-- Mídias & Código -->
               <div class="toolbar-group">
+                <button type="button" id="btnInsertYouTube" class="btn-dark" title="Embedar Vídeo do YouTube" onclick="promptInsertYouTubeVideo()">🎬 YouTube</button>
                 <button type="button" id="btnInsertCode" class="btn-dark" title="Inserir Módulo de Código Literado" onclick="insertCodeSnippet()">💻 Código</button>
                 <button type="button" class="btn-dark" title="Exportar projeto em ZIP" onclick="tangleAndExportZip()">📦 Compilar ZIP</button>
                 <button type="button" id="btnInsertTable" title="Tabela">📊 Tabela</button>
@@ -1349,18 +1718,29 @@
             <span>•</span>
             <span>📍 São Paulo - SP</span>
             <span>•</span>
-            <span id="projectModeToggle" class="project-badge-toggle" onclick="toggleProjectMode()" title="Ativar para tratar este documento como Código-Fonte / Engenharia Literada">
+            <span id="projectModeToggle" class="project-badge-toggle" onclick="toggleProjectMode()" title="Ativar para tratar este documento como Engenharia Literada">
               💻 Modo Engenharia: <b id="projectModeLabel">Desativado</b>
             </span>
+          </div>
+
+          <!-- BARRA RÁPIDA DE HÁBITOS (VERBOS) -->
+          <div class="quick-habits-toolbar" id="quickHabitsBar">
+            <span style="font-weight:700; font-size:11px;">🌱 Hábitos do Dia:</span>
+            <button type="button" class="btn-habit-verb" onclick="toggleHabitVerb('estudei')">#estudei</button>
+            <button type="button" class="btn-habit-verb" onclick="toggleHabitVerb('treinei')">#treinei</button>
+            <button type="button" class="btn-habit-verb" onclick="toggleHabitVerb('li')">#li</button>
+            <button type="button" class="btn-habit-verb" onclick="toggleHabitVerb('meditei')">#meditei</button>
+            <button type="button" class="btn-habit-verb" onclick="toggleHabitVerb('programei')">#programei</button>
+            <button type="button" class="btn-habit-verb" onclick="toggleHabitVerb('escrevi')">#escrevi</button>
           </div>
 
           <!-- TAGS DA PÁGINA -->
           <div class="page-tags-bar" id="pageTagsContainer"></div>
 
-          <!-- GATILHOS DE IGNIÇÃO MENTAL (EMPTY STATE) -->
+          <!-- PAINEL DE IGNIÇÃO -->
           <div class="ignition-box" id="ignitionBox">
             <div class="ignition-header">
-              <span>🚀 BLOQUEIO MENTAL? ESCOLHA UM PONTO DE PARTIDA (SEM PRESSÃO):</span>
+              <span>🚀 BLOQUEIO MENTAL? ESCOLHA UM PONTO DE PARTIDA:</span>
               <button onclick="dismissIgnition()" style="background:transparent; border:none; color:#a8a29e; font-size:14px; cursor:pointer;">✕</button>
             </div>
             <div class="ignition-buttons">
@@ -1374,8 +1754,33 @@
           <div id="collageContainer">
             <div id="textEditor" class="text-flow-area" contenteditable="true"></div>
           </div>
+
+          <!-- SEÇÃO DE REFERÊNCIAS ISOLADA -->
+          <div class="page-references-section" id="referencesSection">
+            <div class="references-header">
+              <div class="references-title">
+                <span>📚 Referências & Fontes da Anotação</span>
+                <span id="referencesCountBadge" style="background:#e7e5e4; color:#57534e; font-size:10px; padding:1px 6px; border-radius:10px;">0</span>
+              </div>
+              <button type="button" class="btn" style="padding:2px 8px; font-size:11px;" onclick="promptAddReference()">+ Adicionar Referência</button>
+            </div>
+            <div class="references-list" id="referencesListContainer"></div>
+          </div>
+
         </div>
       </main>
+
+      <!-- GAVETA: RASTREADOR DE HÁBITOS (CALENDÁRIO MENSAL INTEGRADO) -->
+      <aside class="side-drawer" id="habitsDrawer">
+        <div class="drawer-header">
+          <span style="font-weight:700; font-size:13px;">🌱 Rastreador de Hábitos Mensal</span>
+          <button onclick="closeDrawers()" style="background:transparent; color:#fff; border:none; font-size:16px; cursor:pointer;">✕</button>
+        </div>
+        <div style="padding:8px 12px; background:#f8fafc; border-bottom:1px solid #e2e8f0; font-size:11.5px; color:#475569; line-height:1.4;">
+          Visualização do mês inteiro preenchida automaticamente através das páginas e tags do seu diário.
+        </div>
+        <div style="flex:1; overflow-y:auto; padding:12px;" id="habitsSummaryContainer"></div>
+      </aside>
 
       <!-- GAVETA: THREADS / LAPIDAÇÃO -->
       <aside class="side-drawer" id="threadDrawer">
@@ -1383,17 +1788,11 @@
           <span style="font-weight:700; font-size:13px;">💬 Threads de Lapidação</span>
           <button onclick="closeDrawers()" style="background:transparent; color:#fff; border:none; font-size:16px; cursor:pointer;">✕</button>
         </div>
-
-        <div style="padding:8px 12px; background:#fafaf9; border-bottom:1px solid #e7e5e4; font-size:11px; color:#57534e;">
-          Use as threads para questionar ideias, testar hipóteses e consolidar decisões do projeto.
-        </div>
-
         <div style="display:flex; gap:4px; padding:6px 10px; background:#f5f4f0; border-bottom:1px solid #e7e5e4;">
           <button class="btn active" id="thFilterAll" onclick="setThreadFilter('all')">Todas</button>
           <button class="btn" id="thFilterOpen" onclick="setThreadFilter('open')">Pendentes</button>
           <button class="btn" id="thFilterResolved" onclick="setThreadFilter('resolved')">Resolvidas</button>
         </div>
-
         <div style="flex:1; overflow-y:auto; padding:10px; display:flex; flex-direction:column; gap:10px;" id="threadsListContainer"></div>
       </aside>
 
@@ -1401,10 +1800,7 @@
       <aside class="side-drawer" id="snapshotDrawer">
         <div class="drawer-header">
           <span style="font-weight:700; font-size:13px;">📜 Histórico de Versões</span>
-          <button onclick="closeDrawers()" style="background:transparent; color:#fff; border:none; font-size:16px;">✕</button>
-        </div>
-        <div style="padding:8px 12px; background:#fafaf9; font-size:11px; color:#57534e; border-bottom:1px solid #e7e5e4;">
-          Guarde marcos para acompanhar a evolução do seu raciocínio.
+          <button onclick="closeDrawers()" style="background:transparent; color:#fff; border:none; font-size:16px; cursor:pointer;">✕</button>
         </div>
         <div style="flex:1; overflow-y:auto; padding:10px; display:flex; flex-direction:column; gap:6px;" id="snapshotListContainer"></div>
       </aside>
@@ -1413,10 +1809,10 @@
       <aside class="side-drawer" id="inboxDrawer">
         <div class="drawer-header">
           <span style="font-weight:700; font-size:13px;">⚡ Inbox Rápido</span>
-          <button onclick="closeDrawers()" style="background:transparent; color:#fff; border:none; font-size:16px;">✕</button>
+          <button onclick="closeDrawers()" style="background:transparent; color:#fff; border:none; font-size:16px; cursor:pointer;">✕</button>
         </div>
         <div style="padding:10px; border-bottom:1px solid #e7e5e4; display:flex; flex-direction:column; gap:6px;">
-          <textarea id="quickInboxInput" style="width:100%; height:64px; padding:8px; border:1px solid #d6d3d1; border-radius:4px; font-family:var(--font-sans); font-size:12px; resize:none;" placeholder="Despeje um pensamento aqui sem se preocupar onde categorizar..."></textarea>
+          <textarea id="quickInboxInput" style="width:100%; height:64px; padding:8px; border:1px solid #d6d3d1; border-radius:4px; font-family:var(--font-sans); font-size:12px; resize:none;" placeholder="Despeje um pensamento aqui..."></textarea>
           <button class="btn-accent" onclick="saveInboxNote()">Guardar no Inbox</button>
         </div>
         <div style="flex:1; overflow-y:auto; padding:10px; display:flex; flex-direction:column; gap:6px;" id="inboxListContainer"></div>
@@ -1433,33 +1829,21 @@
       </div>
       <div class="modal-body">
         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
-          <div style="display:flex; align-items:center; gap:6px;">
-            <label style="font-size:11px; font-weight:600;">Modelo:</label>
-            <select id="diagramTemplateSelect" onchange="loadDiagramTemplate(this.value)">
-              <option value="flowchart">Fluxograma / Decisão</option>
-              <option value="sequence">UML - Sequência</option>
-              <option value="class">UML - Classes</option>
-              <option value="erd">Banco de Dados (ERD)</option>
-              <option value="mindmap">Mapa de Raciocínio</option>
-            </select>
-          </div>
+          <select id="diagramTemplateSelect" onchange="loadDiagramTemplate(this.value)">
+            <option value="flowchart">Fluxograma / Decisão</option>
+            <option value="sequence">UML - Sequência</option>
+            <option value="class">UML - Classes</option>
+            <option value="erd">Banco de Dados (ERD)</option>
+            <option value="mindmap">Mapa de Raciocínio</option>
+          </select>
           <button class="btn-accent" onclick="renderDiagramPreview()">🔄 Atualizar</button>
         </div>
-
         <div style="display:flex; gap:10px; flex:1; min-height:240px; flex-wrap:wrap;">
-          <div style="flex:1; min-width:240px; display:flex; flex-direction:column; gap:3px;">
-            <label style="font-size:10px; font-weight:700; color:#57534e;">CÓDIGO MERMAID:</label>
-            <textarea id="mermaidCodeInput" style="flex:1; min-height:180px; font-family:var(--font-code); font-size:11.5px; padding:8px; border:1px solid #cbd5e1; border-radius:4px; background:#fafaf9; outline:none; resize:none;"></textarea>
-          </div>
-
-          <div style="flex:1; min-width:240px; display:flex; flex-direction:column; gap:3px;">
-            <label style="font-size:10px; font-weight:700; color:#57534e;">PRÉVIA:</label>
-            <div id="mermaidPreviewBox" style="flex:1; min-height:180px; background:#fff; border:1px solid #cbd5e1; border-radius:4px; padding:8px; overflow:auto; display:flex; justify-content:center; align-items:center;">
-              <div id="mermaidOutput"></div>
-            </div>
+          <textarea id="mermaidCodeInput" style="flex:1; min-height:180px; font-family:var(--font-code); font-size:11.5px; padding:8px; border:1px solid #cbd5e1; border-radius:4px; background:#fafaf9; outline:none; resize:none;"></textarea>
+          <div id="mermaidPreviewBox" style="flex:1; min-height:180px; background:#fff; border:1px solid #cbd5e1; border-radius:4px; padding:8px; overflow:auto; display:flex; justify-content:center; align-items:center;">
+            <div id="mermaidOutput"></div>
           </div>
         </div>
-
         <div style="display:flex; justify-content:flex-end; gap:6px; border-top:1px solid #e7e5e4; padding-top:10px;">
           <button onclick="closeDiagramModal()">Cancelar</button>
           <button class="btn-accent" onclick="insertDiagramToPage()">✨ Inserir na Folha</button>
@@ -1476,7 +1860,7 @@
         <button onclick="closeSearchModal()" style="background:transparent; color:#fff; border:none; font-size:16px;">✕</button>
       </div>
       <div class="modal-body">
-        <input type="text" id="globalSearchInput" placeholder="Termos, trechos de código, decisões, tags..." style="width:100%; padding:8px 12px; border:2px solid var(--accent); border-radius:6px; font-size:13.5px; outline:none;" oninput="executeGlobalSearch(this.value)" />
+        <input type="text" id="globalSearchInput" placeholder="Termos, código, decisões, tags..." style="width:100%; padding:8px 12px; border:2px solid var(--accent); border-radius:6px; font-size:13.5px; outline:none;" oninput="executeGlobalSearch(this.value)" />
         <div id="searchResultsContainer" style="display:flex; flex-direction:column; gap:6px; max-height:300px; overflow-y:auto; margin-top:6px;"></div>
       </div>
     </div>
@@ -1484,7 +1868,7 @@
 
   <script>
     /* ==========================================================================
-       1. ARMAZENAMENTO ROBUSTO COM INDEXEDDB (SEM LIMITE DE 5MB)
+       1. ARMAZENAMENTO INDEXEDDB (SCHEMA V2)
        ========================================================================== */
     const DB_NAME = 'CraftNotebookDB_v2';
     const DB_STORE = 'app_state';
@@ -1494,9 +1878,7 @@
         const req = indexedDB.open(DB_NAME, 1);
         req.onupgradeneeded = () => {
           const db = req.result;
-          if (!db.objectStoreNames.contains(DB_STORE)) {
-            db.createObjectStore(DB_STORE);
-          }
+          if (!db.objectStoreNames.contains(DB_STORE)) db.createObjectStore(DB_STORE);
         };
         req.onsuccess = () => resolve(req.result);
         req.onerror = () => reject(req.error);
@@ -1513,7 +1895,6 @@
           tx.onerror = () => reject(tx.error);
         });
       } catch (err) {
-        console.warn('Fallback para localStorage:', err);
         try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) {}
       }
     }
@@ -1533,9 +1914,6 @@
       }
     }
 
-    /* ==========================================================================
-       2. INICIALIZAÇÃO & MODELO DE DADOS PLANO (SCHEMA V2)
-       ========================================================================== */
     mermaid.initialize({ startOnLoad: false, theme: 'neutral', securityLevel: 'loose' });
 
     const templates = {
@@ -1554,6 +1932,8 @@
       "Escreva 3 linhas soltas sobre como você quer ver esse projeto finalizado no futuro."
     ];
 
+    const TRACKED_HABIT_VERBS = ['estudei', 'treinei', 'li', 'meditei', 'programei', 'escrevi', 'caminhei'];
+
     function formatDefaultDate(d = new Date()) {
       return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
     }
@@ -1571,11 +1951,12 @@
         pages: [{
           id: pId,
           title: `Diário - ${todayFormatted}`,
-          tags: ['journal', 'engenharia'],
+          tags: ['journal', 'estudei'],
           paperOrientation: 'orientation-portrait',
           fontSize: 24,
           contentHTML: '',
           elements: [],
+          references: [],
           inkDataURL: null,
           threads: [],
           snapshots: [],
@@ -1588,17 +1969,16 @@
 
     function createInitialAppState() {
       const firstBook = createInitialBook();
-      return {
-        version: 2,
-        activeBookId: firstBook.id,
-        books: [firstBook]
-      };
+      return { version: 2, activeBookId: firstBook.id, books: [firstBook] };
     }
 
     let appState = createInitialAppState();
     let currentThreadFilter = 'all';
     let currentTagFilter = 'all';
     let activeSelectionRange = null;
+
+    // Estado da visualização mensal do Habit Tracker
+    let habitViewDate = new Date();
 
     function getActiveBook() {
       let book = appState.books.find(b => b.id === appState.activeBookId);
@@ -1623,6 +2003,7 @@
         if (!page.snapshots) page.snapshots = [];
         if (!page.elements) page.elements = [];
         if (!page.tags) page.tags = [];
+        if (!page.references) page.references = [];
         if (!page.paperOrientation) page.paperOrientation = 'orientation-portrait';
         if (!page.fontSize) page.fontSize = 24;
         if (page.isSoftwareProject === undefined) page.isSoftwareProject = false;
@@ -1630,9 +2011,6 @@
       return page;
     }
 
-    /* ==========================================================================
-       3. SINCRONIZAÇÃO E PERSISTÊNCIA
-       ========================================================================== */
     let isCanvasDirtySinceLoad = false;
     let currentLoadedInkPageId = null;
 
@@ -1663,15 +2041,10 @@
       }, 300);
     }
 
-    /* MIGRADOR AUTOMÁTICO (Capítulos -> Tags) */
     function migrateLegacyData(parsed) {
       if (!parsed) return createInitialAppState();
+      if (parsed.version === 2 && Array.isArray(parsed.books)) return parsed;
 
-      if (parsed.version === 2 && Array.isArray(parsed.books)) {
-        return parsed;
-      }
-
-      // Migração se possuir capítulos
       if (parsed.books && Array.isArray(parsed.books)) {
         parsed.books.forEach(b => {
           if (b.chapters && Array.isArray(b.chapters)) {
@@ -1680,6 +2053,7 @@
               const tagFromChap = (c.title || '').replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚãõÃÕâêîôûÂÊÎÔÛçÇ_-]/g, '').toLowerCase() || 'geral';
               (c.pages || []).forEach(p => {
                 if (!p.tags) p.tags = [];
+                if (!p.references) p.references = [];
                 if (!p.tags.includes(tagFromChap)) p.tags.push(tagFromChap);
                 b.pages.push(p);
               });
@@ -1691,27 +2065,22 @@
         parsed.version = 2;
         return parsed;
       }
-
       return createInitialAppState();
     }
 
     async function loadFromStorage() {
       let data = await dbGet('craft_notebook_v2_data');
       if (!data) {
-        // Tenta recuperar do localStorage legado
         const legacyRaw = localStorage.getItem('scrapbook_craft_data');
         if (legacyRaw) {
           try { data = JSON.parse(legacyRaw); } catch (e) {}
         }
       }
-
       appState = migrateLegacyData(data);
       renderAll();
     }
 
-    /* ==========================================================================
-       4. HISTÓRICO UNDO / REDO
-       ========================================================================== */
+    /* HISTÓRICO UNDO / REDO */
     let undoStack = [], redoStack = [], isPerformingUndoRedo = false, historyDebounce = null;
     function initHistory(html = '') { undoStack = [html]; redoStack = []; }
     function pushHistoryState(html, immediate = false) {
@@ -1787,9 +2156,7 @@
       syncInkCanvasDimensions();
     }
 
-    /* ==========================================================================
-       5. DESENHO LIVRE & PINCEL
-       ========================================================================== */
+    /* PINCEL E CANVAS TOUCH-SAFE */
     let currentInkTool = 'select', isDrawingInk = false, lastInkX = 0, lastInkY = 0;
     const inkCanvas = document.getElementById('inkCanvas');
     const inkCtx = inkCanvas.getContext('2d');
@@ -1876,7 +2243,7 @@
         }
       }
 
-      if (!hasPixels) return alert('Nenhum traço livre foi desenhado para converter em card.');
+      if (!hasPixels) return alert('Nenhum traço livre desenhado para converter em card.');
 
       minX = Math.max(0, minX - 10);
       minY = Math.max(0, minY - 10);
@@ -1982,27 +2349,353 @@
     inkCanvas.addEventListener('pointercancel', stopInkDrawing);
 
     /* ==========================================================================
-       6. RENDERIZAÇÃO DA INTERFACE PLANO: PÁGINAS & TAGS
+       2. YOUTUBE EMBED PLAYER SOB DEMANDA
        ========================================================================== */
-    function renderBookSelector() {
-      const select = document.getElementById('bookSelect');
-      select.innerHTML = '';
-      appState.books.forEach(b => {
-        const opt = document.createElement('option');
-        opt.value = b.id;
-        opt.textContent = b.bookTitle || 'Sem título';
-        if (b.id === appState.activeBookId) opt.selected = true;
-        select.appendChild(opt);
-      });
-      document.getElementById('btnDeleteBook').style.display = appState.books.length > 1 ? 'inline-flex' : 'none';
+    function extractYouTubeId(url) {
+      if (!url) return null;
+      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+      const match = url.trim().match(regExp);
+      return (match && match[2].length === 11) ? match[2] : null;
     }
 
+    window.promptInsertYouTubeVideo = () => {
+      const url = prompt('Cole o link do YouTube (ex: https://youtu.be/...):');
+      if (!url) return;
+      const ytId = extractYouTubeId(url);
+      if (!ytId) return alert('Link do YouTube inválido.');
+
+      const caption = prompt('Título / Anotação para o vídeo:') || 'Vídeo de Estudo';
+      addMediaElement('video', ytId, caption, {
+        videoId: ytId,
+        isPlaying: false,
+        width: 420,
+        mode: 'flow',
+        align: 'right'
+      });
+    };
+
+    window.toggleVideoPlayer = (cardId, playState) => {
+      const page = getActivePage();
+      const item = page.elements.find(el => el.id === cardId);
+      if (!item) return;
+
+      item.isPlaying = playState;
+      renderCollageElements();
+      saveToStorage();
+    };
+
+    /* ==========================================================================
+       3. SEÇÃO DE REFERÊNCIAS ISOLADA
+       ========================================================================== */
+    window.promptAddReference = () => {
+      const title = prompt('Título da Referência / Livro / Paper:');
+      if (!title || !title.trim()) return;
+
+      const author = prompt('Autor ou Fonte (opcional):') || '';
+      const url = prompt('URL ou Link direto (opcional):') || '';
+      const note = prompt('Citação ou Comentário breve (opcional):') || '';
+
+      const page = getActivePage();
+      if (!page.references) page.references = [];
+
+      page.references.push({
+        id: 'ref_' + Date.now(),
+        title: title.trim(),
+        author: author.trim(),
+        url: url.trim(),
+        note: note.trim()
+      });
+
+      renderReferences();
+      saveToStorage();
+    };
+
+    window.deleteReference = (refId) => {
+      const page = getActivePage();
+      page.references = page.references.filter(r => r.id !== refId);
+      renderReferences();
+      saveToStorage();
+    };
+
+    function renderReferences() {
+      const page = getActivePage();
+      const container = document.getElementById('referencesListContainer');
+      const badge = document.getElementById('referencesCountBadge');
+      container.innerHTML = '';
+
+      if (!page.references || page.references.length === 0) {
+        badge.textContent = '0';
+        container.innerHTML = '<div style="font-size:11.5px; color:#a8a29e; font-style:italic;">Nenhuma referência anexada a esta anotação ainda.</div>';
+        return;
+      }
+
+      badge.textContent = page.references.length;
+
+      page.references.forEach(ref => {
+        const card = document.createElement('div');
+        card.className = 'reference-card';
+        card.innerHTML = `
+          <div class="ref-info">
+            <span class="ref-title-text">📖 ${escapeHTML(ref.title)}</span>
+            ${ref.author ? `<span class="ref-author-text">Autor / Fonte: <b>${escapeHTML(ref.author)}</b></span>` : ''}
+            ${ref.url ? `<a href="${escapeHTML(ref.url)}" target="_blank" rel="noopener noreferrer" class="ref-url-link">🔗 ${escapeHTML(ref.url)}</a>` : ''}
+            ${ref.note ? `<div class="ref-note-text">“${escapeHTML(ref.note)}”</div>` : ''}
+          </div>
+          <button class="btn-danger btn-icon" title="Excluir Referência" onclick="deleteReference('${ref.id}')">✕</button>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    /* ==========================================================================
+       4. HABIT TRACKER MENSAL DINÂMICO
+       ========================================================================== */
+    function getPageDate(page) {
+      if (page.updatedAt) {
+        const d = new Date(page.updatedAt);
+        if (!isNaN(d.getTime())) return d;
+      }
+      if (page.createdAt) {
+        const d = new Date(page.createdAt);
+        if (!isNaN(d.getTime())) return d;
+        const parts = page.createdAt.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
+        if (parts) return new Date(parts[3], parts[2] - 1, parts[1]);
+      }
+      return new Date();
+    }
+
+    window.toggleHabitVerb = (verb) => {
+      const page = getActivePage();
+      if (!page.tags) page.tags = [];
+
+      const cleanVerb = verb.toLowerCase();
+      const idx = page.tags.indexOf(cleanVerb);
+
+      if (idx >= 0) page.tags.splice(idx, 1);
+      else page.tags.push(cleanVerb);
+
+      saveToStorage();
+      renderPageTags();
+      renderNavigation();
+      updateHabitsToolbarActiveState();
+    };
+
+    function updateHabitsToolbarActiveState() {
+      const page = getActivePage();
+      const tags = page ? (page.tags || []) : [];
+      document.querySelectorAll('.btn-habit-verb').forEach(btn => {
+        const verb = btn.textContent.replace(/^#/, '').toLowerCase();
+        btn.classList.toggle('active', tags.includes(verb));
+      });
+    }
+
+    document.getElementById('btnOpenHabits').onclick = () => {
+      closeDrawers();
+      renderHabitTrackerSummary();
+      document.getElementById('habitsDrawer').classList.add('open');
+    };
+
+    window.changeHabitMonth = (delta) => {
+      habitViewDate.setMonth(habitViewDate.getMonth() + delta);
+      renderHabitTrackerSummary();
+    };
+
+    function renderHabitTrackerSummary() {
+      const container = document.getElementById('habitsSummaryContainer');
+      container.innerHTML = '';
+      const book = getActiveBook();
+
+      const viewYear = habitViewDate.getFullYear();
+      const viewMonth = habitViewDate.getMonth();
+      const realNow = new Date();
+      const isCurrentMonth = (viewYear === realNow.getFullYear() && viewMonth === realNow.getMonth());
+      const todayDate = realNow.getDate();
+
+      const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+      const monthName = habitViewDate.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+
+      // Agrupa hábitos conhecidos e personalizados
+      const foundHabits = new Set(TRACKED_HABIT_VERBS);
+      book.pages.forEach(p => (p.tags || []).forEach(t => {
+        if (t.endsWith('ei') || t.endsWith('ou') || t.endsWith('i')) foundHabits.add(t);
+      }));
+      const habitList = Array.from(foundHabits);
+
+      // Mapeia dias do mês: { 1: Set(), 2: Set(), ... }
+      const habitByDay = {};
+      for (let d = 1; d <= daysInMonth; d++) habitByDay[d] = new Set();
+
+      book.pages.forEach(p => {
+        const pDate = getPageDate(p);
+        if (pDate.getFullYear() === viewYear && pDate.getMonth() === viewMonth) {
+          const dNum = pDate.getDate();
+          const content = (p.contentHTML || '').toLowerCase();
+          habitList.forEach(h => {
+            if ((p.tags || []).includes(h) || content.includes('#' + h)) {
+              habitByDay[dNum].add(h);
+            }
+          });
+        }
+      });
+
+      let theadCells = `<th style="text-align:left; padding-left:8px; min-width:105px; position:sticky; left:0; background:#f8fafc; z-index:2;">Hábito</th>`;
+      for (let d = 1; d <= daysInMonth; d++) {
+        const isToday = isCurrentMonth && (d === todayDate);
+        theadCells += `<th style="${isToday ? 'background:#fef08a; color:#78350f; font-weight:800;' : ''}">${d}</th>`;
+      }
+
+      let tbodyRows = '';
+      let totalDoneInMonth = 0;
+
+      habitList.forEach(habit => {
+        tbodyRows += `<tr><td style="text-align:left; font-weight:600; padding-left:8px; position:sticky; left:0; background:#fff; z-index:2; border-right:1px solid #cbd5e1;">#${escapeHTML(habit)}</td>`;
+        for (let d = 1; d <= daysInMonth; d++) {
+          const done = habitByDay[d].has(habit);
+          const isToday = isCurrentMonth && (d === todayDate);
+          const isFuture = (isCurrentMonth && d > todayDate) || (!isCurrentMonth && habitViewDate > realNow);
+
+          if (done) {
+            totalDoneInMonth++;
+            tbodyRows += `<td class="habit-cell-done" title="Dia ${d}: Feito!">✓</td>`;
+          } else if (isFuture) {
+            tbodyRows += `<td class="habit-cell-future" title="Dia ${d}">·</td>`;
+          } else {
+            tbodyRows += `<td class="habit-cell-empty" style="${isToday ? 'background:#fef9c3;' : ''}" title="Dia ${d}: Não registrado">—</td>`;
+          }
+        }
+        tbodyRows += `</tr>`;
+      });
+
+      container.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; background:#f0fdf4; border:1px solid #bbf7d0; padding:10px 14px; border-radius:6px; margin-bottom:12px;">
+          <div>
+            <div style="font-size:13.5px; font-weight:700; color:#166534; text-transform:capitalize;">📅 ${monthName}</div>
+            <div style="font-size:11px; color:#15803d; margin-top:2px;">
+              ${isCurrentMonth ? `Hoje é dia <b>${todayDate}</b> • ` : ''}<b>${totalDoneInMonth}</b> hábitos concluídos
+            </div>
+          </div>
+          <div style="display:flex; gap:4px;">
+            <button type="button" class="btn" style="padding:2px 8px; font-size:11px;" onclick="changeHabitMonth(-1)">‹</button>
+            <button type="button" class="btn" style="padding:2px 8px; font-size:11px;" onclick="changeHabitMonth(1)">›</button>
+          </div>
+        </div>
+
+        <div style="overflow-x:auto; max-width:100%; border:1px solid #e2e8f0; border-radius:6px; background:#fff;">
+          <table class="habit-matrix-table">
+            <thead><tr>${theadCells}</tr></thead>
+            <tbody>${tbodyRows}</tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    /* ==========================================================================
+       5. DROPDOWN DE CADERNOS & POPOVER
+       ========================================================================== */
+    const bookDropdownArrow = document.getElementById('btnBookDropdownArrow');
+    const bookDropdownPopover = document.getElementById('bookDropdownPopover');
+    const bookTitleInput = document.getElementById('bookTitleInput');
+
+    function toggleBookPopover(show = null) {
+      const isOpen = show !== null ? show : !bookDropdownPopover.classList.contains('open');
+      bookDropdownPopover.classList.toggle('open', isOpen);
+      bookDropdownArrow.classList.toggle('open', isOpen);
+    }
+
+    bookDropdownArrow.onclick = (e) => {
+      e.stopPropagation();
+      toggleBookPopover();
+    };
+
+    bookTitleInput.addEventListener('click', (e) => {
+      if (!bookDropdownPopover.classList.contains('open')) {
+        toggleBookPopover(true);
+      }
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('#bookDropdownContainer')) {
+        toggleBookPopover(false);
+      }
+    });
+
+    function renderBookSelector() {
+      const book = getActiveBook();
+      bookTitleInput.value = book.bookTitle || 'Meu Caderno';
+      document.title = `${book.bookTitle || 'Caderno'} - Journaling & Engenharia`;
+
+      const listContainer = document.getElementById('bookPopoverList');
+      listContainer.innerHTML = '';
+
+      appState.books.forEach(b => {
+        const item = document.createElement('div');
+        const isActive = b.id === appState.activeBookId;
+        item.className = `book-popover-item ${isActive ? 'active' : ''}`;
+        item.innerHTML = `
+          <span>📖 ${escapeHTML(b.bookTitle || 'Sem título')}</span>
+          ${isActive ? '<span style="font-size:10px; color:#fef08a; font-weight:700;">Atual</span>' : ''}
+        `;
+        item.onclick = (e) => {
+          e.stopPropagation();
+          switchBook(b.id);
+          toggleBookPopover(false);
+        };
+        listContainer.appendChild(item);
+      });
+
+      const btnDelete = document.getElementById('btnDeleteBookPopover');
+      btnDelete.style.display = appState.books.length > 1 ? 'block' : 'none';
+    }
+
+    document.getElementById('btnNewBookPopover').onclick = (e) => {
+      e.stopPropagation();
+      const title = prompt('Nome do novo Caderno:', `Caderno ${appState.books.length + 1}`);
+      if (!title || !title.trim()) return;
+      syncCurrentPageToState();
+      const newBook = createInitialBook(title.trim());
+      appState.books.push(newBook);
+      appState.activeBookId = newBook.id;
+      toggleBookPopover(false);
+      renderAll();
+      saveToStorage();
+    };
+
+    document.getElementById('btnDeleteBookPopover').onclick = (e) => {
+      e.stopPropagation();
+      if (appState.books.length <= 1) return alert('Você deve manter pelo menos um caderno.');
+      const book = getActiveBook();
+      if (!confirm(`Excluir o caderno "${book.bookTitle}" e todas as suas anotações?`)) return;
+      appState.books = appState.books.filter(b => b.id !== book.id);
+      appState.activeBookId = appState.books[0].id;
+      toggleBookPopover(false);
+      renderAll();
+      saveToStorage();
+    };
+
+    bookTitleInput.addEventListener('input', (e) => {
+      const book = getActiveBook();
+      book.bookTitle = e.target.value.trim() || 'Meu Caderno';
+      document.title = `${book.bookTitle} - Journaling & Engenharia`;
+      saveToStorage();
+    });
+
+    window.switchBook = (bookId) => {
+      syncCurrentPageToState();
+      inkCtx.clearRect(0, 0, inkCanvas.width, inkCanvas.height);
+      isCanvasDirtySinceLoad = false;
+      appState.activeBookId = bookId;
+      renderAll();
+      saveToStorage();
+    };
+
+    /* ==========================================================================
+       6. NAVEGAÇÃO, PÁGINAS & TAGS
+       ========================================================================== */
     function renderTagFilterBar() {
       const bar = document.getElementById('tagFilterBar');
       bar.innerHTML = '';
       const book = getActiveBook();
 
-      // Agrupa todas as tags únicas usadas nas páginas
       const allTags = new Set();
       book.pages.forEach(p => (p.tags || []).forEach(t => allTags.add(t)));
 
@@ -2035,7 +2728,7 @@
       }
 
       if (filteredPages.length === 0) {
-        pList.innerHTML = '<li style="padding:12px 10px; font-size:11px; color:#a8a29e; text-align:center;">Nenhuma página encontrada para esta tag.</li>';
+        pList.innerHTML = '<li style="padding:12px 10px; font-size:11px; color:#a8a29e; text-align:center;">Nenhuma página para esta tag.</li>';
         return;
       }
 
@@ -2049,7 +2742,7 @@
           <div class="nav-item-top">
             <span>${p.isSoftwareProject ? '💻' : '📄'} ${escapeHTML(p.title || 'Sem título')}</span>
             <div class="nav-actions">
-              ${book.pages.length > 1 ? `<button class="btn-danger btn-icon" title="Excluir página" onclick="deletePage(event, '${p.id}')">✕</button>` : ''}
+              ${book.pages.length > 1 ? `<button class="btn-danger btn-icon" title="Excluir" onclick="deletePage(event, '${p.id}')">✕</button>` : ''}
             </div>
           </div>
           <div class="nav-item-meta">
@@ -2064,7 +2757,7 @@
           book.activePageId = p.id;
           renderAll();
           saveToStorage();
-          if (window.innerWidth <= 860) toggleMobileSidebar(false);
+          if (window.innerWidth <= 768) toggleMobileSidebar(false);
         };
         pList.appendChild(li);
       });
@@ -2078,7 +2771,8 @@
 
       (page.tags || []).forEach((tag, idx) => {
         const chip = document.createElement('span');
-        chip.className = 'page-tag-chip';
+        const isHabit = TRACKED_HABIT_VERBS.includes(tag.toLowerCase()) || tag.endsWith('ei') || tag.endsWith('ou');
+        chip.className = `page-tag-chip ${isHabit ? 'habit-tag' : ''}`;
         chip.innerHTML = `#${escapeHTML(tag)} <button onclick="removePageTag(${idx})" title="Remover tag">✕</button>`;
         container.appendChild(chip);
       });
@@ -2086,7 +2780,7 @@
       const input = document.createElement('input');
       input.type = 'text';
       input.className = 'page-tag-input';
-      input.placeholder = '+ #tag e Enter';
+      input.placeholder = '+ #tag ou verbo';
       input.onkeydown = (e) => {
         if (e.key === 'Enter' && input.value.trim()) {
           e.preventDefault();
@@ -2096,6 +2790,7 @@
             saveToStorage();
             renderPageTags();
             renderNavigation();
+            updateHabitsToolbarActiveState();
           }
           input.value = '';
         }
@@ -2110,13 +2805,10 @@
       saveToStorage();
       renderPageTags();
       renderNavigation();
+      updateHabitsToolbarActiveState();
     };
 
     function renderPageContent() {
-      const book = getActiveBook();
-      document.getElementById('bookTitleInput').value = book.bookTitle || 'Meu Caderno';
-      document.title = `${book.bookTitle || 'Caderno'} - Journaling & Engenharia`;
-
       const page = getActivePage();
       if (!page) return;
 
@@ -2144,7 +2836,9 @@
       document.getElementById('ignitionBox').classList.toggle('hidden', !isBlank);
 
       renderPageTags();
+      updateHabitsToolbarActiveState();
       renderCollageElements();
+      renderReferences();
       renderThreads();
       initHistory(page.contentHTML || '');
       setInkTool('select');
@@ -2161,9 +2855,6 @@
       renderPageContent();
     }
 
-    /* ==========================================================================
-       7. GESTÃO DE PÁGINAS & CADERNOS
-       ========================================================================== */
     document.getElementById('btnAddPage').onclick = () => {
       const book = getActiveBook();
       syncCurrentPageToState();
@@ -2178,6 +2869,7 @@
         fontSize: 24,
         contentHTML: '',
         elements: [],
+        references: [],
         inkDataURL: null,
         threads: [],
         snapshots: [],
@@ -2189,7 +2881,7 @@
       book.activePageId = nPid;
       renderAll();
       saveToStorage();
-      if (window.innerWidth <= 860) toggleMobileSidebar(false);
+      if (window.innerWidth <= 768) toggleMobileSidebar(false);
     };
 
     window.deletePage = (e, pId) => {
@@ -2199,36 +2891,6 @@
       if (!confirm('Excluir esta página permanentemente?')) return;
       book.pages = book.pages.filter(p => p.id !== pId);
       book.activePageId = book.pages[0].id;
-      renderAll();
-      saveToStorage();
-    };
-
-    window.switchBook = (bookId) => {
-      syncCurrentPageToState();
-      inkCtx.clearRect(0, 0, inkCanvas.width, inkCanvas.height);
-      isCanvasDirtySinceLoad = false;
-      appState.activeBookId = bookId;
-      renderAll();
-      saveToStorage();
-    };
-
-    document.getElementById('btnNewBook').onclick = () => {
-      const title = prompt('Nome do novo Caderno / Projeto:', `Projeto ${appState.books.length + 1}`);
-      if (!title || !title.trim()) return;
-      syncCurrentPageToState();
-      const newBook = createInitialBook(title.trim());
-      appState.books.push(newBook);
-      appState.activeBookId = newBook.id;
-      renderAll();
-      saveToStorage();
-    };
-
-    document.getElementById('btnDeleteBook').onclick = () => {
-      if (appState.books.length <= 1) return alert('Você deve manter pelo menos um caderno.');
-      const book = getActiveBook();
-      if (!confirm(`Excluir caderno "${book.bookTitle}"?`)) return;
-      appState.books = appState.books.filter(b => b.id !== book.id);
-      appState.activeBookId = appState.books[0].id;
       renderAll();
       saveToStorage();
     };
@@ -2251,62 +2913,227 @@
     };
 
     /* ==========================================================================
-       8. TEMPLATES & ANTI-BLOQUEIO
+       7. CARDS SCRAPBOOK & MÍDIAS
        ========================================================================== */
-    window.dismissIgnition = () => document.getElementById('ignitionBox').classList.add('hidden');
-
-    window.applyTemplate = (key) => {
+    function renderCollageElements() {
+      const container = document.getElementById('collageContainer');
       const editor = document.getElementById('textEditor');
-      let tplHTML = '';
+      container.querySelectorAll('.craft-media-card').forEach(el => el.remove());
 
-      if (key === 'braindump') {
-        tplHTML = `
-          <h2 class="craft-h2">⚡ Descarrego Mental Livre</h2>
-          <p><i>(Escreva sem censura nem ordem, apenas esvaziando a mente)</i></p>
-          <p>• O que está ocupando espaço na cabeça hoje: </p>
-          <p>• O que está me travando: </p>
-          <p><br></p>
+      const page = getActivePage();
+      if (!page.elements) page.elements = [];
+
+      page.elements.forEach(item => {
+        const el = createCraftMediaCard(item);
+        if (item.mode === 'free') container.appendChild(el);
+        else container.insertBefore(el, editor);
+      });
+      updateInfinitePageHeight();
+    }
+
+    function createCraftMediaCard(item) {
+      const div = document.createElement('div');
+      const isFree = item.mode === 'free';
+      const type = item.type;
+
+      let styleClass = 'style-polaroid';
+      if (type === 'video') styleClass = 'style-video';
+      if (type === 'drawing') styleClass = 'style-drawing';
+      if (type === 'sticky') styleClass = 'style-sticky';
+      if (type === 'audio') styleClass = 'style-cassette';
+      if (type === 'file') styleClass = 'style-filetag';
+      if (type === 'diagram') styleClass = 'style-diagram';
+
+      div.className = `craft-media-card ${styleClass} ${isFree ? 'mode-free' : `mode-flow align-${item.align || 'right'}`}`;
+      div.id = item.id;
+      div.style.width = (item.width || (type === 'video' ? 420 : (type === 'diagram' ? 440 : (type === 'sticky' ? 240 : 300)))) + 'px';
+
+      if (isFree) {
+        div.style.left = (item.x || 20) + 'px';
+        div.style.top = (item.y || 30) + 'px';
+      }
+
+      let inner = '';
+      if (type === 'video') {
+        const isPlaying = !!item.isPlaying;
+        inner = `
+          ${isPlaying ? `
+            <iframe class="video-player-frame" src="https://www.youtube-nocookie.com/embed/${item.videoId}?autoplay=1&enablejsapi=1" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"></iframe>
+          ` : `
+            <div class="video-thumb-container">
+              <img src="https://img.youtube.com/vi/${item.videoId}/hqdefault.jpg" class="video-thumb-img" alt="Thumbnail Vídeo" />
+              <div class="video-play-overlay" title="Assistir Vídeo" onclick="toggleVideoPlayer('${item.id}', true)">▶</div>
+            </div>
+          `}
+          <div class="video-controls-bar">
+            <input type="text" class="video-title-input" value="${escapeHTML(item.caption || '')}" placeholder="Legenda do vídeo..." oninput="updateItemCaption('${item.id}', this.value)" />
+            ${isPlaying ? `
+              <button class="btn-danger" style="padding:2px 6px; font-size:10px;" onclick="toggleVideoPlayer('${item.id}', false)">⏹ Fechar Player</button>
+            ` : `
+              <button class="btn-dark" style="padding:2px 6px; font-size:10px;" onclick="toggleVideoPlayer('${item.id}', true)">▶ Assistir</button>
+            `}
+          </div>
         `;
-      } else if (key === 'devjournal') {
-        tplHTML = `
-          <h2 class="craft-h2">🛠️ Diário de Engenharia & Arquitetura</h2>
-          <h3 class="craft-h3">1. O Gargalo / Desafio Atual</h3>
-          <p>O que está acontecendo vs o que deveria acontecer?</p>
-          <h3 class="craft-h3">2. Alternativas e Hipóteses</h3>
-          <p>• Opção 1: </p>
-          <p>• Opção 2: </p>
-          <h3 class="craft-h3">3. Próximo Passo Prático</h3>
-          <p>O que será testado agora: </p>
-          <p><br></p>
+      } else if (type === 'drawing') {
+        inner = `<div class="drawing-media-box" style="width:100%; display:flex; justify-content:center;"><img src="${item.src}" style="width:100%; height:auto; display:block; pointer-events:none;" /></div>`;
+      } else if (type === 'image') {
+        inner = `
+          <div class="polaroid-media-box"><img src="${item.src}" alt="Foto" /></div>
+          <input type="text" class="polaroid-caption" value="${escapeHTML(item.caption || '')}" placeholder="Legenda..." oninput="updateItemCaption('${item.id}', this.value)" />
         `;
-      } else if (key === 'projectpolish') {
-        tplHTML = `
-          <h2 class="craft-h2">🎯 Lapidação do Projeto</h2>
-          <h3 class="craft-h3">Objetivo Central</h3>
-          <p>Qual é a regra de ouro ou o propósito desta entrega?</p>
-          <h3 class="craft-h3">O que NÃO faremos (Eliminar Complexidade)</h3>
-          <p>• Fora do escopo para manter a simplicidade: </p>
-          <p><br></p>
+      } else if (type === 'sticky') {
+        inner = `<div class="sticky-content-area" contenteditable="true" oninput="updateStickyContent('${item.id}', this.innerHTML)">${item.text || ''}</div>`;
+      } else if (type === 'audio') {
+        inner = `
+          <div class="cassette-label-header"><span>📼</span><input type="text" class="cassette-title-input" value="${escapeHTML(item.caption || 'Áudio')}" oninput="updateItemCaption('${item.id}', this.value)" /></div>
+          <div class="cassette-reels"><span>● SIDE A ●</span><span>VOICE MEMO</span></div>
+          <audio controls src="${item.src}" style="width:100%; height:30px; filter:invert(0.9); border-radius:4px;"></audio>
         `;
-      } else if (key === 'randomprompt') {
-        const p = PROMPTS[Math.floor(Math.random() * PROMPTS.length)];
-        tplHTML = `
-          <blockquote class="craft-quote">“${p}”<cite>— Pergunta Destravadora</cite></blockquote>
-          <p>Minha resposta sincera: </p>
-          <p><br></p>
+      } else if (type === 'file') {
+        inner = `
+          <div class="filetag-paperclip">📎</div>
+          <div class="filetag-body">
+            <input type="text" class="filetag-name-input" value="${escapeHTML(item.caption || item.fileName || 'Arquivo')}" oninput="updateItemCaption('${item.id}', this.value)" />
+            <div class="filetag-footer">
+              <span style="font-size:10px; color:#78716c; font-weight:600;">${item.fileSize || 'Arquivo'}</span>
+              <a href="${item.src}" download="${item.fileName || 'arquivo'}" class="btn" style="padding:1px 6px; font-size:9.5px;">⬇ Baixar</a>
+            </div>
+          </div>
+        `;
+      } else if (type === 'diagram') {
+        inner = `
+          <div class="diagram-viewport">${item.svgData}</div>
+          <input type="text" class="diagram-caption" value="${escapeHTML(item.caption || 'Diagrama')}" placeholder="Título..." oninput="updateItemCaption('${item.id}', this.value)" />
         `;
       }
 
-      editor.innerHTML = tplHTML;
-      dismissIgnition();
-      syncCurrentPageToState();
-      pushHistoryState(editor.innerHTML, true);
+      div.innerHTML = `
+        <div class="frame-quick-actions">
+          <button class="frame-drag-handle" title="Arrastar">✥</button>
+          <button title="Flutuar à Esquerda" onclick="setItemAlign('${item.id}', 'left')">⇦</button>
+          <button title="Centralizado" onclick="setItemAlign('${item.id}', 'center')">◽</button>
+          <button title="Flutuar à Direita" onclick="setItemAlign('${item.id}', 'right')">⇨</button>
+          <button class="btn-danger" title="Excluir" onclick="deleteMediaElement('${item.id}')">✕</button>
+        </div>
+        ${inner}
+        <div class="resize-handle" title="Redimensionar"></div>
+      `;
+
+      setupCardInteractions(div, item);
+      return div;
+    }
+
+    function setupCardInteractions(card, item) {
+      const drag = card.querySelector('.frame-drag-handle');
+      const resize = card.querySelector('.resize-handle');
+
+      if (drag) {
+        drag.addEventListener('pointerdown', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          if (item.mode !== 'free') {
+            item.mode = 'free';
+            item.x = card.offsetLeft;
+            item.y = card.offsetTop;
+            renderCollageElements();
+            return;
+          }
+          card.classList.add('dragging');
+          try { drag.setPointerCapture(e.pointerId); } catch {}
+          const startX = e.clientX, startY = e.clientY;
+          const origL = card.offsetLeft, origT = card.offsetTop;
+
+          function onMove(ev) {
+            const nl = Math.max(0, origL + (ev.clientX - startX));
+            const nt = Math.max(0, origT + (ev.clientY - startY));
+            card.style.left = nl + 'px';
+            card.style.top = nt + 'px';
+            item.x = nl; item.y = nt;
+            updateInfinitePageHeight();
+          }
+          function onUp(ev) {
+            card.classList.remove('dragging');
+            try { if (drag.hasPointerCapture(ev.pointerId)) drag.releasePointerCapture(ev.pointerId); } catch {}
+            window.removeEventListener('pointermove', onMove);
+            window.removeEventListener('pointerup', onUp);
+            updateInfinitePageHeight();
+            saveToStorage();
+          }
+          window.addEventListener('pointermove', onMove);
+          window.addEventListener('pointerup', onUp);
+        });
+      }
+
+      if (resize) {
+        resize.addEventListener('pointerdown', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          try { resize.setPointerCapture(e.pointerId); } catch {}
+          const startX = e.clientX, startW = card.offsetWidth;
+
+          function onResize(ev) {
+            const nw = Math.max(120, Math.min(startW + (ev.clientX - startX), 1200));
+            card.style.width = nw + 'px';
+            item.width = nw;
+          }
+          function onUpResize(ev) {
+            try { if (resize.hasPointerCapture(ev.pointerId)) resize.releasePointerCapture(ev.pointerId); } catch {}
+            window.removeEventListener('pointermove', onResize);
+            window.removeEventListener('pointerup', onUpResize);
+            updateInfinitePageHeight();
+            saveToStorage();
+          }
+          window.addEventListener('pointermove', onResize);
+          window.addEventListener('pointerup', onUpResize);
+        });
+      }
+    }
+
+    function addMediaElement(type, srcOrData, defaultCaption = '', extra = {}) {
+      const page = getActivePage();
+      if (!page.elements) page.elements = [];
+
+      const newItem = {
+        id: 'media_' + Date.now(),
+        type: type,
+        src: (type === 'image' || type === 'drawing' || type === 'audio' || type === 'file') ? srcOrData : null,
+        svgData: type === 'diagram' ? srcOrData : null,
+        text: type === 'sticky' ? srcOrData : null,
+        caption: defaultCaption,
+        width: extra.width || (type === 'video' ? 420 : (type === 'diagram' ? 440 : (type === 'sticky' ? 240 : (type === 'drawing' ? 200 : 300)))),
+        mode: extra.mode || 'flow',
+        align: extra.align || 'right',
+        x: extra.x !== undefined ? extra.x : 30,
+        y: extra.y !== undefined ? extra.y : 40,
+        ...extra
+      };
+
+      page.elements.push(newItem);
+      renderCollageElements();
       saveToStorage();
-      editor.focus();
+    }
+
+    window.setItemAlign = (id, align) => {
+      const item = getActivePage().elements.find(el => el.id === id);
+      if (item) { item.mode = 'flow'; item.align = align; renderCollageElements(); saveToStorage(); }
+    };
+    window.updateItemCaption = (id, cap) => {
+      const item = getActivePage().elements.find(el => el.id === id);
+      if (item) { item.caption = cap; saveToStorage(); }
+    };
+    window.updateStickyContent = (id, txt) => {
+      const item = getActivePage().elements.find(el => el.id === id);
+      if (item) { item.text = txt; saveToStorage(); }
+    };
+    window.deleteMediaElement = (id) => {
+      const page = getActivePage();
+      page.elements = page.elements.filter(el => el.id !== id);
+      renderCollageElements();
+      saveToStorage();
     };
 
     /* ==========================================================================
-       9. PROGRAMAÇÃO LITERADA, TANGLING & CÓDIGO
+       8. CÓDIGO LITERADO & PROGRAMAÇÃO
        ========================================================================== */
     const LANG_EXTENSIONS = {
       python: '.py', javascript: '.js', typescript: '.ts', sql: '.sql',
@@ -2504,7 +3331,7 @@
     }
 
     /* ==========================================================================
-       10. MODO THREAD EVOLUÍDO & CONSOLIDAÇÃO DE DECISÕES
+       9. THREADS DE LAPIDAÇÃO
        ========================================================================== */
     document.addEventListener('selectionchange', () => {
       const sel = window.getSelection();
@@ -2567,7 +3394,6 @@
       const mark = document.createElement('mark');
       mark.className = 'craft-highlight';
       mark.setAttribute('data-thread-id', threadId);
-      mark.title = 'Clique para ver a discussão / hipótese';
 
       try {
         activeSelectionRange.surroundContents(mark);
@@ -2626,11 +3452,7 @@
       if (focusThreadId) {
         setTimeout(() => {
           const card = document.getElementById(`card_${focusThreadId}`);
-          if (card) {
-            card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            card.classList.add('highlight-target');
-            setTimeout(() => card.classList.remove('highlight-target'), 2000);
-          }
+          if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }, 150);
       }
     }
@@ -2724,7 +3546,7 @@
           </div>
 
           <div style="display:flex; flex-direction:column; gap:4px;">
-            ${commentsHTML || '<small style="color:#a8a29e; font-size:10px;">Nenhuma anotação nesta thread ainda.</small>'}
+            ${commentsHTML || '<small style="color:#a8a29e; font-size:10px;">Sem comentários ainda.</small>'}
           </div>
 
           <div style="display:flex; gap:3px;">
@@ -2737,7 +3559,7 @@
               <button style="font-size:10px; padding:2px 6px;" onclick="toggleResolveThread('${th.id}')">
                 ${th.resolved ? '🔄 Reabrir' : '✓ Resolver'}
               </button>
-              <button style="font-size:10px; padding:2px 6px;" class="btn-dark" title="Inserir a conclusão desta discussão diretamente no texto como uma decisão consolidada" onclick="consolidateThreadToDocument('${th.id}')">
+              <button style="font-size:10px; padding:2px 6px;" class="btn-dark" title="Consolidar decisão no texto" onclick="consolidateThreadToDocument('${th.id}')">
                 📌 Consolidar Decisão
               </button>
             </div>
@@ -2774,7 +3596,7 @@
     };
 
     window.replyToComment = (threadId, commentId) => {
-      const reply = prompt('Sua resposta / desdobramento:');
+      const reply = prompt('Sua resposta:');
       if (!reply || !reply.trim()) return;
       const page = getActivePage();
       const thread = page.threads.find(t => t.id === threadId);
@@ -2832,7 +3654,7 @@
 
       saveToStorage();
       renderThreads();
-      alert('Decisão consolidada e anexada ao corpo do documento com sucesso!');
+      alert('Decisão consolidada e anexada ao corpo da nota com sucesso!');
     };
 
     window.deleteThread = (threadId) => {
@@ -2852,206 +3674,7 @@
     };
 
     /* ==========================================================================
-       11. CARDS, MÍDIAS & ANEXOS
-       ========================================================================== */
-    function renderCollageElements() {
-      const container = document.getElementById('collageContainer');
-      const editor = document.getElementById('textEditor');
-      container.querySelectorAll('.craft-media-card').forEach(el => el.remove());
-
-      const page = getActivePage();
-      if (!page.elements) page.elements = [];
-
-      page.elements.forEach(item => {
-        const el = createCraftMediaCard(item);
-        if (item.mode === 'free') container.appendChild(el);
-        else container.insertBefore(el, editor);
-      });
-      updateInfinitePageHeight();
-    }
-
-    function createCraftMediaCard(item) {
-      const div = document.createElement('div');
-      const isFree = item.mode === 'free';
-      const type = item.type;
-
-      let styleClass = 'style-polaroid';
-      if (type === 'drawing') styleClass = 'style-drawing';
-      if (type === 'sticky') styleClass = 'style-sticky';
-      if (type === 'audio') styleClass = 'style-cassette';
-      if (type === 'file') styleClass = 'style-filetag';
-      if (type === 'diagram') styleClass = 'style-diagram';
-
-      div.className = `craft-media-card ${styleClass} ${isFree ? 'mode-free' : `mode-flow align-${item.align || 'right'}`}`;
-      div.id = item.id;
-      div.style.width = (item.width || (type === 'diagram' ? 440 : (type === 'sticky' ? 240 : 300))) + 'px';
-
-      if (isFree) {
-        div.style.left = (item.x || 20) + 'px';
-        div.style.top = (item.y || 30) + 'px';
-      }
-
-      let inner = '';
-      if (type === 'drawing') {
-        inner = `<div class="drawing-media-box" style="width:100%; display:flex; justify-content:center;"><img src="${item.src}" style="width:100%; height:auto; display:block; pointer-events:none;" /></div>`;
-      } else if (type === 'image') {
-        inner = `
-          <div class="polaroid-media-box"><img src="${item.src}" alt="Foto" /></div>
-          <input type="text" class="polaroid-caption" value="${escapeHTML(item.caption || '')}" placeholder="Legenda..." oninput="updateItemCaption('${item.id}', this.value)" />
-        `;
-      } else if (type === 'sticky') {
-        inner = `<div class="sticky-content-area" contenteditable="true" oninput="updateStickyContent('${item.id}', this.innerHTML)">${item.text || ''}</div>`;
-      } else if (type === 'audio') {
-        inner = `
-          <div class="cassette-label-header"><span>📼</span><input type="text" class="cassette-title-input" value="${escapeHTML(item.caption || 'Áudio')}" oninput="updateItemCaption('${item.id}', this.value)" /></div>
-          <div class="cassette-reels"><span>● SIDE A ●</span><span>VOICE MEMO</span></div>
-          <audio controls src="${item.src}" style="width:100%; height:30px; filter:invert(0.9); border-radius:4px;"></audio>
-        `;
-      } else if (type === 'file') {
-        inner = `
-          <div class="filetag-paperclip">📎</div>
-          <div class="filetag-body">
-            <input type="text" class="filetag-name-input" value="${escapeHTML(item.caption || item.fileName || 'Arquivo')}" oninput="updateItemCaption('${item.id}', this.value)" />
-            <div class="filetag-footer">
-              <span style="font-size:10px; color:#78716c; font-weight:600;">${item.fileSize || 'Arquivo'}</span>
-              <a href="${item.src}" download="${item.fileName || 'arquivo'}" class="btn" style="padding:1px 6px; font-size:9.5px;">⬇ Baixar</a>
-            </div>
-          </div>
-        `;
-      } else if (type === 'diagram') {
-        inner = `
-          <div class="diagram-viewport">${item.svgData}</div>
-          <input type="text" class="diagram-caption" value="${escapeHTML(item.caption || 'Diagrama')}" placeholder="Título..." oninput="updateItemCaption('${item.id}', this.value)" />
-        `;
-      }
-
-      div.innerHTML = `
-        <div class="frame-quick-actions">
-          <button class="frame-drag-handle" title="Arrastar">✥</button>
-          <button title="Flutuar à Esquerda" onclick="setItemAlign('${item.id}', 'left')">⇦</button>
-          <button title="Centralizado" onclick="setItemAlign('${item.id}', 'center')">◽</button>
-          <button title="Flutuar à Direita" onclick="setItemAlign('${item.id}', 'right')">⇨</button>
-          <button class="btn-danger" title="Excluir" onclick="deleteMediaElement('${item.id}')">✕</button>
-        </div>
-        ${inner}
-        <div class="resize-handle" title="Redimensionar"></div>
-      `;
-
-      setupCardInteractions(div, item);
-      return div;
-    }
-
-    function setupCardInteractions(card, item) {
-      const drag = card.querySelector('.frame-drag-handle');
-      const resize = card.querySelector('.resize-handle');
-
-      if (drag) {
-        drag.addEventListener('pointerdown', (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          if (item.mode !== 'free') {
-            item.mode = 'free';
-            item.x = card.offsetLeft;
-            item.y = card.offsetTop;
-            renderCollageElements();
-            return;
-          }
-          card.classList.add('dragging');
-          try { drag.setPointerCapture(e.pointerId); } catch {}
-          const startX = e.clientX, startY = e.clientY;
-          const origL = card.offsetLeft, origT = card.offsetTop;
-
-          function onMove(ev) {
-            const nl = Math.max(0, origL + (ev.clientX - startX));
-            const nt = Math.max(0, origT + (ev.clientY - startY));
-            card.style.left = nl + 'px';
-            card.style.top = nt + 'px';
-            item.x = nl; item.y = nt;
-            updateInfinitePageHeight();
-          }
-          function onUp(ev) {
-            card.classList.remove('dragging');
-            try { if (drag.hasPointerCapture(ev.pointerId)) drag.releasePointerCapture(ev.pointerId); } catch {}
-            window.removeEventListener('pointermove', onMove);
-            window.removeEventListener('pointerup', onUp);
-            updateInfinitePageHeight();
-            saveToStorage();
-          }
-          window.addEventListener('pointermove', onMove);
-          window.addEventListener('pointerup', onUp);
-        });
-      }
-
-      if (resize) {
-        resize.addEventListener('pointerdown', (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          try { resize.setPointerCapture(e.pointerId); } catch {}
-          const startX = e.clientX, startW = card.offsetWidth;
-
-          function onResize(ev) {
-            const nw = Math.max(120, Math.min(startW + (ev.clientX - startX), 1200));
-            card.style.width = nw + 'px';
-            item.width = nw;
-          }
-          function onUpResize(ev) {
-            try { if (resize.hasPointerCapture(ev.pointerId)) resize.releasePointerCapture(ev.pointerId); } catch {}
-            window.removeEventListener('pointermove', onResize);
-            window.removeEventListener('pointerup', onUpResize);
-            updateInfinitePageHeight();
-            saveToStorage();
-          }
-          window.addEventListener('pointermove', onResize);
-          window.addEventListener('pointerup', onUpResize);
-        });
-      }
-    }
-
-    function addMediaElement(type, srcOrData, defaultCaption = '', extra = {}) {
-      const page = getActivePage();
-      if (!page.elements) page.elements = [];
-
-      const newItem = {
-        id: 'media_' + Date.now(),
-        type: type,
-        src: (type === 'image' || type === 'drawing' || type === 'audio' || type === 'file') ? srcOrData : null,
-        svgData: type === 'diagram' ? srcOrData : null,
-        text: type === 'sticky' ? srcOrData : null,
-        caption: defaultCaption,
-        width: type === 'diagram' ? 440 : (type === 'sticky' ? 240 : (type === 'drawing' ? (extra.width || 200) : 300)),
-        mode: extra.mode || 'flow',
-        align: extra.align || 'right',
-        x: extra.x !== undefined ? extra.x : 30,
-        y: extra.y !== undefined ? extra.y : 40,
-        ...extra
-      };
-
-      page.elements.push(newItem);
-      renderCollageElements();
-      saveToStorage();
-    }
-
-    window.setItemAlign = (id, align) => {
-      const item = getActivePage().elements.find(el => el.id === id);
-      if (item) { item.mode = 'flow'; item.align = align; renderCollageElements(); saveToStorage(); }
-    };
-    window.updateItemCaption = (id, cap) => {
-      const item = getActivePage().elements.find(el => el.id === id);
-      if (item) { item.caption = cap; saveToStorage(); }
-    };
-    window.updateStickyContent = (id, txt) => {
-      const item = getActivePage().elements.find(el => el.id === id);
-      if (item) { item.text = txt; saveToStorage(); }
-    };
-    window.deleteMediaElement = (id) => {
-      const page = getActivePage();
-      page.elements = page.elements.filter(el => el.id !== id);
-      renderCollageElements();
-      saveToStorage();
-    };
-
-    /* ==========================================================================
-       12. FORMATAÇÃO DO EDITOR
+       10. FORMATAÇÃO DO EDITOR, TABELAS & SNAPSHOTS
        ========================================================================== */
     function formatDoc(cmd, val = null) {
       document.execCommand(cmd, false, val);
@@ -3114,11 +3737,10 @@
     };
 
     document.getElementById('btnInsertQuote').onclick = () => {
-      const sel = window.getSelection().toString().trim() || 'Citação ou princípio importante...';
+      const sel = window.getSelection().toString().trim() || 'Citação ou princípio...';
       insertHtmlAtCursor(`<blockquote class="craft-quote">“${escapeHTML(sel)}”<cite>— Autor</cite></blockquote><p><br></p>`);
     };
 
-    /* INSERÇÕES: IMAGEM, ÁUDIO, ANEXOS */
     window.addEventListener('paste', (e) => {
       const items = (e.clipboardData || e.originalEvent.clipboardData).items;
       for (let item of items) {
@@ -3180,9 +3802,6 @@
       e.target.value = '';
     };
 
-    /* ==========================================================================
-       13. SNAPSHOTS, INBOX & BUSCA GLOBAL
-       ========================================================================== */
     const snapshotDrawer = document.getElementById('snapshotDrawer');
     document.getElementById('btnSaveSnapshot').onclick = () => {
       const page = getActivePage();
@@ -3199,7 +3818,7 @@
         date: new Date().toLocaleString()
       });
       saveToStorage();
-      alert('Versão arquivada com sucesso!');
+      alert('Versão arquivada!');
     };
 
     document.getElementById('btnOpenSnapshots').onclick = () => {
@@ -3279,7 +3898,7 @@
       list.innerHTML = '';
       const b = getActiveBook();
       if (!b.inboxNotes || b.inboxNotes.length === 0) {
-        list.innerHTML = '<div style="text-align:center; color:#a8a29e; font-size:11px; margin-top:20px;">Inbox livre de pendências.</div>';
+        list.innerHTML = '<div style="text-align:center; color:#a8a29e; font-size:11px; margin-top:20px;">Inbox livre.</div>';
         return;
       }
       b.inboxNotes.forEach((note, idx) => {
@@ -3357,7 +3976,6 @@
       if (count === 0) c.innerHTML = '<div style="font-size:11px; color:#a8a29e; text-align:center; padding:10px;">Nenhuma anotação encontrada.</div>';
     };
 
-    /* MODAL DE DIAGRAMAS */
     const diagramModal = document.getElementById('diagramModal');
     const mermaidCodeInput = document.getElementById('mermaidCodeInput');
     const mermaidOutput = document.getElementById('mermaidOutput');
@@ -3393,7 +4011,6 @@
       document.querySelectorAll('.side-drawer').forEach(d => d.classList.remove('open'));
     }
 
-    /* MODO MEMORIAL & ATALHOS */
     window.toggleMemorialMode = () => document.body.classList.toggle('memorial-mode');
 
     window.addEventListener('keydown', (e) => {
@@ -3432,6 +4049,7 @@
         closeDrawers();
         closeDiagramModal();
         closeSearchModal();
+        toggleBookPopover(false);
         toggleMobileSidebar(false);
       }
     });
@@ -3439,9 +4057,6 @@
     document.getElementById('btnUndo').onclick = () => executeUndo();
     document.getElementById('btnRedo').onclick = () => executeRedo();
 
-    /* ==========================================================================
-       14. EXPORTAR E IMPORTAR JSON (SCHEMA V2)
-       ========================================================================== */
     document.getElementById('btnExport').onclick = () => {
       syncCurrentPageToState();
       const currentBook = getActiveBook();
@@ -3470,7 +4085,6 @@
           if (migrated.books && Array.isArray(migrated.books)) {
             appState = migrated;
           } else if (migrated.pages && Array.isArray(migrated.pages)) {
-            // Importando um caderno único
             const newBId = 'b_' + Date.now();
             migrated.id = newBId;
             appState.books.push(migrated);
@@ -3481,7 +4095,7 @@
           isCanvasDirtySinceLoad = false;
           renderAll();
           saveToStorage();
-          alert('Caderno importado e migrado para Schema v2 com sucesso!');
+          alert('Caderno importado e sincronizado com sucesso!');
         } catch (err) {
           alert('Arquivo JSON inválido ou corrompido.');
         }
@@ -3491,7 +4105,7 @@
     };
 
     document.getElementById('btnResetAll').onclick = () => {
-      if (confirm('Atenção: Isso restaurará o caderno padrão e limpará todo o banco de dados!')) {
+      if (confirm('Atenção: Isso restaurará o caderno padrão e limpará o banco de dados!')) {
         dbSet('craft_notebook_v2_data', null);
         localStorage.removeItem('scrapbook_craft_data');
         appState = createInitialAppState();
@@ -3518,7 +4132,6 @@
       saveToStorage();
     };
 
-    /* TOOLBAR NAVEGAÇÃO HORIZONTAL */
     const paperToolbar = document.getElementById('paperToolbar');
     const btnScrollLeft = document.getElementById('btnScrollToolbarLeft');
     const btnScrollRight = document.getElementById('btnScrollToolbarRight');
