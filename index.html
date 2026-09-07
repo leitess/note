@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>Journey</title>
+  <title>Caderno de Engenharia, Hábitos & Journaling</title>
   
   <!-- Fontes -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -177,7 +177,6 @@
     }
     .btn-book-dropdown-arrow.open { transform: rotate(180deg); }
 
-    /* POPOVER FLUTUANTE */
     .book-dropdown-popover {
       position: absolute;
       top: calc(100% + 8px);
@@ -695,7 +694,7 @@
       border-color: #15803d;
     }
 
-    /* PAINEL DE IGNIÇÃO */
+    /* PAINEL DE IGNIÇÃO: CAMADA CORRIGIDA (Z-INDEX 20 & POSITION RELATIVE) */
     .ignition-box {
       background: #faf8f5;
       border: 1px dashed #d6cebf;
@@ -706,8 +705,10 @@
       flex-direction: column;
       gap: 10px;
       user-select: none;
+      position: relative;
+      z-index: 20;
     }
-    .ignition-box.hidden { display: none; }
+    .ignition-box.hidden { display: none !important; }
     .ignition-header {
       font-size: 12px;
       font-weight: 700;
@@ -828,7 +829,7 @@
     .ref-url-link:hover { text-decoration: underline; }
     .ref-note-text { font-size: 12px; color: #44403c; font-style: italic; margin-top: 2px; }
 
-    /* CARD DE VÍDEO YOUTUBE */
+    /* CARD DE VÍDEO YOUTUBE (NOCookie & Sob Demanda) */
     .style-video {
       background: #181615;
       border: 1px solid #332f2b;
@@ -1741,13 +1742,13 @@
           <div class="ignition-box" id="ignitionBox">
             <div class="ignition-header">
               <span>🚀 BLOQUEIO MENTAL? ESCOLHA UM PONTO DE PARTIDA:</span>
-              <button onclick="dismissIgnition()" style="background:transparent; border:none; color:#a8a29e; font-size:14px; cursor:pointer;">✕</button>
+              <button type="button" onclick="dismissIgnition()" style="background:transparent; border:none; color:#a8a29e; font-size:14px; cursor:pointer;">✕</button>
             </div>
             <div class="ignition-buttons">
-              <button class="btn-ignition" onclick="applyTemplate('braindump')">⚡ Descarrego Livre (Braindump)</button>
-              <button class="btn-ignition" onclick="applyTemplate('devjournal')">🛠️ Diário de Engenharia / Dev</button>
-              <button class="btn-ignition" onclick="applyTemplate('projectpolish')">🎯 Lapidação de Projeto & Decisão</button>
-              <button class="btn-ignition" onclick="applyTemplate('randomprompt')">🎲 Pergunta Destravadora</button>
+              <button type="button" class="btn-ignition" onclick="applyTemplate('braindump')">⚡ Descarrego Livre (Braindump)</button>
+              <button type="button" class="btn-ignition" onclick="applyTemplate('devjournal')">🛠️ Diário de Engenharia / Dev</button>
+              <button type="button" class="btn-ignition" onclick="applyTemplate('projectpolish')">🎯 Lapidação de Projeto & Decisão</button>
+              <button type="button" class="btn-ignition" onclick="applyTemplate('randomprompt')">🎲 Pergunta Destravadora</button>
             </div>
           </div>
 
@@ -1770,7 +1771,7 @@
         </div>
       </main>
 
-      <!-- GAVETA: RASTREADOR DE HÁBITOS (CALENDÁRIO MENSAL INTEGRADO) -->
+      <!-- GAVETA: RASTREADOR DE HÁBITOS MENSAL -->
       <aside class="side-drawer" id="habitsDrawer">
         <div class="drawer-header">
           <span style="font-weight:700; font-size:13px;">🌱 Rastreador de Hábitos Mensal</span>
@@ -1977,7 +1978,6 @@
     let currentTagFilter = 'all';
     let activeSelectionRange = null;
 
-    // Estado da visualização mensal do Habit Tracker
     let habitViewDate = new Date();
 
     function getActiveBook() {
@@ -2349,7 +2349,7 @@
     inkCanvas.addEventListener('pointercancel', stopInkDrawing);
 
     /* ==========================================================================
-       2. YOUTUBE EMBED PLAYER SOB DEMANDA
+       2. YOUTUBE EMBED PLAYER SOB DEMANDA (Com Correção de Erro 153)
        ========================================================================== */
     function extractYouTubeId(url) {
       if (!url) return null;
@@ -2514,14 +2514,12 @@
       const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
       const monthName = habitViewDate.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
 
-      // Agrupa hábitos conhecidos e personalizados
       const foundHabits = new Set(TRACKED_HABIT_VERBS);
       book.pages.forEach(p => (p.tags || []).forEach(t => {
         if (t.endsWith('ei') || t.endsWith('ou') || t.endsWith('i')) foundHabits.add(t);
       }));
       const habitList = Array.from(foundHabits);
 
-      // Mapeia dias do mês: { 1: Set(), 2: Set(), ... }
       const habitByDay = {};
       for (let d = 1; d <= daysInMonth; d++) habitByDay[d] = new Set();
 
@@ -2913,7 +2911,65 @@
     };
 
     /* ==========================================================================
-       7. CARDS SCRAPBOOK & MÍDIAS
+       7. TEMPLATES & ANTI-BLOQUEIO (FUNÇÕES GLOBAIS DE IGNIÇÃO)
+       ========================================================================== */
+    window.dismissIgnition = () => {
+      const box = document.getElementById('ignitionBox');
+      if (box) box.classList.add('hidden');
+    };
+
+    window.applyTemplate = (key) => {
+      const editor = document.getElementById('textEditor');
+      let tplHTML = '';
+
+      if (key === 'braindump') {
+        tplHTML = `
+          <h2 class="craft-h2">⚡ Descarrego Mental Livre</h2>
+          <p><i>(Escreva sem censura nem ordem, apenas esvaziando a mente)</i></p>
+          <p>• O que está ocupando espaço na cabeça hoje: </p>
+          <p>• O que está me travando: </p>
+          <p><br></p>
+        `;
+      } else if (key === 'devjournal') {
+        tplHTML = `
+          <h2 class="craft-h2">🛠️ Diário de Engenharia & Arquitetura</h2>
+          <h3 class="craft-h3">1. O Gargalo / Desafio Atual</h3>
+          <p>O que está acontecendo vs o que deveria acontecer?</p>
+          <h3 class="craft-h3">2. Alternativas e Hipóteses</h3>
+          <p>• Opção 1: </p>
+          <p>• Opção 2: </p>
+          <h3 class="craft-h3">3. Próximo Passo Prático</h3>
+          <p>O que será testado agora: </p>
+          <p><br></p>
+        `;
+      } else if (key === 'projectpolish') {
+        tplHTML = `
+          <h2 class="craft-h2">🎯 Lapidação do Projeto</h2>
+          <h3 class="craft-h3">Objetivo Central</h3>
+          <p>Qual é a regra de ouro ou o propósito desta entrega?</p>
+          <h3 class="craft-h3">O que NÃO faremos (Eliminar Complexidade)</h3>
+          <p>• Fora do escopo para manter a simplicidade: </p>
+          <p><br></p>
+        `;
+      } else if (key === 'randomprompt') {
+        const p = PROMPTS[Math.floor(Math.random() * PROMPTS.length)];
+        tplHTML = `
+          <blockquote class="craft-quote">“${p}”<cite>— Pergunta Destravadora</cite></blockquote>
+          <p>Minha resposta sincera: </p>
+          <p><br></p>
+        `;
+      }
+
+      editor.innerHTML = tplHTML;
+      dismissIgnition();
+      syncCurrentPageToState();
+      pushHistoryState(editor.innerHTML, true);
+      saveToStorage();
+      editor.focus();
+    };
+
+    /* ==========================================================================
+       8. CARDS SCRAPBOOK & MÍDIAS
        ========================================================================== */
     function renderCollageElements() {
       const container = document.getElementById('collageContainer');
@@ -3133,7 +3189,7 @@
     };
 
     /* ==========================================================================
-       8. CÓDIGO LITERADO & PROGRAMAÇÃO
+       9. CÓDIGO LITERADO & PROGRAMAÇÃO
        ========================================================================== */
     const LANG_EXTENSIONS = {
       python: '.py', javascript: '.js', typescript: '.ts', sql: '.sql',
@@ -3331,7 +3387,7 @@
     }
 
     /* ==========================================================================
-       9. THREADS DE LAPIDAÇÃO
+       10. THREADS DE LAPIDAÇÃO
        ========================================================================== */
     document.addEventListener('selectionchange', () => {
       const sel = window.getSelection();
@@ -3674,7 +3730,7 @@
     };
 
     /* ==========================================================================
-       10. FORMATAÇÃO DO EDITOR, TABELAS & SNAPSHOTS
+       11. FORMATAÇÃO DO EDITOR, TABELAS & SNAPSHOTS
        ========================================================================== */
     function formatDoc(cmd, val = null) {
       document.execCommand(cmd, false, val);
