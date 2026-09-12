@@ -10,6 +10,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400;1,700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
 
+  <!-- Google Identity Services (OAuth 2.0) -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+
   <!-- Mermaid.js -->
   <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 
@@ -1465,12 +1468,10 @@
       }
       .sidebar.open { transform: translateX(0); }
 
-      /* Barra de ferramentas */
       .toolbar-wrapper { padding: 2px 4px; }
-      .toolbar-scroll-btn { display: none; } /* No mobile o touch scroll nativo é mais fluido */
+      .toolbar-scroll-btn { display: none; }
       .paper-toolbar { gap: 4px; padding: 2px 0; }
 
-      /* Folha de papel */
       .paper-sheet {
         padding: 18px 14px 80px 14px !important;
         margin: 0 auto !important;
@@ -1480,7 +1481,6 @@
         max-width: 100% !important;
       }
 
-      /* Banner de Tags & Modo Projeto */
       .page-header-banner {
         flex-direction: column;
         align-items: flex-start;
@@ -1489,24 +1489,21 @@
       }
       .page-tags-section { width: 100%; }
 
-      /* Tipografia adaptada para telas menores */
       .text-flow-area {
         font-size: 17px !important;
         line-height: 27px !important;
       }
       .craft-sheet-date-header {
         font-size: 12.5px;
-        text-align: left; /* No celular, data alinhada à esquerda evita quebra feia */
+        text-align: left;
       }
 
-      /* Tabela rolável no celular sem quebrar a folha */
       .text-flow-area table.craft-table {
         display: block;
         overflow-x: auto;
         white-space: nowrap;
       }
 
-      /* Cards no Mobile: Força todos (inclusive os livres) a fluírem normalmente */
       .craft-media-card,
       .craft-media-card.mode-free,
       .craft-media-card.mode-flow {
@@ -1518,12 +1515,11 @@
         width: 100% !important;
         max-width: 100% !important;
       }
-      .frame-drag-handle, .resize-handle { display: none !important; } /* Desativa arraste livre no mobile para não prender a rolagem da página */
+      .frame-drag-handle, .resize-handle { display: none !important; }
 
       .style-video, .style-diagram { width: 100% !important; }
       .side-drawer { width: 100% !important; max-width: 100vw !important; }
 
-      /* Modais e Toasts */
       .modal-box { max-height: 82vh; }
       .dialog-box { max-width: 95vw; }
       .toast-container {
@@ -1581,11 +1577,16 @@
         <button id="btnOpenSearch" class="btn-dark" title="Buscar em tudo (Ctrl+K)">🔍 Busca</button>
         <button id="btnOpenInbox" class="btn-dark" title="Inbox Rápido">⚡ Inbox</button>
         <button onclick="toggleMemorialMode()" title="Leitura Solene sem Distrações">📖 Memorial</button>
-        <button id="btnExport" title="Exportar Backup JSON">💾 Backup</button>
-        <label class="btn" style="margin-bottom:0;" title="Importar JSON">
+        <button id="btnExport" title="Exportar Backup JSON Local">💾 Backup</button>
+        <label class="btn" style="margin-bottom:0;" title="Importar JSON Local">
           📂 Importar
           <input type="file" id="inputImport" accept=".json" style="display:none;" />
         </label>
+        
+        <!-- BOTÕES DO GOOGLE DRIVE -->
+        <button type="button" id="btnDriveExport" class="btn-accent" title="Salvar Backup no Google Drive">☁️ Salvar no Drive</button>
+        <button type="button" id="btnDriveImport" class="btn-dark" title="Abrir Backup do Google Drive">☁️ Abrir do Drive</button>
+
         <button id="btnResetAll" class="btn-danger btn-icon" title="Limpar Tudo">⚠️</button>
       </div>
     </header>
@@ -1779,7 +1780,7 @@
     </div>
   </div>
 
-  <!-- MODAL DE DIÁLOGO UNIFICADO (SUBSTITUI ALERT / CONFIRM / PROMPT) -->
+  <!-- MODAL DE DIÁLOGO UNIFICADO -->
   <div class="modal-backdrop" id="appDialogModal">
     <div class="modal-box dialog-box" id="appDialogCard">
       <div class="modal-header">
@@ -2120,10 +2121,16 @@
       }, 300);
     }
 
+    /* MIGRATION & RECONHECIMENTO DE ESTRUTURAS (ROBUSTO) */
     function migrateLegacyData(parsed) {
-      if (!parsed) return createInitialAppState();
-      if (parsed.version === 2 && Array.isArray(parsed.books)) return parsed;
+      if (!parsed) return null;
 
+      // Caso 1: Backup completo do workspace (com array de books)
+      if (parsed.version === 2 && Array.isArray(parsed.books)) {
+        return { isFullWorkspace: true, state: parsed };
+      }
+
+      // Caso 2: Backup completo legado
       if (parsed.books && Array.isArray(parsed.books)) {
         parsed.books.forEach(b => {
           if (b.chapters && Array.isArray(b.chapters)) {
@@ -2142,9 +2149,109 @@
           }
         });
         parsed.version = 2;
-        return parsed;
+        return { isFullWorkspace: true, state: parsed };
       }
-      return createInitialAppState();
+
+      // Caso 3: Caderno Único Exportado (Drive ou Backup local que contenha a chave `pages`)
+      if (parsed.pages && Array.isArray(parsed.pages)) {
+        const bookId = parsed.id || ('b_' + Date.now());
+        const pages = parsed.pages.map(p => ({
+          ...p,
+          id: p.id || ('p_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5)),
+          tags: Array.isArray(p.tags) ? p.tags : [],
+          references: Array.isArray(p.references) ? p.references : [],
+          threads: Array.isArray(p.threads) ? p.threads : [],
+          snapshots: Array.isArray(p.snapshots) ? p.snapshots : [],
+          elements: Array.isArray(p.elements) ? p.elements : [],
+          contentHTML: p.contentHTML || '',
+          paperOrientation: p.paperOrientation || 'orientation-portrait',
+          fontSize: p.fontSize || 20,
+          isSoftwareProject: !!p.isSoftwareProject
+        }));
+
+        return {
+          isSingleBook: true,
+          book: {
+            id: bookId,
+            bookTitle: parsed.bookTitle || 'Meu Caderno Importado',
+            activePageId: parsed.activePageId || (pages[0] ? pages[0].id : null),
+            inboxNotes: Array.isArray(parsed.inboxNotes) ? parsed.inboxNotes : [],
+            pages: pages
+          }
+        };
+      }
+
+      // Caso 4: Caderno individual com capítulos (legado)
+      if (parsed.chapters && Array.isArray(parsed.chapters)) {
+        const pages = [];
+        parsed.chapters.forEach(c => {
+          const tagFromChap = (c.title || '').replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚãõÃÕâêîôûÂÊÎÔÛçÇ_-]/g, '').toLowerCase() || 'geral';
+          (c.pages || []).forEach(p => {
+            if (!p.tags) p.tags = [];
+            if (!p.references) p.references = [];
+            if (!p.tags.includes(tagFromChap)) p.tags.push(tagFromChap);
+            pages.push(p);
+          });
+        });
+        return {
+          isSingleBook: true,
+          book: {
+            id: parsed.id || ('b_' + Date.now()),
+            bookTitle: parsed.bookTitle || 'Meu Caderno Importado',
+            activePageId: pages[0] ? pages[0].id : null,
+            inboxNotes: Array.isArray(parsed.inboxNotes) ? parsed.inboxNotes : [],
+            pages: pages
+          }
+        };
+      }
+
+      return null;
+    }
+
+    /* APLICAÇÃO SEGURA DE DADOS IMPORTADOS */
+    function applyImportedData(importedJson) {
+      const result = migrateLegacyData(importedJson);
+      if (!result) {
+        throw new Error('O arquivo selecionado não contém uma estrutura de caderno reconhecida.');
+      }
+
+      // Sincroniza qualquer digitação antes de alterar
+      syncCurrentPageToState();
+
+      if (result.isSingleBook) {
+        const newBook = result.book;
+        // Verifica se o caderno já existe (por ID ou mesmo título)
+        const existingIdx = appState.books.findIndex(b => b.id === newBook.id || (b.bookTitle && b.bookTitle.trim().toLowerCase() === newBook.bookTitle.trim().toLowerCase()));
+
+        if (existingIdx !== -1) {
+          // Atualiza o caderno existente com o conteúdo do arquivo
+          appState.books[existingIdx] = newBook;
+          appState.activeBookId = newBook.id;
+        } else {
+          // Adiciona como um novo caderno, preservando integralmente os outros existentes!
+          appState.books.push(newBook);
+          appState.activeBookId = newBook.id;
+        }
+      } else if (result.isFullWorkspace) {
+        appState = result.state;
+      }
+
+      // Validação de integridade
+      const currentBook = getActiveBook();
+      if (!currentBook.pages || currentBook.pages.length === 0) {
+        const init = createInitialBook(currentBook.bookTitle);
+        currentBook.pages = init.pages;
+        currentBook.activePageId = init.activePageId;
+      }
+      if (!currentBook.pages.some(p => p.id === currentBook.activePageId)) {
+        currentBook.activePageId = currentBook.pages[0].id;
+      }
+
+      inkCtx.clearRect(0, 0, inkCanvas.width, inkCanvas.height);
+      isCanvasDirtySinceLoad = false;
+
+      renderAll();
+      saveToStorage();
     }
 
     async function loadFromStorage() {
@@ -2155,7 +2262,20 @@
           try { data = JSON.parse(legacyRaw); } catch (e) {}
         }
       }
-      appState = migrateLegacyData(data);
+      const migrated = migrateLegacyData(data);
+      if (migrated) {
+        if (migrated.isFullWorkspace) {
+          appState = migrated.state;
+        } else if (migrated.isSingleBook) {
+          appState = {
+            version: 2,
+            activeBookId: migrated.book.id,
+            books: [migrated.book]
+          };
+        }
+      } else {
+        appState = createInitialAppState();
+      }
       renderAll();
     }
 
@@ -2841,9 +2961,6 @@
       showToast('Página excluída.');
     };
 
-    /* ==========================================================================
-       7. CABEÇALHO COM DATA NO TOPO DIREITO & TABELA
-       ========================================================================== */
     window.insertDateHeader = () => {
       const now = new Date();
       const days = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
@@ -2950,9 +3067,7 @@
       editor.focus();
     };
 
-    /* ==========================================================================
-       8. CARDS E MÍDIAS
-       ========================================================================== */
+
     function renderCollageElements() {
       const container = document.getElementById('collageContainer');
       const editor = document.getElementById('textEditor');
@@ -3173,9 +3288,6 @@
       showToast('Bloco removido.');
     };
 
-    /* ==========================================================================
-       9. CÓDIGO LITERADO & PROGRAMAÇÃO
-       ========================================================================== */
     const LANG_EXTENSIONS = {
       python: '.py', javascript: '.js', typescript: '.ts', sql: '.sql',
       cpp: '.cpp', rust: '.rs', go: '.go', html: '.html', bash: '.sh', json: '.json'
@@ -3372,9 +3484,6 @@
       document.getElementById('collageContainer').appendChild(footer);
     }
 
-    /* ==========================================================================
-       10. THREADS DE LAPIDAÇÃO
-       ========================================================================== */
     document.addEventListener('selectionchange', () => {
       const sel = window.getSelection();
       const tooltip = document.getElementById('selectionTooltip');
@@ -3728,9 +3837,6 @@
       showToast('Discussão excluída.');
     };
 
-    /* ==========================================================================
-       11. FORMATAÇÃO DO EDITOR & CABEÇALHOS
-       ========================================================================== */
     function formatDoc(cmd, val = null) {
       document.execCommand(cmd, false, val);
       document.getElementById('textEditor').focus();
@@ -4144,24 +4250,10 @@
       r.onload = (evt) => {
         try {
           const imported = JSON.parse(evt.target.result);
-          const migrated = migrateLegacyData(imported);
-
-          if (migrated.books && Array.isArray(migrated.books)) {
-            appState = migrated;
-          } else if (migrated.pages && Array.isArray(migrated.pages)) {
-            const newBId = 'b_' + Date.now();
-            migrated.id = newBId;
-            appState.books.push(migrated);
-            appState.activeBookId = newBId;
-          }
-
-          inkCtx.clearRect(0, 0, inkCanvas.width, inkCanvas.height);
-          isCanvasDirtySinceLoad = false;
-          renderAll();
-          saveToStorage();
+          applyImportedData(imported);
           showToast('Caderno importado e sincronizado com sucesso!', 'success');
         } catch (err) {
-          appAlert('O arquivo fornecido é inválido ou está corrompido.', 'Erro de Importação');
+          appAlert('O arquivo fornecido é inválido ou está corrompido: ' + err.message, 'Erro de Importação');
         }
       };
       r.readAsText(file);
@@ -4212,6 +4304,193 @@
       sidebarBackdrop.classList.toggle('active', isOpen);
     }
     document.getElementById('btnToggleSidebar').onclick = () => toggleMobileSidebar();
+
+    const GOOGLE_CLIENT_ID = '379078301094-cdgooe6ff6f5gtrosjlfrcbkav54vn4v.apps.googleusercontent.com';
+    const GOOGLE_DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
+
+    let gTokenClient = null;
+    let gAccessToken = null;
+
+    async function getGoogleAuthToken() {
+      return new Promise(async (resolve, reject) => {
+        if (gAccessToken) return resolve(gAccessToken);
+
+        let clientId = GOOGLE_CLIENT_ID;
+        if (!clientId || clientId.includes('SEU_CLIENT_ID_AQUI')) {
+          clientId = localStorage.getItem('google_drive_client_id');
+        }
+
+        if (!clientId || clientId.includes('SEU_CLIENT_ID_AQUI')) {
+          const res = await appPrompt({
+            title: '🔑 Configurar Google Client ID',
+            message: 'Insira o seu Client ID gerado no Google Cloud Console (terminado em .apps.googleusercontent.com):',
+            fields: [{ id: 'cid', label: 'Client ID:', placeholder: 'xxxx.apps.googleusercontent.com', required: true }],
+            submitText: 'Salvar e Conectar'
+          });
+          if (!res || !res.cid) return reject(new Error('Client ID não informado.'));
+          clientId = res.cid.trim();
+          localStorage.setItem('google_drive_client_id', clientId);
+        }
+
+        if (!window.google || !google.accounts || !google.accounts.oauth2) {
+          return reject(new Error('Biblioteca do Google indisponível. Verifique sua conexão à internet.'));
+        }
+
+        try {
+          gTokenClient = google.accounts.oauth2.initTokenClient({
+            client_id: clientId,
+            scope: GOOGLE_DRIVE_SCOPE,
+            callback: (response) => {
+              if (response.error) return reject(response);
+              gAccessToken = response.access_token;
+              resolve(gAccessToken);
+            }
+          });
+          gTokenClient.requestAccessToken({ prompt: '' });
+        } catch (err) {
+          reject(err);
+        }
+      });
+    }
+
+    async function exportToGoogleDrive() {
+      try {
+        showToast('Conectando ao Google Drive...');
+        const token = await getGoogleAuthToken();
+
+        syncCurrentPageToState();
+        const currentBook = getActiveBook();
+        const exportObject = {
+          version: 2,
+          exportedAt: new Date().toISOString(),
+          ...currentBook
+        };
+
+        const fileName = `${(currentBook.bookTitle || 'caderno').toLowerCase().replace(/[^a-z0-9]/gi, '_')}_backup.json`;
+        const jsonContent = JSON.stringify(exportObject, null, 2);
+
+        showToast('Verificando arquivos no Drive...');
+        const query = encodeURIComponent(`name = '${fileName}' and trashed = false`);
+        const searchRes = await fetch(`https://www.googleapis.com/drive/v3/files?q=${query}&fields=files(id,name)`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        
+        if (!searchRes.ok) throw new Error('Não foi possível verificar os arquivos no Google Drive.');
+        const searchData = await searchRes.json();
+        const existingFile = (searchData.files && searchData.files.length > 0) ? searchData.files[0] : null;
+
+        showToast('Enviando dados...');
+
+        if (existingFile) {
+          const updateRes = await fetch(`https://www.googleapis.com/upload/drive/v3/files/${existingFile.id}?uploadType=media`, {
+            method: 'PATCH',
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
+            body: jsonContent
+          });
+
+          if (!updateRes.ok) throw new Error('Falha ao atualizar arquivo existente.');
+          showToast(`Backup "${fileName}" atualizado no Drive!`, 'success');
+        } else {
+          const boundary = 'foo_bar_craft_boundary';
+          const metadata = { name: fileName, mimeType: 'application/json' };
+
+          const multipartBody = 
+            `--${boundary}\r\n` +
+            `Content-Type: application/json; charset=UTF-8\r\n\r\n` +
+            `${JSON.stringify(metadata)}\r\n` +
+            `--${boundary}\r\n` +
+            `Content-Type: application/json\r\n\r\n` +
+            `${jsonContent}\r\n` +
+            `--${boundary}--`;
+
+          const createRes = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': `multipart/related; boundary=${boundary}`
+            },
+            body: multipartBody
+          });
+
+          if (!createRes.ok) throw new Error('Falha ao criar o arquivo no Drive.');
+          showToast(`Backup "${fileName}" criado no Drive!`, 'success');
+        }
+      } catch (err) {
+        console.error(err);
+        appAlert('Erro ao salvar no Google Drive: ' + (err.message || 'Falha na requisição'), 'Erro no Drive');
+      }
+    }
+
+    async function importFromGoogleDrive() {
+      try {
+        showToast('Conectando ao Google Drive...');
+        const token = await getGoogleAuthToken();
+
+        showToast('Buscando backups...');
+        const query = encodeURIComponent("name contains '.json' and trashed = false");
+        const listRes = await fetch(`https://www.googleapis.com/drive/v3/files?q=${query}&fields=files(id,name,modifiedTime)&orderBy=modifiedTime desc`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        
+        if (!listRes.ok) throw new Error('Não foi possível listar os arquivos do Google Drive.');
+        const listData = await listRes.json();
+
+        if (!listData.files || listData.files.length === 0) {
+          return appAlert('Nenhum backup .json foi encontrado no seu Google Drive para este aplicativo.', 'Aviso');
+        }
+
+        let optionsHtml = '';
+        listData.files.forEach(f => {
+          const dateFormatted = new Date(f.modifiedTime).toLocaleString('pt-BR');
+          optionsHtml += `
+            <div style="padding:10px 12px; background:#f5f4f0; border:1px solid #d6d3d1; border-radius:4px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <b style="font-size:13px; color:#1c1917;">📄 ${escapeHTML(f.name)}</b>
+                <div style="font-size:10.5px; color:#78716c; margin-top:2px;">Modificado: ${dateFormatted}</div>
+              </div>
+              <button type="button" class="btn-accent" style="font-size:10.5px; padding:3px 10px;" onclick="loadSpecificDriveFile('${f.id}')">Carregar</button>
+            </div>
+          `;
+        });
+
+        document.getElementById('dialogModalTitle').textContent = '☁️ Escolha o Backup do Drive';
+        document.getElementById('dialogModalBody').innerHTML = `<div style="max-height:280px; overflow-y:auto;">${optionsHtml}</div>`;
+        document.getElementById('dialogModalFooter').innerHTML = `<button type="button" class="btn" onclick="cancelAppDialog()">Cancelar</button>`;
+        document.getElementById('appDialogModal').classList.add('open');
+
+      } catch (err) {
+        console.error(err);
+        appAlert('Erro ao listar arquivos do Drive: ' + (err.message || 'Falha na requisição'), 'Erro no Drive');
+      }
+    }
+
+    window.loadSpecificDriveFile = async (fileId) => {
+      cancelAppDialog();
+      try {
+        showToast('Baixando backup do Drive...');
+        const token = await getGoogleAuthToken();
+
+        const fileRes = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        if (!fileRes.ok) throw new Error('Não foi possível ler o conteúdo do arquivo.');
+        const importedJson = await fileRes.json();
+        
+        applyImportedData(importedJson);
+
+        showToast('Caderno restaurado com sucesso do Google Drive!', 'success');
+      } catch (err) {
+        console.error(err);
+        appAlert('Erro ao carregar arquivo do Drive: ' + err.message, 'Erro de Sincronização');
+      }
+    };
+
+    document.getElementById('btnDriveExport').onclick = () => exportToGoogleDrive();
+    document.getElementById('btnDriveImport').onclick = () => importFromGoogleDrive();
 
     window.onload = () => {
       loadFromStorage();
