@@ -1623,7 +1623,7 @@
                 </select>
               </div>
 
-              <!-- FORMATADORES & OPÇÃO DE CABEÇALHO COM DATA -->
+              <!-- FORMATADORES & CABEÇALHO -->
               <div class="toolbar-group">
                 <select id="headingSelect" onchange="insertHeading(this.value); this.value='';" title="Inserir Título ou Cabeçalho">
                   <option value="" disabled selected>📑 Títulos</option>
@@ -1643,13 +1643,34 @@
                 <input type="color" id="inkColor" title="Cor do Texto" value="#1c1917" onchange="formatDoc('foreColor', this.value)" />
               </div>
 
-              <!-- Desenho -->
-              <div class="toolbar-group" style="background:#f5f4f0; padding:2px 5px; border-radius:4px;">
+              <!-- FERRAMENTAS DE DESENHO, BALDE & FIGURAS -->
+              <div class="toolbar-group" style="background:#f5f4f0; padding:2px 6px; border-radius:4px; gap:4px;">
                 <button type="button" id="toolSelect" class="btn active-tool" onclick="setInkTool('select')">👆 Texto</button>
                 <button type="button" id="toolPen" class="btn" onclick="setInkTool('pen')">🖊️ Pincel</button>
                 <button type="button" id="toolEraser" class="btn" onclick="setInkTool('eraser')">🧹 Borracha</button>
-                <input type="color" id="brushColor" title="Cor do Traço" value="#1c1917" />
-                <input type="range" id="brushSize" min="1" max="30" value="3" title="Espessura" style="width:45px;" />
+                <button type="button" id="toolBucket" class="btn" onclick="setInkTool('bucket')" title="Balde de Tinta (Preencher área fechada ou fundo)">🪣 Balde</button>
+
+                <!-- CLUSTER DE FIGURAS GEOMÉTRICAS -->
+                <div style="display:inline-flex; align-items:center; gap:3px; background:#fff; border:1px solid #d6d3d1; padding:1px 5px; border-radius:4px;">
+                  <button type="button" id="toolShape" class="btn" onclick="setInkTool('shape')" title="Desenhar Figura">🔷 Figura</button>
+                  <select id="shapeTypeSelect" title="Escolha a Figura" onchange="onShapeSelectChange()" style="font-size:11px; height:24px; border:none; outline:none; background:transparent; padding:0 2px;">
+                    <option value="rect">▭ Retângulo</option>
+                    <option value="square">◻ Quadrado</option>
+                    <option value="circle">◯ Círculo / Oval</option>
+                    <option value="triangle">△ Triângulo</option>
+                    <option value="line">― Linha Reta</option>
+                    <option value="arrow">➔ Seta</option>
+                    <option value="star">★ Estrela</option>
+                    <option value="diamond">⬧ Losango</option>
+                  </select>
+                  <label style="display:inline-flex; align-items:center; gap:3px; font-size:10.5px; cursor:pointer; user-select:none; font-weight:700;" title="Preencher interior da figura">
+                    <input type="checkbox" id="shapeFillToggle" onchange="onShapeFillToggle()" /> Preencher
+                  </label>
+                  <input type="color" id="shapeFillColor" title="Cor de Preenchimento da Figura" value="#fef08a" style="width:22px; height:22px; padding:0; border:none; cursor:pointer; opacity:0.4;" />
+                </div>
+
+                <input type="color" id="brushColor" title="Cor do Traço / Tinta do Balde" value="#1c1917" />
+                <input type="range" id="brushSize" min="1" max="30" value="3" title="Espessura do Traço" style="width:45px;" />
                 <button type="button" id="btnInkToCard" class="btn-dark" title="Converter desenho em card móvel" onclick="convertInkToMovableCard()">✨ Card Móvel</button>
                 <button type="button" id="btnClearInk" class="btn-danger" style="font-size:10px; padding:2px 5px;" onclick="clearPageInk()">Limpar</button>
               </div>
@@ -1845,7 +1866,7 @@
 
   <script>
     /* ==========================================================================
-       1. SISTEMA PROFISSIONAL DE DIÁLOGOS (SUBSTITUTO DE ALERT/CONFIRM/PROMPT)
+       1. SISTEMA PROFISSIONAL DE DIÁLOGOS
        ========================================================================== */
     let dialogResolver = null;
 
@@ -2042,6 +2063,7 @@
           elements: [],
           references: [],
           inkDataURL: null,
+          shapes: [],
           threads: [],
           snapshots: [],
           isSoftwareProject: false,
@@ -2085,6 +2107,7 @@
         if (!page.elements) page.elements = [];
         if (!page.tags) page.tags = [];
         if (!page.references) page.references = [];
+        if (!page.shapes) page.shapes = [];
         if (!page.paperOrientation) page.paperOrientation = 'orientation-portrait';
         if (!page.fontSize) page.fontSize = 20;
         if (page.isSoftwareProject === undefined) page.isSoftwareProject = false;
@@ -2110,6 +2133,7 @@
       if (canvas && canvas.width > 0 && canvas.height > 0 && isCanvasDirtySinceLoad && currentLoadedInkPageId === page.id) {
         page.inkDataURL = canvas.toDataURL();
       }
+      if (!page.shapes) page.shapes = [];
     }
 
     let saveDebounceTimer = null;
@@ -2121,16 +2145,19 @@
       }, 300);
     }
 
-    /* MIGRATION & RECONHECIMENTO DE ESTRUTURAS (ROBUSTO) */
+    /* MIGRATION & RECONHECIMENTO DE ESTRUTURAS */
     function migrateLegacyData(parsed) {
       if (!parsed) return null;
 
-      // Caso 1: Backup completo do workspace (com array de books)
       if (parsed.version === 2 && Array.isArray(parsed.books)) {
+        parsed.books.forEach(b => {
+          (b.pages || []).forEach(p => {
+            if (!p.shapes) p.shapes = [];
+          });
+        });
         return { isFullWorkspace: true, state: parsed };
       }
 
-      // Caso 2: Backup completo legado
       if (parsed.books && Array.isArray(parsed.books)) {
         parsed.books.forEach(b => {
           if (b.chapters && Array.isArray(b.chapters)) {
@@ -2140,6 +2167,7 @@
               (c.pages || []).forEach(p => {
                 if (!p.tags) p.tags = [];
                 if (!p.references) p.references = [];
+                if (!p.shapes) p.shapes = [];
                 if (!p.tags.includes(tagFromChap)) p.tags.push(tagFromChap);
                 b.pages.push(p);
               });
@@ -2152,7 +2180,6 @@
         return { isFullWorkspace: true, state: parsed };
       }
 
-      // Caso 3: Caderno Único Exportado (Drive ou Backup local que contenha a chave `pages`)
       if (parsed.pages && Array.isArray(parsed.pages)) {
         const bookId = parsed.id || ('b_' + Date.now());
         const pages = parsed.pages.map(p => ({
@@ -2160,6 +2187,7 @@
           id: p.id || ('p_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5)),
           tags: Array.isArray(p.tags) ? p.tags : [],
           references: Array.isArray(p.references) ? p.references : [],
+          shapes: Array.isArray(p.shapes) ? p.shapes : [],
           threads: Array.isArray(p.threads) ? p.threads : [],
           snapshots: Array.isArray(p.snapshots) ? p.snapshots : [],
           elements: Array.isArray(p.elements) ? p.elements : [],
@@ -2181,54 +2209,25 @@
         };
       }
 
-      // Caso 4: Caderno individual com capítulos (legado)
-      if (parsed.chapters && Array.isArray(parsed.chapters)) {
-        const pages = [];
-        parsed.chapters.forEach(c => {
-          const tagFromChap = (c.title || '').replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚãõÃÕâêîôûÂÊÎÔÛçÇ_-]/g, '').toLowerCase() || 'geral';
-          (c.pages || []).forEach(p => {
-            if (!p.tags) p.tags = [];
-            if (!p.references) p.references = [];
-            if (!p.tags.includes(tagFromChap)) p.tags.push(tagFromChap);
-            pages.push(p);
-          });
-        });
-        return {
-          isSingleBook: true,
-          book: {
-            id: parsed.id || ('b_' + Date.now()),
-            bookTitle: parsed.bookTitle || 'Meu Caderno Importado',
-            activePageId: pages[0] ? pages[0].id : null,
-            inboxNotes: Array.isArray(parsed.inboxNotes) ? parsed.inboxNotes : [],
-            pages: pages
-          }
-        };
-      }
-
       return null;
     }
 
-    /* APLICAÇÃO SEGURA DE DADOS IMPORTADOS */
     function applyImportedData(importedJson) {
       const result = migrateLegacyData(importedJson);
       if (!result) {
         throw new Error('O arquivo selecionado não contém uma estrutura de caderno reconhecida.');
       }
 
-      // Sincroniza qualquer digitação antes de alterar
       syncCurrentPageToState();
 
       if (result.isSingleBook) {
         const newBook = result.book;
-        // Verifica se o caderno já existe (por ID ou mesmo título)
         const existingIdx = appState.books.findIndex(b => b.id === newBook.id || (b.bookTitle && b.bookTitle.trim().toLowerCase() === newBook.bookTitle.trim().toLowerCase()));
 
         if (existingIdx !== -1) {
-          // Atualiza o caderno existente com o conteúdo do arquivo
           appState.books[existingIdx] = newBook;
           appState.activeBookId = newBook.id;
         } else {
-          // Adiciona como um novo caderno, preservando integralmente os outros existentes!
           appState.books.push(newBook);
           appState.activeBookId = newBook.id;
         }
@@ -2236,7 +2235,6 @@
         appState = result.state;
       }
 
-      // Validação de integridade
       const currentBook = getActiveBook();
       if (!currentBook.pages || currentBook.pages.length === 0) {
         const init = createInitialBook(currentBook.bookTitle);
@@ -2349,25 +2347,250 @@
       syncInkCanvasDimensions();
     }
 
-    /* PINCEL E CANVAS */
-    let currentInkTool = 'select', isDrawingInk = false, lastInkX = 0, lastInkY = 0;
+    /* ==========================================================================
+       3. PINCEL, BALDE DE TINTA (FLOOD FILL) & FIGURAS GEOMÉTRICAS
+       ========================================================================== */
+    let currentInkTool = 'select'; // 'select', 'pen', 'eraser', 'shape', 'bucket'
+    let isDrawingInk = false, lastInkX = 0, lastInkY = 0;
+    let isDrawingShape = false, shapeStartX = 0, shapeStartY = 0, shapeSnapshot = null;
+
     const inkCanvas = document.getElementById('inkCanvas');
-    const inkCtx = inkCanvas.getContext('2d');
+    const inkCtx = inkCanvas.getContext('2d', { willReadFrequently: true });
     const viewport = document.getElementById('viewport');
 
     function setInkTool(tool) {
       currentInkTool = tool;
-      document.querySelectorAll('#toolSelect, #toolPen, #toolEraser').forEach(b => b.classList.remove('active-tool'));
+      document.querySelectorAll('#toolSelect, #toolPen, #toolEraser, #toolShape, #toolBucket').forEach(b => b.classList.remove('active-tool'));
+      
       if (tool === 'select') {
         document.getElementById('toolSelect').classList.add('active-tool');
         inkCanvas.classList.remove('drawing-active');
         viewport.classList.remove('drawing-mode-active');
       } else {
-        if (tool === 'pen') document.getElementById('toolPen').classList.add('active-tool');
-        if (tool === 'eraser') document.getElementById('toolEraser').classList.add('active-tool');
+        const btnId = tool === 'pen' ? 'toolPen' :
+                      tool === 'eraser' ? 'toolEraser' :
+                      tool === 'shape' ? 'toolShape' :
+                      tool === 'bucket' ? 'toolBucket' : 'toolPen';
+        const targetBtn = document.getElementById(btnId);
+        if (targetBtn) targetBtn.classList.add('active-tool');
         inkCanvas.classList.add('drawing-active');
         viewport.classList.add('drawing-mode-active');
       }
+    }
+
+    window.onShapeSelectChange = () => setInkTool('shape');
+    window.onShapeFillToggle = () => {
+      const isChecked = document.getElementById('shapeFillToggle').checked;
+      const fillInput = document.getElementById('shapeFillColor');
+      if (fillInput) fillInput.style.opacity = isChecked ? '1' : '0.4';
+    };
+
+    function hexToRgba(hex) {
+      let c = hex.replace('#', '');
+      if (c.length === 3) c = c.split('').map(x => x + x).join('');
+      const num = parseInt(c, 16);
+      return {
+        r: (num >> 16) & 255,
+        g: (num >> 8) & 255,
+        b: num & 255,
+        a: 255
+      };
+    }
+
+    /* ALGORITMO DE BALDE DE TINTA (FLOOD FILL) SEGURO COM FILA E CONTROLE DE TRANSPARÊNCIA */
+    function floodFill(canvas, startX, startY, fillHex) {
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
+      const w = canvas.width;
+      const h = canvas.height;
+      if (w <= 0 || h <= 0) return;
+
+      const startXInt = Math.floor(startX);
+      const startYInt = Math.floor(startY);
+      if (startXInt < 0 || startXInt >= w || startYInt < 0 || startYInt >= h) return;
+
+      const imgData = ctx.getImageData(0, 0, w, h);
+      const data = imgData.data;
+      const fillRgba = hexToRgba(fillHex);
+
+      const startIdx = (startYInt * w + startXInt) * 4;
+      const startR = data[startIdx];
+      const startG = data[startIdx + 1];
+      const startB = data[startIdx + 2];
+      const startA = data[startIdx + 3];
+
+      const tol = 32;
+      const matchStart = (idx) => {
+        const r = data[idx];
+        const g = data[idx + 1];
+        const b = data[idx + 2];
+        const a = data[idx + 3];
+        if (startA === 0 && a === 0) return true;
+        if (startA === 0 || a === 0) return false;
+        return Math.abs(r - startR) <= tol &&
+               Math.abs(g - startG) <= tol &&
+               Math.abs(b - startB) <= tol &&
+               Math.abs(a - startA) <= tol;
+      };
+
+      if (startA === 255 &&
+          Math.abs(startR - fillRgba.r) <= tol &&
+          Math.abs(startG - fillRgba.g) <= tol &&
+          Math.abs(startB - fillRgba.b) <= tol) {
+        return;
+      }
+
+      const queue = new Int32Array(w * h * 2);
+      let head = 0;
+      let tail = 0;
+
+      queue[tail++] = startXInt;
+      queue[tail++] = startYInt;
+
+      const visited = new Uint8Array(w * h);
+      visited[startYInt * w + startXInt] = 1;
+
+      while (head < tail) {
+        const x = queue[head++];
+        const y = queue[head++];
+        const idx = (y * w + x) * 4;
+
+        data[idx] = fillRgba.r;
+        data[idx + 1] = fillRgba.g;
+        data[idx + 2] = fillRgba.b;
+        data[idx + 3] = 255;
+
+        const neighbors = [
+          [x + 1, y],
+          [x - 1, y],
+          [x, y + 1],
+          [x, y - 1]
+        ];
+
+        for (let i = 0; i < 4; i++) {
+          const nx = neighbors[i][0];
+          const ny = neighbors[i][1];
+          if (nx >= 0 && nx < w && ny >= 0 && ny < h) {
+            const nPos = ny * w + nx;
+            if (!visited[nPos]) {
+              visited[nPos] = 1;
+              if (matchStart(nPos * 4)) {
+                queue[tail++] = nx;
+                queue[tail++] = ny;
+              }
+            }
+          }
+        }
+      }
+
+      ctx.putImageData(imgData, 0, 0);
+    }
+
+    /* RENDERIZADOR DE FORMAS GEOMÉTRICAS */
+    function drawGeometricShape(ctx, type, x1, y1, x2, y2, strokeColor, fillColor, lineWidth) {
+      ctx.save();
+      ctx.strokeStyle = strokeColor;
+      ctx.fillStyle = fillColor || 'transparent';
+      ctx.lineWidth = lineWidth;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+
+      const w = x2 - x1;
+      const h = y2 - y1;
+
+      ctx.beginPath();
+
+      switch (type) {
+        case 'rect':
+          ctx.rect(x1, y1, w, h);
+          break;
+
+        case 'square': {
+          const side = Math.max(Math.abs(w), Math.abs(h));
+          const sx = w < 0 ? x1 - side : x1;
+          const sy = h < 0 ? y1 - side : y1;
+          ctx.rect(sx, sy, side, side);
+          break;
+        }
+
+        case 'circle': {
+          const radiusX = Math.abs(w) / 2;
+          const radiusY = Math.abs(h) / 2;
+          const centerX = x1 + w / 2;
+          const centerY = y1 + h / 2;
+          ctx.ellipse(centerX, centerY, Math.max(1, radiusX), Math.max(1, radiusY), 0, 0, Math.PI * 2);
+          break;
+        }
+
+        case 'triangle': {
+          ctx.moveTo(x1 + w / 2, y1);
+          ctx.lineTo(x2, y2);
+          ctx.lineTo(x1, y2);
+          ctx.closePath();
+          break;
+        }
+
+        case 'line':
+          ctx.moveTo(x1, y1);
+          ctx.lineTo(x2, y2);
+          break;
+
+        case 'arrow': {
+          ctx.moveTo(x1, y1);
+          ctx.lineTo(x2, y2);
+          ctx.stroke();
+
+          const angle = Math.atan2(y2 - y1, x2 - x1);
+          const headLen = Math.max(12, lineWidth * 3.2);
+          ctx.beginPath();
+          ctx.moveTo(x2, y2);
+          ctx.lineTo(x2 - headLen * Math.cos(angle - Math.PI / 6), y2 - headLen * Math.sin(angle - Math.PI / 6));
+          ctx.moveTo(x2, y2);
+          ctx.lineTo(x2 - headLen * Math.cos(angle + Math.PI / 6), y2 - headLen * Math.sin(angle + Math.PI / 6));
+          break;
+        }
+
+        case 'star': {
+          const cx = x1 + w / 2;
+          const cy = y1 + h / 2;
+          const outerR = Math.max(Math.abs(w), Math.abs(h)) / 2;
+          const innerR = outerR * 0.45;
+          const points = 5;
+          let rot = (Math.PI / 2) * 3;
+          const step = Math.PI / points;
+
+          ctx.moveTo(cx, cy - outerR);
+          for (let i = 0; i < points; i++) {
+            let px = cx + Math.cos(rot) * outerR;
+            let py = cy + Math.sin(rot) * outerR;
+            ctx.lineTo(px, py);
+            rot += step;
+
+            px = cx + Math.cos(rot) * innerR;
+            py = cy + Math.sin(rot) * innerR;
+            ctx.lineTo(px, py);
+            rot += step;
+          }
+          ctx.closePath();
+          break;
+        }
+
+        case 'diamond': {
+          const cx = x1 + w / 2;
+          const cy = y1 + h / 2;
+          ctx.moveTo(cx, y1);
+          ctx.lineTo(x2, cy);
+          ctx.lineTo(cx, y2);
+          ctx.lineTo(x1, cy);
+          ctx.closePath();
+          break;
+        }
+      }
+
+      if (fillColor && type !== 'line' && type !== 'arrow') {
+        ctx.fill();
+      }
+      ctx.stroke();
+      ctx.restore();
     }
 
     function syncInkCanvasDimensions() {
@@ -2406,17 +2629,29 @@
           if (cur && cur.id === targetPageId) inkCtx.drawImage(img, 0, 0);
         };
         img.src = page.inkDataURL;
+      } else if (page.shapes && page.shapes.length > 0) {
+        page.shapes.forEach(shp => {
+          if (shp.type === 'bucket_fill') {
+            floodFill(inkCanvas, shp.x, shp.y, shp.color);
+          } else {
+            drawGeometricShape(inkCtx, shp.type, shp.startX, shp.startY, shp.endX, shp.endY, shp.strokeColor, shp.fillColor, shp.strokeWidth || 3);
+          }
+        });
       }
     }
 
     async function clearPageInk() {
-      const ok = await appConfirm('Deseja apagar todos os traços feitos à mão nesta página?', 'Limpar Desenho', true);
+      const ok = await appConfirm('Deseja apagar todos os traços, figuras e pinturas desta página?', 'Limpar Desenho e Figuras', true);
       if (!ok) return;
       inkCtx.clearRect(0, 0, inkCanvas.width, inkCanvas.height);
       const page = getActivePage();
-      if (page) { page.inkDataURL = null; isCanvasDirtySinceLoad = true; }
+      if (page) {
+        page.inkDataURL = null;
+        page.shapes = [];
+        isCanvasDirtySinceLoad = true;
+      }
       saveToStorage();
-      showToast('Traços apagados.');
+      showToast('Desenhos e figuras apagados.');
     }
 
     window.convertInkToMovableCard = async () => {
@@ -2438,7 +2673,7 @@
         }
       }
 
-      if (!hasPixels) return appAlert('Nenhum traço livre desenhado para converter em card.', 'Aviso');
+      if (!hasPixels) return appAlert('Nenhum traço ou figura desenhada para converter em card.', 'Aviso');
 
       minX = Math.max(0, minX - 10);
       minY = Math.max(0, minY - 10);
@@ -2454,7 +2689,11 @@
 
       inkCtx.clearRect(0, 0, w, h);
       const page = getActivePage();
-      if (page) { page.inkDataURL = null; isCanvasDirtySinceLoad = true; }
+      if (page) {
+        page.inkDataURL = null;
+        page.shapes = [];
+        isCanvasDirtySinceLoad = true;
+      }
 
       addMediaElement('drawing', tempCanvas.toDataURL('image/png'), '', {
         mode: 'free',
@@ -2516,22 +2755,135 @@
     inkCanvas.addEventListener('pointerdown', (e) => {
       if (currentInkTool === 'select') return;
       e.preventDefault();
+      syncInkCanvasDimensions();
+      const coords = getCanvasCoords(e.clientX, e.clientY);
+
+      if (currentInkTool === 'bucket') {
+        const color = document.getElementById('brushColor').value;
+        floodFill(inkCanvas, coords.x, coords.y, color);
+        const page = getActivePage();
+        if (page) {
+          if (!page.shapes) page.shapes = [];
+          page.shapes.push({
+            id: 'fill_' + Date.now(),
+            type: 'bucket_fill',
+            x: Math.round(coords.x),
+            y: Math.round(coords.y),
+            color: color,
+            createdAt: new Date().toISOString()
+          });
+          isCanvasDirtySinceLoad = true;
+          syncCurrentPageToState();
+          saveToStorage();
+        }
+        showToast('Área preenchida!');
+        return;
+      }
+
+      if (currentInkTool === 'shape') {
+        isDrawingShape = true;
+        shapeStartX = coords.x;
+        shapeStartY = coords.y;
+        shapeSnapshot = inkCtx.getImageData(0, 0, inkCanvas.width, inkCanvas.height);
+        try { inkCanvas.setPointerCapture(e.pointerId); } catch {}
+        return;
+      }
+
       isDrawingInk = true;
       try { inkCanvas.setPointerCapture(e.pointerId); } catch {}
-      const coords = getCanvasCoords(e.clientX, e.clientY);
       lastInkX = coords.x;
       lastInkY = coords.y;
       drawInkSegment(e.clientX, e.clientY, e.pressure, e.pointerType, true);
     });
 
     inkCanvas.addEventListener('pointermove', (e) => {
-      if (!isDrawingInk || currentInkTool === 'select') return;
+      if (currentInkTool === 'select') return;
       e.preventDefault();
-      const events = (e.getCoalescedEvents && e.getCoalescedEvents().length > 0) ? e.getCoalescedEvents() : [e];
-      for (const ev of events) drawInkSegment(ev.clientX, ev.clientY, ev.pressure, ev.pointerType, false);
+
+      if (isDrawingShape && shapeSnapshot) {
+        const coords = getCanvasCoords(e.clientX, e.clientY);
+        inkCtx.putImageData(shapeSnapshot, 0, 0);
+
+        const shapeType = document.getElementById('shapeTypeSelect').value || 'rect';
+        const strokeColor = document.getElementById('brushColor').value;
+        const strokeSize = parseFloat(document.getElementById('brushSize').value) || 3;
+        const isFilled = document.getElementById('shapeFillToggle').checked;
+        const fillColor = isFilled ? document.getElementById('shapeFillColor').value : null;
+
+        let endX = coords.x;
+        let endY = coords.y;
+
+        if (e.shiftKey) {
+          const dx = endX - shapeStartX;
+          const dy = endY - shapeStartY;
+          const side = Math.max(Math.abs(dx), Math.abs(dy));
+          endX = shapeStartX + (dx < 0 ? -side : side);
+          endY = shapeStartY + (dy < 0 ? -side : side);
+        }
+
+        drawGeometricShape(inkCtx, shapeType, shapeStartX, shapeStartY, endX, endY, strokeColor, fillColor, strokeSize);
+        return;
+      }
+
+      if (isDrawingInk) {
+        const events = (e.getCoalescedEvents && e.getCoalescedEvents().length > 0) ? e.getCoalescedEvents() : [e];
+        for (const ev of events) drawInkSegment(ev.clientX, ev.clientY, ev.pressure, ev.pointerType, false);
+      }
     });
 
     function stopInkDrawing(e) {
+      if (isDrawingShape && shapeSnapshot) {
+        isDrawingShape = false;
+        if (e && e.pointerId) {
+          try { if (inkCanvas.hasPointerCapture(e.pointerId)) inkCanvas.releasePointerCapture(e.pointerId); } catch {}
+        }
+
+        const coords = getCanvasCoords(e.clientX, e.clientY);
+        inkCtx.putImageData(shapeSnapshot, 0, 0);
+
+        const shapeType = document.getElementById('shapeTypeSelect').value || 'rect';
+        const strokeColor = document.getElementById('brushColor').value;
+        const strokeSize = parseFloat(document.getElementById('brushSize').value) || 3;
+        const isFilled = document.getElementById('shapeFillToggle').checked;
+        const fillColor = isFilled ? document.getElementById('shapeFillColor').value : null;
+
+        let endX = coords.x;
+        let endY = coords.y;
+        if (e && e.shiftKey) {
+          const dx = endX - shapeStartX;
+          const dy = endY - shapeStartY;
+          const side = Math.max(Math.abs(dx), Math.abs(dy));
+          endX = shapeStartX + (dx < 0 ? -side : side);
+          endY = shapeStartY + (dy < 0 ? -side : side);
+        }
+
+        if (Math.hypot(endX - shapeStartX, endY - shapeStartY) > 2) {
+          drawGeometricShape(inkCtx, shapeType, shapeStartX, shapeStartY, endX, endY, strokeColor, fillColor, strokeSize);
+
+          const page = getActivePage();
+          if (page) {
+            if (!page.shapes) page.shapes = [];
+            page.shapes.push({
+              id: 'shp_' + Date.now(),
+              type: shapeType,
+              startX: Math.round(shapeStartX),
+              startY: Math.round(shapeStartY),
+              endX: Math.round(endX),
+              endY: Math.round(endY),
+              strokeColor: strokeColor,
+              fillColor: fillColor,
+              strokeWidth: strokeSize,
+              createdAt: new Date().toISOString()
+            });
+            isCanvasDirtySinceLoad = true;
+            syncCurrentPageToState();
+            saveToStorage();
+          }
+        }
+        shapeSnapshot = null;
+        return;
+      }
+
       if (isDrawingInk) {
         isDrawingInk = false;
         if (e && e.pointerId) {
@@ -2545,7 +2897,7 @@
     inkCanvas.addEventListener('pointercancel', stopInkDrawing);
 
     /* ==========================================================================
-       3. YOUTUBE EMBED
+       4. YOUTUBE EMBED
        ========================================================================== */
     function extractYouTubeId(url) {
       if (!url) return null;
@@ -2589,7 +2941,7 @@
     };
 
     /* ==========================================================================
-       4. REFERÊNCIAS
+       5. REFERÊNCIAS
        ========================================================================== */
     window.promptAddReference = async () => {
       const form = await appPrompt({
@@ -2661,7 +3013,7 @@
     }
 
     /* ==========================================================================
-       5. SELETOR DE CADERNOS & POPOVER
+       6. SELETOR DE CADERNOS & POPOVER
        ========================================================================== */
     const bookDropdownArrow = document.getElementById('btnBookDropdownArrow');
     const bookDropdownPopover = document.getElementById('bookDropdownPopover');
@@ -2765,7 +3117,7 @@
     };
 
     /* ==========================================================================
-       6. NAVEGAÇÃO, PÁGINAS E TAGS
+       7. NAVEGAÇÃO, PÁGINAS E TAGS
        ========================================================================== */
     function renderTagFilterBar() {
       const bar = document.getElementById('tagFilterBar');
@@ -2933,6 +3285,7 @@
         elements: [],
         references: [],
         inkDataURL: null,
+        shapes: [],
         threads: [],
         snapshots: [],
         isSoftwareProject: false,
@@ -2983,6 +3336,25 @@
       saveToStorage();
       editor.focus();
       showToast('Data inserida no cabeçalho!');
+    };
+
+    window.changeFontSize = (delta) => {
+      const page = getActivePage();
+      if (!page) return;
+      page.fontSize = Math.max(12, Math.min(36, (page.fontSize || 20) + delta));
+      const editor = document.getElementById('textEditor');
+      editor.style.fontSize = page.fontSize + 'px';
+      editor.style.lineHeight = (page.fontSize + 12) + 'px';
+      saveToStorage();
+    };
+
+    document.getElementById('paperOrientation').onchange = (e) => {
+      const page = getActivePage();
+      if (!page) return;
+      page.paperOrientation = e.target.value;
+      document.getElementById('paperSheet').className = `paper-sheet ${page.paperOrientation}`;
+      saveToStorage();
+      syncInkCanvasDimensions();
     };
 
     window.openTableDialog = async () => {
@@ -3066,7 +3438,6 @@
       saveToStorage();
       editor.focus();
     };
-
 
     function renderCollageElements() {
       const container = document.getElementById('collageContainer');
@@ -3969,6 +4340,7 @@
         title: page.title,
         contentHTML: page.contentHTML,
         inkDataURL: page.inkDataURL,
+        shapes: page.shapes ? JSON.parse(JSON.stringify(page.shapes)) : [],
         isSoftwareProject: page.isSoftwareProject,
         date: new Date().toLocaleString()
       });
@@ -4017,6 +4389,7 @@
       page.contentHTML = s.contentHTML;
       page.isSoftwareProject = s.isSoftwareProject || false;
       if (s.inkDataURL !== undefined) page.inkDataURL = s.inkDataURL;
+      if (s.shapes !== undefined) page.shapes = JSON.parse(JSON.stringify(s.shapes));
       renderPageContent();
       saveToStorage();
       closeDrawers();
