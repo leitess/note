@@ -230,6 +230,42 @@
 
     .header-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
 
+    /* Indicador e Controle de Sincronização Google Drive */
+    .drive-sync-cluster {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #25221e;
+      border: 1px solid #44403c;
+      padding: 2px 8px;
+      border-radius: var(--radius-sm);
+    }
+    .drive-sync-badge {
+      font-size: 9.5px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      padding: 2px 6px;
+      border-radius: 2px;
+      text-transform: uppercase;
+      background: #38332d;
+      color: #a8a29e;
+    }
+    .drive-sync-badge.synced { background: #14532d; color: #86efac; }
+    .drive-sync-badge.saving { background: #854d0e; color: #fef08a; }
+    .drive-sync-badge.pending { background: #7c2d12; color: #fed7aa; }
+    .drive-sync-badge.error { background: #7f1d1d; color: #fca5a5; }
+
+    .drive-autosave-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 10.5px;
+      font-weight: 700;
+      color: #e7e5e4;
+      cursor: pointer;
+      user-select: none;
+    }
+
     button, .btn {
       background: #fcfbf9;
       color: #1c1917;
@@ -1574,6 +1610,14 @@
       </div>
 
       <div class="header-actions">
+        <!-- INDICADOR E TOGGLE DE AUTO-SAVE DO GOOGLE DRIVE -->
+        <div class="drive-sync-cluster">
+          <span id="driveSyncBadge" class="drive-sync-badge">☁️ Inativo</span>
+          <label class="drive-autosave-label" title="Ativar sincronização e salvamento periódico em segundo plano no Google Drive">
+            <input type="checkbox" id="chkDriveAutoSave" onchange="toggleDriveAutoSave(this.checked)" /> Auto-Drive
+          </label>
+        </div>
+
         <button id="btnOpenSearch" class="btn-dark" title="Buscar em tudo (Ctrl+K)">🔍 Busca</button>
         <button id="btnOpenInbox" class="btn-dark" title="Inbox Rápido">⚡ Inbox</button>
         <button onclick="toggleMemorialMode()" title="Leitura Solene sem Distrações">📖 Memorial</button>
@@ -1584,7 +1628,7 @@
         </label>
         
         <!-- BOTÕES DO GOOGLE DRIVE -->
-        <button type="button" id="btnDriveExport" class="btn-accent" title="Salvar Backup no Google Drive">☁️ Salvar no Drive</button>
+        <button type="button" id="btnDriveExport" class="btn-accent" title="Salvar Backup no Google Drive Agora">☁️ Salvar no Drive</button>
         <button type="button" id="btnDriveImport" class="btn-dark" title="Abrir Backup do Google Drive">☁️ Abrir do Drive</button>
 
         <button id="btnResetAll" class="btn-danger btn-icon" title="Limpar Tudo">⚠️</button>
@@ -1643,7 +1687,7 @@
                 <input type="color" id="inkColor" title="Cor do Texto" value="#1c1917" onchange="formatDoc('foreColor', this.value)" />
               </div>
 
-              <!-- FERRAMENTAS DE DESENHO, BALDE & FIGURAS -->
+              <!-- FERRAMENTAS DE DESENHO, BALDE & FIGURAS (ESTILO PAINT) -->
               <div class="toolbar-group" style="background:#f5f4f0; padding:2px 6px; border-radius:4px; gap:4px;">
                 <button type="button" id="toolSelect" class="btn active-tool" onclick="setInkTool('select')">👆 Texto</button>
                 <button type="button" id="toolPen" class="btn" onclick="setInkTool('pen')">🖊️ Pincel</button>
@@ -2139,6 +2183,7 @@
     let saveDebounceTimer = null;
     function saveToStorage() {
       syncCurrentPageToState();
+      markDirtyForDriveSync();
       clearTimeout(saveDebounceTimer);
       saveDebounceTimer = setTimeout(() => {
         dbSet('craft_notebook_v2_data', appState);
@@ -3615,6 +3660,7 @@
 
     function addMediaElement(type, srcOrData, defaultCaption = '', extra = {}) {
       const page = getActivePage();
+      if (!page) return;
       if (!page.elements) page.elements = [];
 
       const newItem = {
@@ -4678,15 +4724,90 @@
     }
     document.getElementById('btnToggleSidebar').onclick = () => toggleMobileSidebar();
 
+    /* ==========================================================================
+       8. INTEGRAÇÃO GOOGLE DRIVE & AUTO-SAVE PERIÓDICO EM SEGUNDO PLANO
+       ========================================================================== */
     const GOOGLE_CLIENT_ID = '379078301094-cdgooe6ff6f5gtrosjlfrcbkav54vn4v.apps.googleusercontent.com';
     const GOOGLE_DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
 
     let gTokenClient = null;
     let gAccessToken = null;
 
-    async function getGoogleAuthToken() {
+    let isDriveDirty = false;
+    let isDriveSaving = false;
+    let driveAutoSaveTimer = null;
+    let drivePeriodicInterval = null;
+
+    function setDriveSyncStatus(status, label) {
+      const badge = document.getElementById('driveSyncBadge');
+      if (!badge) return;
+      badge.className = `drive-sync-badge ${status}`;
+      badge.textContent = label;
+    }
+
+    function markDirtyForDriveSync() {
+      isDriveDirty = true;
+      const isAutoSaveActive = localStorage.getItem('google_drive_autosave_enabled') === 'true';
+      if (isAutoSaveActive) {
+        setDriveSyncStatus('pending', '☁️ Pendente');
+        scheduleDebouncedDriveSave();
+      }
+    }
+
+    function scheduleDebouncedDriveSave() {
+      clearTimeout(driveAutoSaveTimer);
+      driveAutoSaveTimer = setTimeout(() => {
+        const isAutoSaveActive = localStorage.getItem('google_drive_autosave_enabled') === 'true';
+        if (isAutoSaveActive && isDriveDirty && !isDriveSaving) {
+          exportToGoogleDrive(true);
+        }
+      }, 5000);
+    }
+
+    async function toggleDriveAutoSave(enabled) {
+      localStorage.setItem('google_drive_autosave_enabled', enabled ? 'true' : 'false');
+      if (enabled) {
+        try {
+          showToast('Conectando ao Google Drive para Auto-Save...');
+          await getGoogleAuthToken(false);
+          setDriveSyncStatus(isDriveDirty ? 'pending' : 'synced', isDriveDirty ? '☁️ Pendente' : '☁️ Sincronizado');
+          startDrivePeriodicTimer();
+          if (isDriveDirty) exportToGoogleDrive(true);
+        } catch (err) {
+          document.getElementById('chkDriveAutoSave').checked = false;
+          localStorage.setItem('google_drive_autosave_enabled', 'false');
+          setDriveSyncStatus('error', '⚠️ Erro Auth');
+          appAlert('Não foi possível ativar o Auto-Save no Drive: ' + (err.message || 'Falha de conexão'), 'Google Drive');
+        }
+      } else {
+        stopDrivePeriodicTimer();
+        clearTimeout(driveAutoSaveTimer);
+        setDriveSyncStatus('idle', '☁️ Inativo');
+        showToast('Auto-Save no Drive desativado.');
+      }
+    }
+
+    function startDrivePeriodicTimer() {
+      stopDrivePeriodicTimer();
+      // Verificação periódica a cada 30 segundos
+      drivePeriodicInterval = setInterval(() => {
+        const isAutoSaveActive = localStorage.getItem('google_drive_autosave_enabled') === 'true';
+        if (isAutoSaveActive && isDriveDirty && !isDriveSaving) {
+          exportToGoogleDrive(true);
+        }
+      }, 30000);
+    }
+
+    function stopDrivePeriodicTimer() {
+      if (drivePeriodicInterval) {
+        clearInterval(drivePeriodicInterval);
+        drivePeriodicInterval = null;
+      }
+    }
+
+    async function getGoogleAuthToken(forceRefresh = false) {
       return new Promise(async (resolve, reject) => {
-        if (gAccessToken) return resolve(gAccessToken);
+        if (gAccessToken && !forceRefresh) return resolve(gAccessToken);
 
         let clientId = GOOGLE_CLIENT_ID;
         if (!clientId || clientId.includes('SEU_CLIENT_ID_AQUI')) {
@@ -4714,22 +4835,47 @@
             client_id: clientId,
             scope: GOOGLE_DRIVE_SCOPE,
             callback: (response) => {
-              if (response.error) return reject(response);
+              if (response.error) {
+                gAccessToken = null;
+                return reject(response);
+              }
               gAccessToken = response.access_token;
               resolve(gAccessToken);
             }
           });
-          gTokenClient.requestAccessToken({ prompt: '' });
+          gTokenClient.requestAccessToken({ prompt: forceRefresh ? 'consent' : '' });
         } catch (err) {
+          gAccessToken = null;
           reject(err);
         }
       });
     }
 
-    async function exportToGoogleDrive() {
+    // Requisição protegida que trata automaticamente expiração e erro 401
+    async function fetchWithDriveAuth(url, options = {}, isRetry = false) {
+      const token = await getGoogleAuthToken(isRetry);
+      const headers = {
+        ...(options.headers || {}),
+        Authorization: `Bearer ${token}`
+      };
+
+      const response = await fetch(url, { ...options, headers });
+
+      if (response.status === 401 && !isRetry) {
+        gAccessToken = null;
+        return fetchWithDriveAuth(url, options, true);
+      }
+
+      return response;
+    }
+
+    async function exportToGoogleDrive(isSilent = false) {
+      if (isDriveSaving) return;
+      isDriveSaving = true;
+      setDriveSyncStatus('saving', '☁️ Salvando...');
+
       try {
-        showToast('Conectando ao Google Drive...');
-        const token = await getGoogleAuthToken();
+        if (!isSilent) showToast('Conectando ao Google Drive...');
 
         syncCurrentPageToState();
         const currentBook = getActiveBook();
@@ -4742,30 +4888,21 @@
         const fileName = `${(currentBook.bookTitle || 'caderno').toLowerCase().replace(/[^a-z0-9]/gi, '_')}_backup.json`;
         const jsonContent = JSON.stringify(exportObject, null, 2);
 
-        showToast('Verificando arquivos no Drive...');
         const query = encodeURIComponent(`name = '${fileName}' and trashed = false`);
-        const searchRes = await fetch(`https://www.googleapis.com/drive/v3/files?q=${query}&fields=files(id,name)`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const searchRes = await fetchWithDriveAuth(`https://www.googleapis.com/drive/v3/files?q=${query}&fields=files(id,name)`);
         
-        if (!searchRes.ok) throw new Error('Não foi possível verificar os arquivos no Google Drive.');
+        if (!searchRes.ok) throw new Error('Falha ao verificar arquivos no Drive.');
         const searchData = await searchRes.json();
         const existingFile = (searchData.files && searchData.files.length > 0) ? searchData.files[0] : null;
 
-        showToast('Enviando dados...');
-
         if (existingFile) {
-          const updateRes = await fetch(`https://www.googleapis.com/upload/drive/v3/files/${existingFile.id}?uploadType=media`, {
+          const updateRes = await fetchWithDriveAuth(`https://www.googleapis.com/upload/drive/v3/files/${existingFile.id}?uploadType=media`, {
             method: 'PATCH',
-            headers: {
-              Authorization: `Bearer ${token}`,
-              'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: jsonContent
           });
 
-          if (!updateRes.ok) throw new Error('Falha ao atualizar arquivo existente.');
-          showToast(`Backup "${fileName}" atualizado no Drive!`, 'success');
+          if (!updateRes.ok) throw new Error('Falha ao atualizar backup no Drive.');
         } else {
           const boundary = 'foo_bar_craft_boundary';
           const metadata = { name: fileName, mimeType: 'application/json' };
@@ -4779,34 +4916,35 @@
             `${jsonContent}\r\n` +
             `--${boundary}--`;
 
-          const createRes = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+          const createRes = await fetchWithDriveAuth('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
             method: 'POST',
-            headers: {
-              Authorization: `Bearer ${token}`,
-              'Content-Type': `multipart/related; boundary=${boundary}`
-            },
+            headers: { 'Content-Type': `multipart/related; boundary=${boundary}` },
             body: multipartBody
           });
 
-          if (!createRes.ok) throw new Error('Falha ao criar o arquivo no Drive.');
-          showToast(`Backup "${fileName}" criado no Drive!`, 'success');
+          if (!createRes.ok) throw new Error('Falha ao criar backup no Drive.');
         }
+
+        isDriveDirty = false;
+        setDriveSyncStatus('synced', '☁️ Sincronizado');
+        if (!isSilent) showToast(`Backup salvo no Google Drive com sucesso!`, 'success');
       } catch (err) {
         console.error(err);
-        appAlert('Erro ao salvar no Google Drive: ' + (err.message || 'Falha na requisição'), 'Erro no Drive');
+        setDriveSyncStatus('error', '⚠️ Falha Sync');
+        if (!isSilent) {
+          appAlert('Erro ao salvar no Google Drive: ' + (err.message || 'Falha na requisição'), 'Erro no Drive');
+        }
+      } finally {
+        isDriveSaving = false;
       }
     }
 
     async function importFromGoogleDrive() {
       try {
-        showToast('Conectando ao Google Drive...');
-        const token = await getGoogleAuthToken();
-
-        showToast('Buscando backups...');
+        showToast('Buscando backups no Google Drive...');
         const query = encodeURIComponent("name contains '.json' and trashed = false");
-        const listRes = await fetch(`https://www.googleapis.com/drive/v3/files?q=${query}&fields=files(id,name,modifiedTime)&orderBy=modifiedTime desc`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        
+        const listRes = await fetchWithDriveAuth(`https://www.googleapis.com/drive/v3/files?q=${query}&fields=files(id,name,modifiedTime)&orderBy=modifiedTime desc`);
         
         if (!listRes.ok) throw new Error('Não foi possível listar os arquivos do Google Drive.');
         const listData = await listRes.json();
@@ -4836,6 +4974,7 @@
 
       } catch (err) {
         console.error(err);
+        setDriveSyncStatus('error', '⚠️ Falha Sync');
         appAlert('Erro ao listar arquivos do Drive: ' + (err.message || 'Falha na requisição'), 'Erro no Drive');
       }
     }
@@ -4844,29 +4983,38 @@
       cancelAppDialog();
       try {
         showToast('Baixando backup do Drive...');
-        const token = await getGoogleAuthToken();
-
-        const fileRes = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const fileRes = await fetchWithDriveAuth(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`);
 
         if (!fileRes.ok) throw new Error('Não foi possível ler o conteúdo do arquivo.');
         const importedJson = await fileRes.json();
         
         applyImportedData(importedJson);
-
+        isDriveDirty = false;
+        setDriveSyncStatus('synced', '☁️ Sincronizado');
         showToast('Caderno restaurado com sucesso do Google Drive!', 'success');
       } catch (err) {
         console.error(err);
+        setDriveSyncStatus('error', '⚠️ Falha Sync');
         appAlert('Erro ao carregar arquivo do Drive: ' + err.message, 'Erro de Sincronização');
       }
     };
 
-    document.getElementById('btnDriveExport').onclick = () => exportToGoogleDrive();
+    document.getElementById('btnDriveExport').onclick = () => exportToGoogleDrive(false);
     document.getElementById('btnDriveImport').onclick = () => importFromGoogleDrive();
 
     window.onload = () => {
       loadFromStorage();
+
+      // Recupera o estado salvo do Auto-Save no Drive
+      const isAutoSaveActive = localStorage.getItem('google_drive_autosave_enabled') === 'true';
+      const chk = document.getElementById('chkDriveAutoSave');
+      if (chk) chk.checked = isAutoSaveActive;
+      if (isAutoSaveActive) {
+        startDrivePeriodicTimer();
+        setDriveSyncStatus('synced', '☁️ Auto Ativo');
+      } else {
+        setDriveSyncStatus('idle', '☁️ Inativo');
+      }
     };
   </script>
 </body>
